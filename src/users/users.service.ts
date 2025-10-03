@@ -12,9 +12,16 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
-  create(createUserDto: CreateUserDto) {
-    const passwordHash = await bcrypt.hash;
-    return this.usersRepository.save(createUserDto);
+  async create(createUserDto: CreateUserDto) {
+    const passwordHash = await bcrypt.hash(createUserDto.password, 10);
+    const user = this.usersRepository.create({
+      email: createUserDto.email,
+      name: createUserDto.name,
+      passwordHash: passwordHash,
+      role: 'customer',
+      age: createUserDto.age,
+    });
+    return this.usersRepository.save(user);
   }
 
   findAll() {

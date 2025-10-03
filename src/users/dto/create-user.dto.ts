@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsEnum,
+  // IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -36,16 +36,16 @@ export class CreateUserDto {
   @Length(8, 32)
   password: string;
 
-  @ApiProperty({
-    example: 'customer',
-    description: 'บทบาทของผู้ใช้ (admin หรือ customer)',
-    enum: ['admin', 'customer'],
-    default: 'customer',
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(['admin', 'customer'])
-  role?: 'admin' | 'customer';
+  // @ApiProperty({
+  //   example: 'customer',
+  //   description: 'บทบาทของผู้ใช้ (admin หรือ customer)',
+  //   enum: ['admin', 'customer'],
+  //   default: 'customer',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // @IsEnum(['admin', 'customer'])
+  // role?: 'admin' | 'customer';
 
   @ApiProperty({
     description: 'อายุ',
