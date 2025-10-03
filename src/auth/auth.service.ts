@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -11,8 +12,11 @@ export class AuthService {
 
   async signIn(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findOneByEmail(email);
-    if (user?.passwordHash !== pass) {
-      throw new UnauthorizedException('น้องรหัสหรือเมลผิดน้อง');
+    const isMatch = await bcrypt.compare(pass, user?.passwordHash);
+    if (!isMatch) {
+      throw new UnauthorizedException(
+        'น้องรหัสหรือเมลผิด ไม่ก็ token หมดเวลา ',
+      );
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, ...result } = user;

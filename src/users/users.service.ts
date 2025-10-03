@@ -12,24 +12,25 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
+
   async create(createUserDto: CreateUserDto) {
-    const passwordHash = await bcrypt.hash(createUserDto.password, 10);
+    const hash = await bcrypt.hash(createUserDto.password, 10);
     const user = this.usersRepository.create({
       email: createUserDto.email,
       name: createUserDto.name,
-      passwordHash: passwordHash,
+      passwordHash: hash,
       role: 'customer',
       age: createUserDto.age,
     });
-    return this.usersRepository.save(user);
+    return await this.usersRepository.save(user);
   }
 
-  findAll() {
-    return this.usersRepository.find();
+  async findAll() {
+    return await this.usersRepository.find();
   }
 
-  findOne(id: number) {
-    return this.usersRepository.findOne({ where: { id: id } });
+  async findOne(id: number) {
+    return await this.usersRepository.findOne({ where: { id: id } });
   }
 
   async findOneByEmail(email: string) {
@@ -39,11 +40,21 @@ export class UsersService {
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return this.usersRepository.update(id, updateUserDto);
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.password) {
+      const hash = await bcrypt.hash(updateUserDto.password, 10);
+      const user = this.usersRepository.create({
+        email: updateUserDto.email,
+        name: updateUserDto.name,
+        passwordHash: hash,
+        age: updateUserDto.age,
+      });
+
+      return await this.usersRepository.update(id, user);
+    }
   }
 
-  remove(id: number) {
-    return this.usersRepository.softDelete(id);
+  async remove(id: number) {
+    return await this.usersRepository.softDelete(id);
   }
 }
