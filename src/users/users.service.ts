@@ -26,11 +26,16 @@ export class UsersService {
   }
 
   async findAll() {
-    return await this.usersRepository.find();
+    return await this.usersRepository.find({
+      select: ['id', 'email', 'name', 'role', 'age'],
+    });
   }
 
   async findOne(id: number) {
-    return await this.usersRepository.findOne({ where: { id: id } });
+    return await this.usersRepository.findOne({
+      where: { id: id },
+      select: ['id', 'email', 'name', 'role', 'age'],
+    });
   }
 
   async findOneByEmail(email: string) {
