@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, Length } from 'class-validator';
-import { Transform } from 'class-transformer';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 export class CreateUserDto {
   @ApiProperty({
     description: 'อีเมลสำหรับเข้าสู่ระบบ',
@@ -15,24 +22,35 @@ export class CreateUserDto {
     example: 'Kittisak',
   })
   @IsNotEmpty()
+  @IsString()
   username: string;
 
   @ApiProperty({
-    description: 'รหัสผ่าน (ต้องมีความยาว 8-32 ตัวอักษร)',
+    description: 'รหัสผ่าน (ต้องมีความยาว 8 ตัวอักษรขึ้นไป)',
     example: 'Kittisak123456789',
     minLength: 8,
-    maxLength: 32,
   })
+  @IsString()
   @IsNotEmpty()
   @Length(8, 32)
   password: string;
 
   @ApiProperty({
-    description: 'ชุด id ของ ผู้ใช้',
-    example: [1, 2],
+    example: 'customer',
+    description: 'บทบาทของผู้ใช้ (admin หรือ customer)',
+    enum: ['admin', 'customer'],
+    default: 'customer',
+    required: false,
   })
-  @Transform(({ value }) => Number(value))
-  @IsNumber()
+  @IsOptional()
+  @IsEnum(['admin', 'customer'])
+  role?: 'admin' | 'customer';
+
+  @ApiProperty({
+    description: 'อายุ',
+    example: 18,
+  })
   @IsNotEmpty()
-  roleIds: number;
+  @IsNumber()
+  age: number;
 }
