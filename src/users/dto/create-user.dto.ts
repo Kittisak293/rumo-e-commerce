@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   Length,
+  Min,
 } from 'class-validator';
 export class CreateUserDto {
   @ApiProperty({
@@ -23,7 +24,7 @@ export class CreateUserDto {
   })
   @IsNotEmpty()
   @IsString()
-  username: string;
+  name: string;
 
   @ApiProperty({
     description: 'รหัสผ่าน (ต้องมีความยาว 8 ตัวอักษรขึ้นไป)',
@@ -50,7 +51,8 @@ export class CreateUserDto {
     description: 'อายุ',
     example: 18,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  age: number;
+  @Min(1)
+  age?: number;
 }
