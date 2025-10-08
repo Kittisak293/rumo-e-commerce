@@ -1,26 +1,52 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Product } from './entities/product.entity';
+import { Repository } from 'typeorm';
+import { Category } from 'src/category/entities/category.entity';
 
 @Injectable()
 export class ProductsService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  constructor(
+    @InjectRepository(Product)
+    private readonly productsRepository: Repository<Product>,
+    @InjectRepository(Category)
+    private readonly categoriesRepository: Repository<Category>,
+  ) {}
+
+  async create(createProductDto: CreateProductDto) {
+    const product = this.productsRepository.create(createProductDto);
+    const category = await this.categoriesRepository.findOneByOrFail({
+      id: createProductDto.categoryId,
+    });
+    product.category = category;
+    return await this.productsRepository.save(product);
   }
 
-  findAll() {
-    return `This action returns all products`;
+  async findAll() {
+    return await this.productsRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: number) {
+    return await this.productsRepository.findOne({ where: { id: id } });
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: number, updateProductDto: UpdateProductDto) {
+    const product = this.productsRepository.create(updateProductDto);
+    const category = await this.categoriesRepository.findOneByOrFail({
+      id: updateProductDto.categoryId,
+    });
+    product.category = category;
+    await this.productsRepository.update(id, product);
+    return await this.productsRepository.findOne({ where: { id: id } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: number) {
+    const product = await this.productsRepository.findOne({
+      where: { id: id },
+    });
+    await this.productsRepository.softDelete(id);
+    return product;
   }
 }

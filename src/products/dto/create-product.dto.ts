@@ -3,7 +3,7 @@ import { Transform } from 'class-transformer';
 import { IsNumber, IsString, Min } from 'class-validator';
 
 export class CreateProductDto {
-  @ApiProperty({ description: 'ชื่อสินค้า', example: 'Latte' })
+  @ApiProperty({ description: 'ชื่อสินค้า', example: 'Gaming Mouse ZXY' })
   @IsString()
   name: string;
 
