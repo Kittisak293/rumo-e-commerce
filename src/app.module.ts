@@ -5,13 +5,15 @@ import { User } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { CategoryModule } from './category/category.module';
+import { Product } from './products/entities/product.entity';
+import { Category } from './category/entities/category.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'mydb.sqlite',
-      entities: [User],
+      entities: [User, Product, Category],
       synchronize: true,
     }),
     UsersModule,

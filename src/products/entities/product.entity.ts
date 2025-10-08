@@ -1,3 +1,4 @@
+import { Category } from 'src/category/entities/category.entity';
 import {
   Column,
   CreateDateColumn,
@@ -34,6 +35,6 @@ export class Product {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @ManyToOne(() => Category, (category) => category.product)
+  @ManyToOne(() => Category, (category) => category.products)
   category: Category;
 }
