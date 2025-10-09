@@ -8,13 +8,14 @@ import { CategoryModule } from './category/category.module';
 import { Product } from './products/entities/product.entity';
 import { Category } from './category/entities/category.entity';
 import { CartItemModule } from './cart-item/cart-item.module';
+import { CartItem } from './cart-item/entities/cart-item.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'mydb.sqlite',
-      entities: [User, Product, Category],
+      entities: [User, Product, Category, CartItem],
       synchronize: true,
     }),
     UsersModule,

@@ -1,3 +1,4 @@
+import { CartItem } from 'src/cart-item/entities/cart-item.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -5,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToOne,
 } from 'typeorm';
 @Entity()
 export class User {
@@ -38,4 +40,7 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @OneToOne(() => CartItem, (cartItem) => cartItem.user)
+  cartItem: CartItem;
 }
