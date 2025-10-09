@@ -77,7 +77,7 @@ export class CartItemService {
 
   async remove(id: number) {
     const item = await this.cartItemsRepository.findOneByOrFail({ id });
-    await this.cartItemsRepository.remove(item);
+    await this.cartItemsRepository.softDelete(id);
     return item;
   }
 }

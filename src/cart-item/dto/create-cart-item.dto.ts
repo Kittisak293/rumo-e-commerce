@@ -24,7 +24,7 @@ export class CreateCartItemDto {
 
   @ApiProperty({
     description: 'ID ของสินค้า',
-    example: 10,
+    example: 1,
   })
   @Transform(({ value }) => Number(value))
   @IsNumber()
@@ -33,7 +33,7 @@ export class CreateCartItemDto {
 
   @ApiProperty({
     description: 'ID ของผู้ใช้',
-    example: 5,
+    example: 1,
   })
   @Transform(({ value }) => Number(value))
   @IsNumber()
