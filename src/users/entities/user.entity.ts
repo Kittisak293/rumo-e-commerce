@@ -42,5 +42,5 @@ export class User {
   deletedAt: Date;
 
   @OneToOne(() => CartItem, (cartItem) => cartItem.user)
-  cartItem: CartItem;
+  cartItems: CartItem[];
 }
