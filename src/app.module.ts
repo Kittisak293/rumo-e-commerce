@@ -7,6 +7,7 @@ import { ProductsModule } from './products/products.module';
 import { CategoryModule } from './category/category.module';
 import { Product } from './products/entities/product.entity';
 import { Category } from './category/entities/category.entity';
+import { CartItemModule } from './cart-item/cart-item.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { Category } from './category/entities/category.entity';
     AuthModule,
     ProductsModule,
     CategoryModule,
+    CartItemModule,
   ],
   controllers: [],
   providers: [],

@@ -31,6 +31,4 @@ export class CreateProductDto {
   @IsNumber()
   @Min(1)
   categoryId: number;
-
-  //ยังไม่เสร็จยังงงตรง category อยู่
 }
