@@ -11,6 +11,7 @@ import { CartItemModule } from './cart-items/cart-items.module';
 import { CartItem } from './cart-items/entities/cart-item.entity';
 import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
+import { AddressesModule } from './addresses/addresses.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Order } from './orders/entities/order.entity';
     CategoryModule,
     CartItemModule,
     OrdersModule,
+    AddressesModule,
   ],
   controllers: [],
   providers: [],
