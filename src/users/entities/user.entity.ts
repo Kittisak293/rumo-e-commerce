@@ -1,4 +1,5 @@
 import { CartItem } from 'src/cart-items/entities/cart-item.entity';
+import { Order } from 'src/orders/entities/order.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  OneToOne,
+  OneToMany,
 } from 'typeorm';
 @Entity()
 export class User {
@@ -41,6 +42,9 @@ export class User {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @OneToOne(() => CartItem, (cartItem) => cartItem.user)
+  @OneToMany(() => CartItem, (cartItem) => cartItem.user)
   cartItems: CartItem[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }

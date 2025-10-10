@@ -10,13 +10,14 @@ import { Category } from './categories/entities/category.entity';
 import { CartItemModule } from './cart-items/cart-items.module';
 import { CartItem } from './cart-items/entities/cart-item.entity';
 import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/entities/order.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'mydb.sqlite',
-      entities: [User, Product, Category, CartItem],
+      entities: [User, Product, Category, CartItem, Order],
       synchronize: true,
     }),
     UsersModule,
