@@ -19,17 +19,26 @@ export class Order {
   user: User;
 
   @Column({ default: 'pending' })
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+  status:
+    | 'pending'
+    | 'paid'
+    | 'shipped'
+    | 'delivered'
+    | 'cancelled'
+    | 'shipping';
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   subtotal: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  shipping_fee: number;
+  shippingFee: number;
 
   @Column({ default: 0 })
   totalQuantity: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   total: number;
+
+  @Column({ unique: true })
+  orderNumber?: string;
 }
