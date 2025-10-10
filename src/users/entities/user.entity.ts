@@ -1,4 +1,4 @@
-import { CartItem } from 'src/cart-item/entities/cart-item.entity';
+import { CartItem } from 'src/cart-items/entities/cart-item.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

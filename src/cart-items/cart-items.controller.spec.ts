@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CartItemController } from './cart-item.controller';
-import { CartItemService } from './cart-item.service';
+import { CartItemService } from './cart-items.service';
 
 describe('CartItemController', () => {
   let controller: CartItemController;
