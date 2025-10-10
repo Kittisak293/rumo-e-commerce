@@ -7,8 +7,10 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { Order } from 'src/orders/entities/order.entity';
 
 @Entity({ name: 'address' }) // ตาม ERD ใช้ชื่อ table ว่า address
 @Index(['userId', 'isDefault'])
@@ -21,6 +23,9 @@ export class Address {
   })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToMany(() => Order, (order) => order.address)
+  orders: Order[];
 
   @Column({ name: 'full_name', type: 'varchar', length: 120 })
   fullName: string;

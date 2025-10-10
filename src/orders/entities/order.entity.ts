@@ -1,3 +1,4 @@
+import { Address } from 'src/addresses/entities/address.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
@@ -17,6 +18,12 @@ export class Order {
   })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @ManyToOne(() => Address, (address) => address.orders, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'shipping_address_id' })
+  address: Address;
 
   @Column({ default: 'pending' })
   status:
