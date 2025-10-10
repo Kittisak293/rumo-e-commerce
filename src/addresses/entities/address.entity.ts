@@ -4,7 +4,6 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  Index,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
@@ -12,8 +11,7 @@ import {
 import { User } from 'src/users/entities/user.entity';
 import { Order } from 'src/orders/entities/order.entity';
 
-@Entity({ name: 'address' }) // ตาม ERD ใช้ชื่อ table ว่า address
-@Index(['userId', 'isDefault'])
+@Entity()
 export class Address {
   @PrimaryGeneratedColumn()
   id: number;
