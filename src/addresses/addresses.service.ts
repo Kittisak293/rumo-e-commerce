@@ -4,12 +4,15 @@ import { UpdateAddressDto } from './dto/update-address.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Address } from './entities/address.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AddressesService {
   constructor(
     @InjectRepository(Address)
     private readonly addressRepo: Repository<Address>,
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
   ) {}
 
   async create(createAddressDto: CreateAddressDto) {
@@ -21,6 +24,10 @@ export class AddressesService {
     }
 
     const address = this.addressRepo.create(createAddressDto);
+    const user = await this.usersRepo.findOneOrFail({
+      where: { id: createAddressDto.userId },
+    });
+    address.user = user;
     const saved = await this.addressRepo.save(address);
 
     const hasDefault = await this.addressRepo.exists({
@@ -35,11 +42,17 @@ export class AddressesService {
   }
 
   async findAll(): Promise<Address[]> {
-    return this.addressRepo.find({ order: { id: 'DESC' } });
+    return this.addressRepo.find({
+      order: { id: 'DESC' },
+      relations: ['user'],
+    });
   }
 
   async findOne(id: number): Promise<Address> {
-    const addr = await this.addressRepo.findOneOrFail({ where: { id } });
+    const addr = await this.addressRepo.findOneOrFail({
+      where: { id },
+      relations: ['user'],
+    });
     return addr;
   }
 
@@ -68,14 +81,14 @@ export class AddressesService {
   }
 
   async remove(id: number) {
-    const address = await this.addressRepo.findOneOrFail({ where: { id } });
-    const userId = address.user.id;
-
-    await this.addressRepo.delete(id);
+    const address = await this.addressRepo.findOneOrFail({
+      where: { id },
+      relations: ['user'],
+    });
 
     if (address.isDefault) {
       const another = await this.addressRepo.findOne({
-        where: { user: { id: userId } },
+        where: { user: { id: address.user.id } },
         order: { id: 'DESC' },
       });
       if (another) {
@@ -83,6 +96,8 @@ export class AddressesService {
         await this.addressRepo.save(another);
       }
     }
+
+    await this.addressRepo.softDelete(id);
     return address;
   }
 }

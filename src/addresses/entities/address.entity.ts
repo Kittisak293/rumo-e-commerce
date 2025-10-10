@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Order } from 'src/orders/entities/order.entity';
@@ -51,4 +52,7 @@ export class Address {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
