@@ -12,6 +12,14 @@ export class CreateOrderDto {
   userId: number;
 
   @ApiProperty({
+    description: 'ID ของที่อยู่ผู้ซื้อ',
+    example: 1,
+  })
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  addressId: number;
+
+  @ApiProperty({
     description: 'สถานะของออเดอร์',
     example: 'pending',
     enum: ['pending', 'paid', 'shipped', 'shipping', 'delivered', 'cancelled'],
