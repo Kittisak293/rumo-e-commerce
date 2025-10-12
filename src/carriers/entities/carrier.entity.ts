@@ -1,1 +1,28 @@
-export class Carrier {}
+import { Shipment } from 'src/shipments/entities/shipment.entity';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+
+@Entity()
+export class Carrier {
+  @PrimaryColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column({ length: 32, unique: true })
+  code: string;
+
+  @Column({ length: 255, nullable: true })
+  website?: string;
+
+  @Column({ name: 'tracking_url_template', length: 255, nullable: true })
+  trackingUrlTemplate?: string;
+
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
+
+  @OneToMany(() => Shipment, (shipment) => shipment.carrier, {
+    onDelete: 'CASCADE',
+  })
+  shipments: Shipment[];
+}
