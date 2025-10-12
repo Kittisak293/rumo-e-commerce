@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ShipmentEventsService } from './shipment_events.service';
 import { CreateShipmentEventDto } from './dto/create-shipment_event.dto';
 import { UpdateShipmentEventDto } from './dto/update-shipment_event.dto';
@@ -23,7 +31,10 @@ export class ShipmentEventsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateShipmentEventDto: UpdateShipmentEventDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateShipmentEventDto: UpdateShipmentEventDto,
+  ) {
     return this.shipmentEventsService.update(+id, updateShipmentEventDto);
   }
 

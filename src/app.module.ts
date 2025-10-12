@@ -17,13 +17,25 @@ import { OrderItemsModule } from './order_items/order_items.module';
 import { OrderItem } from './order_items/entities/order_item.entity';
 import { ShipmentsModule } from './shipments/shipments.module';
 import { ShipmentEventsModule } from './shipment_events/shipment_events.module';
+import { Shipment } from './shipments/entities/shipment.entity';
+import { ShipmentEvent } from './shipment_events/entities/shipment_event.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'mydb.sqlite',
-      entities: [User, Product, Category, CartItem, Order, Address, OrderItem],
+      entities: [
+        User,
+        Product,
+        Category,
+        CartItem,
+        Order,
+        Address,
+        OrderItem,
+        Shipment,
+        ShipmentEvent,
+      ],
       synchronize: true,
     }),
     UsersModule,
