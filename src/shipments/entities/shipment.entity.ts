@@ -20,7 +20,7 @@ export class Shipment {
   @JoinColumn({ name: 'order_id' })
   order: Order;
 
-  @OneToMany(() => ShipmentEvent, (shipmentEvent) => shipmentEvent.order, {
+  @OneToMany(() => ShipmentEvent, (shipmentEvent) => shipmentEvent.shipment, {
     onDelete: 'CASCADE',
   })
   shipmentEvents: ShipmentEvent[];
