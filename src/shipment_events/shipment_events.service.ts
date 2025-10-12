@@ -45,7 +45,6 @@ export class ShipmentEventsService {
     });
 
     shipmentEvent.shipment = shipment;
-
     return await this.shipmentEventsRepo.save(shipmentEvent);
   }
 

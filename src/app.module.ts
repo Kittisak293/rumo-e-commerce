@@ -19,6 +19,7 @@ import { ShipmentsModule } from './shipments/shipments.module';
 import { ShipmentEventsModule } from './shipment_events/shipment_events.module';
 import { Shipment } from './shipments/entities/shipment.entity';
 import { ShipmentEvent } from './shipment_events/entities/shipment_event.entity';
+import { CarriersModule } from './carriers/carriers.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ShipmentEvent } from './shipment_events/entities/shipment_event.entity'
     OrderItemsModule,
     ShipmentsModule,
     ShipmentEventsModule,
+    CarriersModule,
   ],
   controllers: [],
   providers: [],
