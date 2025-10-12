@@ -15,6 +15,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { Address } from './addresses/entities/address.entity';
 import { OrderItemsModule } from './order_items/order_items.module';
 import { OrderItem } from './order_items/entities/order_item.entity';
+import { ShipmentsModule } from './shipments/shipments.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { OrderItem } from './order_items/entities/order_item.entity';
     OrdersModule,
     AddressesModule,
     OrderItemsModule,
+    ShipmentsModule,
   ],
   controllers: [],
   providers: [],
