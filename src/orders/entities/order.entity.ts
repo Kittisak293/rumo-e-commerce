@@ -31,6 +31,16 @@ export class Order {
   @JoinColumn({ name: 'shipping_address_id' })
   address: Address;
 
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
+    onDelete: 'CASCADE',
+  })
+  orderItems: OrderItem[];
+
+  @OneToMany(() => Shipment, (shipment) => shipment.order, {
+    onDelete: 'CASCADE',
+  })
+  shipments: Shipment[];
+
   @Column({ default: 'pending' })
   status:
     | 'pending'
@@ -38,7 +48,8 @@ export class Order {
     | 'shipped'
     | 'delivered'
     | 'cancelled'
-    | 'shipping';
+    | 'shipping'
+    | 'refunded';
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   subtotal: number;
@@ -54,16 +65,6 @@ export class Order {
 
   @Column({ unique: true })
   orderNumber?: string;
-
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
-    onDelete: 'CASCADE',
-  })
-  orderItems: OrderItem[];
-
-  @OneToMany(() => Shipment, (shipment) => shipment.order, {
-    onDelete: 'CASCADE',
-  })
-  shipments: Shipment[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
