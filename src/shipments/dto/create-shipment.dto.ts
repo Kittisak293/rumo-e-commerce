@@ -6,7 +6,7 @@ export class CreateShipmentDto {
   @IsInt()
   orderId: number;
 
-  @ApiProperty({ example: 2, description: 'ID ของบริษัทขนส่ง' })
+  @ApiProperty({ example: 1, description: 'ID ของบริษัทขนส่ง' })
   @IsInt()
   carrierId: number;
 

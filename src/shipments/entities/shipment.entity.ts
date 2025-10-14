@@ -3,16 +3,19 @@ import { Order } from 'src/orders/entities/order.entity';
 import { ShipmentEvent } from 'src/shipment_events/entities/shipment_event.entity';
 import {
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
 export class Shipment {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @ManyToOne(() => Order, (order) => order.shipments, {
@@ -40,4 +43,13 @@ export class Shipment {
 
   @Column()
   estimatedDeliveryAt: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
