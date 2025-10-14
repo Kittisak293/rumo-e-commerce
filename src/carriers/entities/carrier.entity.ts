@@ -1,5 +1,5 @@
 import { Shipment } from 'src/shipments/entities/shipment.entity';
-import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Carrier {
@@ -25,4 +25,13 @@ export class Carrier {
     onDelete: 'CASCADE',
   })
   shipments: Shipment[];
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
