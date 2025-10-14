@@ -25,7 +25,8 @@ export class CarriersService {
   }
 
   async update(id: number, updateCarrierDto: UpdateCarrierDto) {
-    return await this.carriersRepo.update(id, updateCarrierDto);
+    await this.carriersRepo.update(id, updateCarrierDto);
+    return await this.carriersRepo.findOne({ where: { id: id } });
   }
 
   async remove(id: number) {
