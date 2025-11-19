@@ -24,16 +24,17 @@
           <q-space />
 
           <div class="row items-center q-gutter-md">
-            <div class="icon-right-upper">
+            <button class="icon-click">
               <img :src="bellLogo" alt="BELL" style="width: 35px" />
-            </div>
-            <div class="icon-right-upper">
-              <img :src="cartLogo" alt="CART" style="width: 35px" />
-            </div>
+            </button>
 
-            <div class="icon-right-upper">
+            <button class="icon-click">
+              <img :src="cartLogo" alt="CART" style="width: 35px" />
+            </button>
+
+            <button class="icon-click">
               <img :src="peopleLogo" alt="PEOPLE" style="width: 30px" />
-            </div>
+            </button>
           </div>
         </div>
       </q-toolbar>
@@ -211,7 +212,26 @@ const search = ref('');
   color: #9ca3af;
 }
 
-.icon-right-upper img {
+.icon-click {
+  background: none; /* ไม่มีพื้นหลัง */
+  border: none; /* ไม่มีขอบ */
+  padding: 0; /* ไม่ดันรูปให้เพี้ยน */
+  cursor: pointer; /* แสดงเป็นปุ่มเมื่อ hover */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   filter: drop-shadow(0px 5px 4px rgba(0, 0, 0, 0.25));
+  margin-right: 20px;
+}
+
+/* รูปมีเงาตาม PNG */
+.icon-click img {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25)); /* เงาตามขอบรูป */
+  transition: 0.01s ease;
+}
+
+/* effect ตอนกด */
+.icon-click:active img {
+  transform: scale(0.92); /* ยุบตอนกดเหมือนปุ่มมือถือ */
 }
 </style>
