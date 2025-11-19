@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh Lpr fFf" class="bg-grey-1">
     <q-header elevated class="bg-primary text-white">
-      <q-toolbar class="q-px-lg q-py-sm">
+      <q-toolbar class="q-px-lg q-py-xss">
         <div class="row items-center full-width no-wrap">
           <div class="row items-center">
             <img :src="RumoLogo" alt="RUMO" style="width: 200px" />
@@ -38,8 +38,6 @@
           </div>
         </div>
       </q-toolbar>
-
-      <div class="header-bar-bottom" />
     </q-header>
 
     <q-drawer
@@ -131,12 +129,6 @@ const search = ref('');
 .search-btn {
   min-width: 80px;
   border-radius: 999px;
-}
-
-.header-bar-bottom {
-  height: 4px;
-  background: white;
-  opacity: 0.1;
 }
 
 .app-drawer {
