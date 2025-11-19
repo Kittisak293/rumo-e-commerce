@@ -1,16 +1,12 @@
-<!-- src/layouts/MainLayout.vue -->
 <template>
   <q-layout view="hHh Lpr fFf" class="bg-grey-1">
-    <!-- HEADER -->
     <q-header elevated class="bg-primary text-white">
       <q-toolbar class="q-px-lg q-py-sm">
         <div class="row items-center full-width no-wrap">
-          <!-- โลโก้ -->
           <div class="row items-center">
             <img :src="RumoLogo" alt="RUMO" style="width: 200px" />
           </div>
 
-          <!-- กล่อง search + ปุ่มค้นหา -->
           <div class="search-wrapper">
             <div class="search-pill">
               <q-input
@@ -25,26 +21,26 @@
               <q-btn label="ค้นหา" class="search-btn2" unelevated no-caps />
             </div>
           </div>
-
-          <!-- ช่องว่างก่อน icon ขวา -->
           <q-space />
 
-          <!-- ไอคอน notification / cart / profile -->
           <div class="row items-center q-gutter-md">
-            <img :src="bellLogo" alt="BELL" style="width: 35px" />
-            <div></div>
-            <img :src="cartLogo" alt="CART" style="width: 35px" />
-            <div></div>
-            <img :src="peopleLogo" alt="PEOPLE" style="width: 30px" />
+            <div class="icon-right-upper">
+              <img :src="bellLogo" alt="BELL" style="width: 35px" />
+            </div>
+            <div class="icon-right-upper">
+              <img :src="cartLogo" alt="CART" style="width: 35px" />
+            </div>
+
+            <div class="icon-right-upper">
+              <img :src="peopleLogo" alt="PEOPLE" style="width: 30px" />
+            </div>
           </div>
         </div>
       </q-toolbar>
 
-      <!-- เส้นสีม่วงด้านล่าง header -->
       <div class="header-bar-bottom" />
     </q-header>
 
-    <!-- DRAWER ซ้าย -->
     <q-drawer
       v-model="leftOpen"
       side="left"
@@ -98,7 +94,6 @@
       </q-list>
     </q-drawer>
 
-    <!-- CONTENT -->
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -143,14 +138,13 @@ const search = ref('');
   opacity: 0.1;
 }
 
-/* Drawer */
 .app-drawer {
   padding-top: 64px; /* ให้รู้สึกต่อจาก header */
 }
 
 .drawer-item {
   border-radius: 18px;
-  box-shadow: 0 5px 5px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.25);
 }
 
 .full-width {
@@ -188,7 +182,7 @@ const search = ref('');
 .search-pill {
   width: 100%;
   max-width: 650px;
-  background: #ffffff; /* ทั้งแท่งเป็นสีขาว */
+  background: #ffffff;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -196,7 +190,6 @@ const search = ref('');
   padding-right: 4px;
 }
 
-/* q-input ให้พื้นหลังโปร่งใส ไม่ดึงสีม่วงมา */
 .search-input2 :deep(.q-field__control) {
   background: white;
   box-shadow: none !important;
@@ -206,16 +199,19 @@ const search = ref('');
   flex: 1;
 }
 
-/* ปุ่มค้นหาเป็นแคปซูลม่วง */
 .search-btn2 {
   border-radius: 999px;
   padding: 0 20px;
   font-weight: 600;
   background-color: #8e4dff;
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.25);
 }
 
-/* placeholder สีเทาอ่อน */
 .search-input-inner::placeholder {
   color: #9ca3af;
+}
+
+.icon-right-upper img {
+  filter: drop-shadow(0px 5px 4px rgba(0, 0, 0, 0.25));
 }
 </style>
