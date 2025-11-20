@@ -1,11 +1,9 @@
 <template>
   <div class="product-card">
-    <!-- ส่วนรูป -->
     <div class="product-card__image-wrap">
-      <img :src="image" :alt="name" />
+      <img :src="image || '/product-images/unknown.jpg'" :alt="name" />
     </div>
 
-    <!-- ส่วนเนื้อหา -->
     <div class="product-card__body">
       <div class="product-card__name">
         {{ name }}
@@ -33,7 +31,7 @@ const props = defineProps<{
 
 <style scoped>
 .product-card {
-  width: 230px;
+  width: 180px;
   border-radius: 24px;
   background: #ffffff;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
@@ -46,19 +44,28 @@ const props = defineProps<{
 /* กล่องรูปด้านบน */
 .product-card__image-wrap {
   background: #f4f4f5;
-  padding: 16px;
+  padding: 6px;
   border-bottom: 1px solid #e5e7eb;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .product-card__image-wrap img {
-  width: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
   border-radius: 20px;
-  object-fit: cover;
 }
 
 /* เนื้อหาด้านล่าง */
 .product-card__body {
   padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* ดัน price + meta ลงล่าง */
+  min-height: 150px; /* ให้สูงเท่า ๆ กันทุกใบ */
 }
 
 .product-card__name {
@@ -66,6 +73,15 @@ const props = defineProps<{
   font-weight: 500;
   color: #111827;
   margin-bottom: 8px;
+  line-height: 1.3;
+
+  /* fix ความสูง title = ไม่ดันราคา */
+  max-height: 40px; /* ประมาณ 2 บรรทัด */
+  min-height: 40px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* ตัดไม่เกิน 2 บรรทัด */
+  -webkit-box-orient: vertical;
 }
 
 .product-card__price {

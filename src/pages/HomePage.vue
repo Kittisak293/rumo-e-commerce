@@ -1,10 +1,11 @@
 <template>
   <q-page padding>
+    <q-item-section class="drawer-text">หน้าหลัก</q-item-section>
     <div class="product-grid">
       <div v-for="p in productStore.products" :key="p.id">
         <ProductCard
           :key="p.id"
-          :image="p.imageUrl"
+          :image="'http://localhost:3000' + p.imageUrl"
           :name="p.name"
           :price="p.price"
           :sold="p.soldCount"
@@ -30,6 +31,11 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap; /* ทำให้สุดขอบขวาแล้วลงมาบรรทัดใหม่จดๆๆ */
   gap: 16px; /* ระยะห่างระหว่างการ์ด */
-  padding: 16px 0;
+}
+
+.drawer-text {
+  font-size: 40px;
+  font-weight: 501;
+  color: #8e4dff;
 }
 </style>
