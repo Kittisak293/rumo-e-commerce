@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Controller,
   Get,
@@ -44,8 +43,8 @@ export class ProductsController {
     return this.productsService.create({
       ...createProductDto,
       imageUrl: file
-        ? '/uploads/products/' + file.filename
-        : '/uploads/products/unknown.jpg',
+        ? '/product-images/' + file.filename
+        : '/product-images/unknown.jpg',
     });
   }
 
