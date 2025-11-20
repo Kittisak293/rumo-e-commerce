@@ -13,7 +13,7 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { extname } from 'path';
 import { v4 } from 'uuid';
 import { diskStorage } from 'multer';
@@ -24,6 +24,7 @@ export class ProductsController {
 
   @Post()
   @ApiBody({ description: 'ข้อมูลสินค้า', type: CreateProductDto })
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -60,6 +61,7 @@ export class ProductsController {
 
   @Patch(':id')
   @ApiBody({ description: 'ข้อมูลสินค้า', type: UpdateProductDto })
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

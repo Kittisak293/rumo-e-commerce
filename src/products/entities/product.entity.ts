@@ -39,7 +39,7 @@ export class Product {
   @Column({ name: 'sold_count' })
   soldCount: number;
 
-  @Column({ default: '/unknown.jpg' })
+  @Column({ default: '/product-images/unknown.jpg' })
   imageUrl: string;
 
   @CreateDateColumn()

@@ -38,5 +38,5 @@ export class CreateProductDto {
     description: 'รูปภาพ',
     required: false,
   })
-  file: string;
+  imageUrl: string;
 }
