@@ -102,11 +102,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import RumoLogo from 'src/assets/Rumo.png';
-import homeLogo from 'src/assets/home.png';
+// import homeLogo from 'src/assets/home.png';
 import homePurpleLogo from 'src/assets/home_purple.png';
-import mallLogo from 'src/assets/mall.png';
+// import mallLogo from 'src/assets/mall.png';
 import mallPurpleLogo from 'src/assets/mall_purple.png';
-import couponLogo from 'src/assets/coupon2.png';
+// import couponLogo from 'src/assets/coupon2.png';
 import couponPurpleLogo from 'src/assets/coupon2_purple.png';
 import bellLogo from 'src/assets/bell.png';
 import cartLogo from 'src/assets/cart.png';
