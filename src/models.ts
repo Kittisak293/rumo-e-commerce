@@ -8,4 +8,5 @@ export interface Product {
   ratingAvg: number;
   ratingCount: number;
   soldCount: number;
+  imageUrl: string;
 }

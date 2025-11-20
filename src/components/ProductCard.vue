@@ -11,9 +11,7 @@
         {{ name }}
       </div>
 
-      <div class="product-card__price">
-        ฿{{ price.toLocaleString('th-TH') }}
-      </div>
+      <div class="product-card__price">฿{{ price.toLocaleString('th-TH') }}</div>
 
       <div class="product-card__meta">
         <span>ขายแล้ว {{ sold }} ชิ้น</span>
