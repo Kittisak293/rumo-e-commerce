@@ -21,6 +21,9 @@ export class ProductsService {
       id: createProductDto.categoryId,
     });
     product.category = category;
+    product.rating_avg = 0;
+    product.rating_count = 0;
+    product.sold_count = 0;
     return await this.productsRepository.save(product);
   }
 
