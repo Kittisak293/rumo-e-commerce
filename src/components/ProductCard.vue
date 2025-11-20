@@ -70,7 +70,7 @@ const props = defineProps<{
 
 .product-card__name {
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 400;
   color: #111827;
   margin-bottom: 8px;
   line-height: 1.3;
@@ -86,7 +86,7 @@ const props = defineProps<{
 
 .product-card__price {
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 400;
   color: #111827;
   margin-bottom: 6px;
 }
