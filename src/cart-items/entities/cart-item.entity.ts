@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -38,6 +39,7 @@ export class CartItem {
   @ManyToOne(() => Product, (product) => product.cartItems, {
     onDelete: 'SET NULL',
   })
+  @JoinColumn({ name: 'product_id' })
   product: Product;
 
   @ManyToOne(() => User, (user) => user.cartItems, { onDelete: 'CASCADE' })
