@@ -1,6 +1,10 @@
 <template>
   <q-page padding>
-    <q-item-section class="drawer-text">หน้าหลัก</q-item-section>
+    <div class="row items-center q-gutter-sm">
+      <img :src="likeLogo" alt="" style="width: 90px; height: 90px" />
+      <span style="font-size: 40px; font-weight: 700; color: #8a33ff"> สินค้าแนะนำประจำวัน </span>
+    </div>
+
     <div class="product-grid">
       <div v-for="p in productStore.products" :key="p.id">
         <ProductCard
@@ -24,6 +28,7 @@ const productStore = useProductStore();
 onMounted(async () => {
   await productStore.getProducts();
 });
+import likeLogo from 'src/assets/like.png';
 </script>
 
 <style scoped>
@@ -31,11 +36,5 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap; /* ทำให้สุดขอบขวาแล้วลงมาบรรทัดใหม่จดๆๆ */
   gap: 16px; /* ระยะห่างระหว่างการ์ด */
-}
-
-.drawer-text {
-  font-size: 40px;
-  font-weight: 501;
-  color: #8e4dff;
 }
 </style>
