@@ -226,4 +226,8 @@ const search = ref('');
 .icon-click:active img {
   transform: scale(0.92); /* ยุบตอนกดเหมือนปุ่มมือถือ */
 }
+
+.menu-item:active {
+  transform: scale(0.92);
+}
 </style>
