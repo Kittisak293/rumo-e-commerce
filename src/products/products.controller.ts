@@ -44,8 +44,8 @@ export class ProductsController {
     return this.productsService.create({
       ...createProductDto,
       imageUrl: file
-        ? '/product-images/' + file.filename
-        : '/product-images/unknown.jpg',
+        ? '/uploads/products/' + file.filename
+        : '/uploads/products/unknown.jpg',
     });
   }
 
@@ -60,8 +60,31 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(+id, updateProductDto);
+  @ApiBody({ description: 'ข้อมูลสินค้า', type: UpdateProductDto })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/products',
+        filename: (req, file, callback) => {
+          console.log(file);
+          const uniqueFileName = v4() + extname(file.originalname);
+          callback(null, uniqueFileName);
+        },
+      }),
+    }),
+  )
+  update(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
+    console.log(file);
+    return this.productsService.update(+id, {
+      ...updateProductDto,
+      imageUrl: file
+        ? '/product-images/' + file.filename
+        : '/product-images/unknown.jpg',
+    });
   }
 
   @Delete(':id')

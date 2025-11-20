@@ -31,4 +31,12 @@ export class CreateProductDto {
   @IsNumber()
   @Min(1)
   categoryId: number;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'รูปภาพ',
+    required: false,
+  })
+  file: string;
 }

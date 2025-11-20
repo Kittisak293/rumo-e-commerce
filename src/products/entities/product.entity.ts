@@ -39,6 +39,9 @@ export class Product {
   @Column({ name: 'sold_count' })
   soldCount: number;
 
+  @Column({ default: '/unknown.jpg' })
+  imageUrl: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
