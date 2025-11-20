@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -29,14 +30,14 @@ export class Product {
   @Column()
   stock: number;
 
-  @Column()
-  rating_avg: number;
+  @Column({ name: 'rating_avg' })
+  ratingAvg: number;
 
-  @Column()
-  rating_count: number;
+  @Column({ name: 'rating_count' })
+  ratingCount: number;
 
-  @Column()
-  sold_count: number;
+  @Column({ name: 'sold_count' })
+  soldCount: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -48,6 +49,7 @@ export class Product {
   deletedAt: Date;
 
   @ManyToOne(() => Category, (category) => category.products)
+  @JoinColumn({ name: 'category_id' })
   category: Category;
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.product)
