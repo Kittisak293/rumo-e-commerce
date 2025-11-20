@@ -29,6 +29,15 @@ export class Product {
   @Column()
   stock: number;
 
+  @Column()
+  rating_avg: number;
+
+  @Column()
+  rating_count: number;
+
+  @Column()
+  sold_count: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
