@@ -21,6 +21,8 @@ import { Shipment } from './shipments/entities/shipment.entity';
 import { ShipmentEvent } from './shipment_events/entities/shipment_event.entity';
 import { CarriersModule } from './carriers/carriers.module';
 import { Carrier } from './carriers/entities/carrier.entity';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
@@ -40,6 +42,10 @@ import { Carrier } from './carriers/entities/carrier.entity';
         Carrier,
       ],
       synchronize: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads/products'),
+      serveRoot: '/product-images',
     }),
     UsersModule,
     AuthModule,
