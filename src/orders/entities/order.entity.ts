@@ -54,16 +54,22 @@ export class Order {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   subtotal: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    name: 'shipping_fee',
+  })
   shippingFee: number;
 
-  @Column({ default: 0 })
+  @Column({ default: 0, name: 'total_quantity' })
   totalQuantity: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   total: number;
 
-  @Column({ unique: true })
+  @Column({ unique: true, name: 'order_number' })
   orderNumber?: string;
 
   @CreateDateColumn({ name: 'created_at' })
