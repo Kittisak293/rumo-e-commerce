@@ -38,7 +38,7 @@ export class Shipment {
   @Column()
   status: string;
 
-  @Column()
+  @Column({ name: 'last_location' })
   lastLocation: string;
 
   @Column()
