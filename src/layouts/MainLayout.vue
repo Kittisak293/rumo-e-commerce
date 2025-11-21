@@ -101,16 +101,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import RumoLogo from 'src/assets/Rumo.png';
-// import homeLogo from 'src/assets/home.png';
-import homePurpleLogo from 'src/assets/home_purple.png';
-// import mallLogo from 'src/assets/mall.png';
-import mallPurpleLogo from 'src/assets/mall_purple.png';
-// import couponLogo from 'src/assets/coupon2.png';
-import couponPurpleLogo from 'src/assets/coupon2_purple.png';
-import bellLogo from 'src/assets/bell.png';
-import cartLogo from 'src/assets/cart.png';
-import peopleLogo from 'src/assets/people.png';
+import RumoLogo from 'src/assets/logos/Rumo.png';
+import homePurpleLogo from 'src/assets/ui/home_purple.png';
+import mallPurpleLogo from 'src/assets/ui/mall_purple.png';
+import couponPurpleLogo from 'src/assets/ui/coupon2_purple.png';
+
+import bellLogo from 'src/assets/icons/bell.png';
+import cartLogo from 'src/assets/icons/cart.png';
+import peopleLogo from 'src/assets/icons/people.png';
 
 const leftOpen = ref(true); // ให้ drawer โชว์บน desktop
 const search = ref('');
@@ -229,5 +227,20 @@ const search = ref('');
 
 .menu-item:active {
   transform: scale(0.92);
+}
+
+.drawer-item--active {
+  background-color: #8e4dff !important;
+  color: white !important;
+  border-radius: 18px;
+  box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.25);
+}
+
+.drawer-item--active .drawer-text {
+  color: white !important;
+}
+
+.drawer-item--active img {
+  filter: brightness(0) invert(1); /* ไอคอนเป็นสีขาว */
 }
 </style>

@@ -4,24 +4,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/HomePage.vue') }],
+    children: [
+      { path: '', name: 'home', component: () => import('pages/HomePage.vue') },
+      // { path: 'mall', component: () => import('pages/MallPage.vue') },
+    ],
   },
-
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
-  },
-
-  {
-    path: '/first-page',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/HomePage.vue') }],
-  },
-
-  {
-    path: '/test',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/HomePage.vue') }],
   },
 ];
 

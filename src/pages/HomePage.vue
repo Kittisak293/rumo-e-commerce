@@ -28,7 +28,7 @@ const productStore = useProductStore();
 onMounted(async () => {
   await productStore.getProducts();
 });
-import likeLogo from 'src/assets/like.png';
+import likeLogo from 'src/assets/ui/like.png';
 </script>
 
 <style scoped>
