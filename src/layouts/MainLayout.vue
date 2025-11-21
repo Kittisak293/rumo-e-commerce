@@ -80,8 +80,8 @@
         <q-item
           v-ripple
           clickable
-          :to="{ name: 'coupons' }"
-          :active="$route.name === 'coupons'"
+          :to="{ name: 'coupon' }"
+          :active="$route.name === 'coupon'"
           active-class="drawer-item--active"
           class="drawer-item q-mb-sm menu-item"
         >
