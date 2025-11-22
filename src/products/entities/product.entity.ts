@@ -44,7 +44,7 @@ export class Product {
   imageUrl: string;
 
   @Column({
-    type: 'enum',
+    type: 'text',
     enum: StoreType,
     default: StoreType.SELLER,
   })

@@ -92,4 +92,9 @@ export class ProductsController {
   remove(@Param('id') id: string) {
     return this.productsService.remove(+id);
   }
+
+  @Get('mall')
+  findMallProducts() {
+    return this.productsService.findMallProducts();
+  }
 }
