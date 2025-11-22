@@ -87,6 +87,7 @@ import mallLogo from 'src/assets/ui/mall2_purple.png';
   min-height: 40px;
   overflow: hidden;
   display: -webkit-box;
+  line-clamp: 2; /* standard */
   -webkit-line-clamp: 2; /* ตัดไม่เกิน 2 บรรทัด */
   -webkit-box-orient: vertical;
 }

@@ -14,8 +14,8 @@
           :image="p.imageUrl"
           :name="p.name"
           :price="p.price"
-          :sold="p.sold"
-          :rating="p.rating"
+          :sold="p.soldCount"
+          :rating="p.ratingAvg"
           :storeType="p.storeType"
         />
       </div>
@@ -27,9 +27,10 @@ import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { api } from 'src/boot/axios';
 import ProductCard from 'src/components/ProductCard.vue';
+import { type Product } from 'src/models';
 
 const route = useRoute();
-const products = ref<any[]>([]);
+const products = ref<Product[]>([]);
 const loading = ref(false);
 
 const loadSearch = async () => {
