@@ -4,7 +4,14 @@
       <span style="font-size: 40px; font-weight: 700; color: #8a33ff">
         ผลการค้นหา: "{{ route.query.q }}"
       </span>
-      <q-btn outline rounded label="เรียงตาม" @click="filterOpen = true" />
+      <q-space />
+      <q-btn
+        class="filter-button"
+        label="เรียงตาม ▼"
+        @click="filterOpen = true"
+        :ripple="false"
+        rounded
+      />
     </div>
 
     <div v-if="loading">กำลังค้นหา...</div>
@@ -211,5 +218,9 @@ const toggleRating = (val: number) => {
 
 .not-found {
   margin: 30px 0 0 30px;
+}
+
+.filter-button {
+  margin-right: 90px;
 }
 </style>
