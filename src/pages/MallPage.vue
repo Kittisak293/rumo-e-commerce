@@ -28,7 +28,7 @@ import { useProductStore } from 'src/stores/productStore';
 import { onMounted } from 'vue';
 const productStore = useProductStore();
 onMounted(async () => {
-  await productStore.getProducts();
+  await productStore.getMallProducts();
 });
 import mallLogo from 'src/assets/ui/mall2_purple.png';
 </script>

@@ -5,8 +5,16 @@
     </div>
 
     <div class="product-card__body">
-      <div class="product-card__name">
-        {{ name }}
+      <div class="product-card__name row item-start">
+        <q-icon
+          v-if="storeType === 'mall'"
+          name="local_mall"
+          size="16px"
+          class="mall-icon q-mr-xs"
+        />
+        <span class="product-card__name">
+          {{ name }}
+        </span>
       </div>
 
       <div class="product-card__price">฿{{ price.toLocaleString('th-TH') }}</div>
@@ -27,6 +35,7 @@ const props = defineProps<{
   price: number;
   sold: number;
   rating: number;
+  storeType?: 'mall' | 'seller';
 }>();
 </script>
 
