@@ -113,10 +113,10 @@ const leftOpen = ref(true); // ให้ drawer โชว์บน desktop
 const search = ref('');
 const router = useRouter();
 
-const onSearch = () => {
+const onSearch = async () => {
   const q = search.value.trim();
   if (!q) return;
-  router.push({ name: 'search', query: { q } });
+  await router.push({ name: 'search', query: { q } });
 };
 </script>
 
