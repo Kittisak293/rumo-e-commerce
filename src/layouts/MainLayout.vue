@@ -16,9 +16,10 @@
                 placeholder="ค้นหาสินค้า"
                 class="search-input2"
                 input-class="search-input-inner"
+                @keyup.enter="onSearch"
               />
 
-              <q-btn label="ค้นหา" class="search-btn2" unelevated no-caps />
+              <q-btn label="ค้นหา" class="search-btn2" unelevated no-caps @click="onSearch" />
             </div>
           </div>
           <q-space />
