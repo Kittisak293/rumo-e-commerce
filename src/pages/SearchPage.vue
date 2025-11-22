@@ -214,6 +214,7 @@ const toggleRating = (val: number) => {
   display: flex;
   flex-wrap: wrap; /* ทำให้สุดขอบขวาแล้วลงมาบรรทัดใหม่จดๆๆ */
   gap: 16px; /* ระยะห่างระหว่างการ์ด */
+  margin-top: 18px;
 }
 
 .not-found {
