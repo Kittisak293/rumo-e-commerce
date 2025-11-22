@@ -1,5 +1,6 @@
 import { CartItem } from 'src/cart-items/entities/cart-item.entity';
 import { Category } from 'src/categories/entities/category.entity';
+import { StoreType } from 'src/common/enums/store-type.enum';
 import { OrderItem } from 'src/order_items/entities/order_item.entity';
 import {
   Column,
@@ -41,6 +42,13 @@ export class Product {
 
   @Column({ default: '/product-images/unknown.jpg' })
   imageUrl: string;
+
+  @Column({
+    type: 'enum',
+    enum: StoreType,
+    default: StoreType.SELLER,
+  })
+  storeType: StoreType;
 
   @CreateDateColumn()
   createdAt: Date;

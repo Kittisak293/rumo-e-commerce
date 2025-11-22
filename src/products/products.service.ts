@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { Category } from 'src/categories/entities/category.entity';
+import { StoreType } from 'src/common/enums/store-type.enum';
 
 @Injectable()
 export class ProductsService {
@@ -51,5 +52,11 @@ export class ProductsService {
     });
     await this.productsRepository.softDelete(id);
     return product;
+  }
+
+  async findMallProducts() {
+    return await this.productsRepository.find({
+      where: { storeType: StoreType.MALL },
+    });
   }
 }

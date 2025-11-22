@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNumber, IsString, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsString, Min } from 'class-validator';
+import { StoreType } from 'src/common/enums/store-type.enum';
 
 export class CreateProductDto {
   @ApiProperty({ description: 'ชื่อสินค้า', example: 'Gaming Mouse ZXY' })
@@ -39,4 +40,7 @@ export class CreateProductDto {
     required: false,
   })
   imageUrl: string;
+
+  @IsEnum(StoreType)
+  storeType: StoreType;
 }
