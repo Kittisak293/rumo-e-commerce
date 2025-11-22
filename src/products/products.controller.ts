@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -49,14 +50,19 @@ export class ProductsController {
     });
   }
 
-  @Get()
-  findAll() {
-    return this.productsService.findAll();
-  }
-
   @Get('mall')
   findMallProducts() {
     return this.productsService.findMallProducts();
+  }
+
+  @Get('search')
+  search(@Query('q') q: string) {
+    return this.productsService.search(q);
+  }
+
+  @Get()
+  findAll() {
+    return this.productsService.findAll();
   }
 
   @Get(':id')

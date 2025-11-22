@@ -59,4 +59,14 @@ export class ProductsService {
       where: { storeType: StoreType.MALL },
     });
   }
+
+  async search(q: string) {
+    if (!q?.trim()) return [];
+
+    return await this.productsRepository
+      .createQueryBuilder('p')
+      .where('LOWER(p.name) LIKE LOWER(:q)', { q: `%${q}%` })
+      .orWhere('LOWER(p.description) LIKE LOWER(:q)', { q: `%${q}%` })
+      .getMany();
+  }
 }
