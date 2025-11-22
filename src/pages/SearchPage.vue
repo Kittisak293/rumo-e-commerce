@@ -1,23 +1,28 @@
 <template>
-  <q-page class="q-pa-lg">
-    <div class="text-h6 q-mb-md">ผลการค้นหา: "{{ route.query.q }}"</div>
+  <q-page padding>
+    <div class="row items-center q-gutter-sm" style="margin: 5px 0 0 25px">
+      <span style="font-size: 40px; font-weight: 700; color: #8a33ff">
+        ผลการค้นหา: "{{ route.query.q }}"
+      </span>
+    </div>
 
     <div v-if="loading">กำลังค้นหา...</div>
 
     <div v-else>
       <div v-if="products.length === 0" class="text-grey">ไม่พบสินค้า</div>
 
-      <div v-else class="row q-col-gutter-md">
-        <ProductCard
-          v-for="p in products"
-          :key="p.id"
-          :image="p.imageUrl"
-          :name="p.name"
-          :price="p.price"
-          :sold="p.soldCount"
-          :rating="p.ratingAvg"
-          :storeType="p.storeType"
-        />
+      <div v-else class="product-grid">
+        <div v-for="p in products" :key="p.id">
+          <ProductCard
+            :key="p.id"
+            :image="'http://localhost:3000' + p.imageUrl"
+            :name="p.name"
+            :price="p.price"
+            :sold="p.soldCount"
+            :rating="p.ratingAvg"
+            :storeType="p.storeType"
+          />
+        </div>
       </div>
     </div>
   </q-page>
@@ -51,4 +56,11 @@ const loadSearch = async () => {
 
 watch(() => route.query.q, loadSearch, { immediate: true });
 </script>
-<style scoped></style>
+
+<style scoped>
+.product-grid {
+  display: flex;
+  flex-wrap: wrap; /* ทำให้สุดขอบขวาแล้วลงมาบรรทัดใหม่จดๆๆ */
+  gap: 16px; /* ระยะห่างระหว่างการ์ด */
+}
+</style>

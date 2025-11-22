@@ -16,7 +16,7 @@
           :price="p.price"
           :sold="p.soldCount"
           :rating="p.ratingAvg"
-          :store-type="p.storeType"
+          :storeType="p.storeType"
         />
       </div>
     </div>
