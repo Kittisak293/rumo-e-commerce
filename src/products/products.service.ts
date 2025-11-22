@@ -82,17 +82,17 @@ export class ProductsService {
     }
 
     // ราคา
-    if (filters.priceMin) {
+    if (filters.priceMin !== null && filters.priceMin !== undefined) {
       qb.andWhere('p.price >= :min', { min: filters.priceMin });
     }
 
-    if (filters.priceMax) {
+    if (filters.priceMax !== null && filters.priceMax !== undefined) {
       qb.andWhere('p.price <= :max', { max: filters.priceMax });
     }
 
     // คะแนน
-    if (filters.ratingMin) {
-      qb.andWhere('p.rating >= :rating', { rating: filters.ratingMin });
+    if (filters.ratingMin !== null && filters.ratingMin !== undefined) {
+      qb.andWhere('p.ratingAvg >= :rating', { rating: filters.ratingMin });
     }
 
     // จัดเรียง
