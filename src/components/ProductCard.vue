@@ -6,13 +6,8 @@
 
     <div class="product-card__body">
       <div class="product-card__name row item-start">
-        <q-icon
-          v-if="storeType === 'mall'"
-          name="local_mall"
-          size="16px"
-          class="mall-icon q-mr-xs"
-        />
-        <span class="product-card__name">
+        <img class="mall-image" v-if="storeType === 'mall'" :src="mallLogo" alt="Mall" />
+        <span class="product-card__name-text">
           {{ name }}
         </span>
       </div>
@@ -37,6 +32,8 @@ const props = defineProps<{
   rating: number;
   storeType?: 'mall' | 'seller';
 }>();
+
+import mallLogo from 'src/assets/ui/mall2_purple.png';
 </script>
 
 <style scoped>
@@ -106,5 +103,14 @@ const props = defineProps<{
   color: #6b7280;
   display: flex;
   justify-content: space-between;
+}
+
+.mall-image {
+  max-height: 10%;
+  max-width: 10%;
+}
+
+.product-card__name-text {
+  margin-left: 3px;
 }
 </style>
