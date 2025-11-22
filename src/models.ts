@@ -9,4 +9,5 @@ export interface Product {
   ratingCount: number;
   soldCount: number;
   imageUrl: string;
+  storeType: 'mall' | 'seller';
 }
