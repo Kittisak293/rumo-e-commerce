@@ -56,8 +56,22 @@ export class ProductsController {
   }
 
   @Get('search')
-  search(@Query('q') q: string) {
-    return this.productsService.search(q);
+  search(
+    @Query('q') q: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('storeType') storeType?: 'mall' | 'seller',
+    @Query('priceMin') priceMin?: number,
+    @Query('priceMax') priceMax?: number,
+    @Query('ratingMin') ratingMin?: number,
+  ) {
+    return this.productsService.search({
+      q,
+      sortBy,
+      storeType,
+      priceMin,
+      priceMax,
+      ratingMin,
+    });
   }
 
   @Get()
