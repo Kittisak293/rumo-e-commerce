@@ -95,5 +95,33 @@ export const useProductStore = defineStore('product', () => {
     }
   }
 
-  return { products, addProduct, delProduct, updateProduct, getProducts, getMallProducts };
+  async function getSearchProducts() {
+    try {
+      Loading.show();
+      const res = await api.get('/products/search');
+      console.log(res.data);
+      products.value = res.data;
+    } catch (err) {
+      console.error(err);
+      Notify.create({
+        color: 'negative',
+        position: 'top',
+        message: 'Loading failed',
+        icon: 'report_problem',
+      });
+    } finally {
+      console.log('finally');
+      Loading.hide();
+    }
+  }
+
+  return {
+    products,
+    addProduct,
+    delProduct,
+    updateProduct,
+    getProducts,
+    getMallProducts,
+    getSearchProducts,
+  };
 });
