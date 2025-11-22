@@ -50,7 +50,6 @@
     >
       <q-list class="q-pt-md q-px-sm">
         <q-item
-          v-ripple
           clickable
           :to="{ name: 'home' }"
           :active="$route.name === 'home'"
@@ -64,7 +63,6 @@
         </q-item>
 
         <q-item
-          v-ripple
           clickable
           :to="{ name: 'mall' }"
           :active="$route.name === 'mall'"
@@ -78,7 +76,6 @@
         </q-item>
 
         <q-item
-          v-ripple
           clickable
           :to="{ name: 'coupon' }"
           :active="$route.name === 'coupon'"
