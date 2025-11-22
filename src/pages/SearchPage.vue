@@ -40,6 +40,7 @@
       <q-card-section class="q-gutter-md">
         <div class="text-subtitle2">เรียงลำดับ</div>
         <q-btn-toggle
+          :ripple="false"
           v-model="sortBy"
           unelevated
           rounded
@@ -81,32 +82,30 @@
         <q-separator />
 
         <div class="text-subtitle2">คะแนน</div>
-        <q-btn-toggle
-          v-model="ratingMin"
+        <q-btn
+          v-for="opt in ratingOptions"
+          :ripple="false"
+          :key="opt.value"
           unelevated
           rounded
-          toggle-color="primary"
-          text-color="black"
-          :options="[
-            { label: '5★', value: 5 },
-            { label: '≥4★', value: 4 },
-            { label: '≥3★', value: 3 },
-            { label: '≥2★', value: 2 },
-            { label: '≥1★', value: 1 },
-          ]"
+          :label="opt.label"
+          :color="ratingMin === opt.value ? 'primary' : 'grey-3'"
+          :text-color="ratingMin === opt.value ? 'white' : 'black'"
+          @click="toggleRating(opt.value)"
         />
 
         <q-separator />
 
         <div class="text-subtitle2">ร้านค้า</div>
         <q-btn-toggle
+          :ripple="false"
           v-model="storeType"
           unelevated
           rounded
           toggle-color="primary"
           text-color="black"
           :options="[
-            { label: 'ทั้งหมด', value: '' },
+            { label: 'ทั้งหมด', value: 'all' },
             { label: 'Mall', value: 'mall' },
             { label: 'ร้านค้าทั่วไป', value: 'seller' },
           ]"
@@ -158,6 +157,13 @@ const priceMin = ref<number | null>(null);
 const priceMax = ref<number | null>(null);
 const ratingMin = ref<number | null>(null);
 const storeType = ref<'all' | 'mall' | 'seller'>('all');
+const ratingOptions = [
+  { label: '5★', value: 5 },
+  { label: '≥4★', value: 4 },
+  { label: '≥3★', value: 3 },
+  { label: '≥2★', value: 2 },
+  { label: '≥1★', value: 1 },
+];
 
 const resetFilters = () => {
   sortBy.value = 'relevant';
@@ -189,6 +195,10 @@ const applyFilters = async () => {
   }
 
   filterOpen.value = false;
+};
+
+const toggleRating = (val: number) => {
+  ratingMin.value = ratingMin.value === val ? null : val;
 };
 </script>
 
