@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
   image: string;
   name: string;
@@ -24,11 +25,12 @@ const props = defineProps<{
   width: 180px;
   border-radius: 24px;
   background: #ffffff;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.18);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   cursor: pointer;
+  border: 1px solid #d3d3d3;
 }
 
 /* กล่องรูปด้านบน */
@@ -36,7 +38,7 @@ const props = defineProps<{
   background: #f4f4f5;
   padding: 6px;
   border-bottom: 1px solid #e5e7eb;
-  height: 180px;
+  height: 150px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -55,7 +57,7 @@ const props = defineProps<{
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* ดัน price + meta ลงล่าง */
-  min-height: 150px; /* ให้สูงเท่า ๆ กันทุกใบ */
+  min-height: 50px; /* ให้สูงเท่า ๆ กันทุกใบ */
 }
 
 .category-card__name {
@@ -96,5 +98,6 @@ const props = defineProps<{
 
 .category-card__name-text {
   margin-left: 3px;
+  font-size: 16.5px;
 }
 </style>

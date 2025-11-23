@@ -46,6 +46,7 @@ import mallLogo from 'src/assets/ui/mall2_purple.png';
   display: flex;
   flex-direction: column;
   cursor: pointer;
+  border: 1px solid #d3d3d3;
 }
 
 /* กล่องรูปด้านบน */

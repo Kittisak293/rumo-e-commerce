@@ -134,15 +134,14 @@
   </q-dialog>
 
   <q-dialog v-model="categoryOpen" persistent>
-    <q-card style="width: 720px; max-width: 95vw; border-radius: 16px">
+    <q-card style="width: 1300px; max-width: 95vw; border-radius: 16px">
       <q-card-section class="row items-center justify-between">
-        <div class="text-h6 text-weight-medium">หมวดหมู่</div>
+        <div></div>
+        <div class="text-h4 text-weight-medium">หมวดหมู่สินค้า</div>
         <q-btn flat round icon="X" @click="categoryOpen = false" />
       </q-card-section>
 
-      <q-separator />
-
-      <div class="product-grid">
+      <div class="category-grid">
         <div v-for="p in categories" :key="p.id">
           <CategoryCard :key="p.id" :image="'http://localhost:3000' + p.imageUrl" :name="p.name" />
         </div>
@@ -159,13 +158,17 @@ import likeLogo from 'src/assets/ui/like.png';
 import type { Product, Category } from 'src/models';
 import { api } from 'src/boot/axios';
 import CategoryCard from 'src/components/CategoryCard.vue';
+import { useCategoryStore } from 'src/stores/categoryStore';
 
 const products = ref<Product[]>([]);
 const categories = ref<Category[]>([]);
 const productStore = useProductStore();
+const categoryStore = useCategoryStore();
 onMounted(async () => {
   await productStore.getProducts();
+  await categoryStore.getCategories();
   products.value = productStore.products;
+  categories.value = categoryStore.categories;
 });
 const loading = ref(false);
 const filterOpen = ref(false);
@@ -231,5 +234,7 @@ const toggleRating = (val: number) => {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+  text-align: center;
+  margin: 0 50px 70px 70px;
 }
 </style>
