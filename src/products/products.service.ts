@@ -40,7 +40,7 @@ export class ProductsService {
 
   async update(
     id: number,
-    updateProductDto: UpdateProductDto & { imageUrl: string },
+    updateProductDto: UpdateProductDto & { imageUrl?: string },
   ): Promise<Product> {
     const product = this.productsRepository.create(updateProductDto);
     const category = await this.categoriesRepository.findOneByOrFail({

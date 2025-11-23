@@ -124,9 +124,7 @@ export class ProductsController {
     console.log(file);
     return this.productsService.update(+id, {
       ...updateProductDto,
-      imageUrl: file
-        ? '/product-images/' + file.filename
-        : '/product-images/unknown.jpg',
+      imageUrl: file ? '/product-images/' + file.filename : undefined,
     });
   }
 
