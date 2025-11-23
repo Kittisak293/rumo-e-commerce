@@ -12,18 +12,23 @@
         rounded
       />
     </div>
+    <div v-if="loading">กำลังค้นหา...</div>
 
-    <div class="product-grid">
-      <div v-for="p in products" :key="p.id">
-        <ProductCard
-          :key="p.id"
-          :image="'http://localhost:3000' + p.imageUrl"
-          :name="p.name"
-          :price="p.price"
-          :sold="p.soldCount"
-          :rating="p.ratingAvg"
-          :storeType="p.storeType"
-        />
+    <div v-else>
+      <div v-if="products.length === 0" class="text-grey not-found">ไม่พบสินค้า</div>
+
+      <div v-else class="product-grid">
+        <div v-for="p in products" :key="p.id">
+          <ProductCard
+            :key="p.id"
+            :image="'http://localhost:3000' + p.imageUrl"
+            :name="p.name"
+            :price="p.price"
+            :sold="p.soldCount"
+            :rating="p.ratingAvg"
+            :storeType="p.storeType"
+          />
+        </div>
       </div>
     </div>
   </q-page>
@@ -189,5 +194,9 @@ const toggleRating = (val: number) => {
   display: flex;
   flex-wrap: wrap; /* ทำให้สุดขอบขวาแล้วลงมาบรรทัดใหม่จดๆๆ */
   gap: 16px; /* ระยะห่างระหว่างการ์ด */
+}
+
+.not-found {
+  margin: 10px 0 0 30px;
 }
 </style>
