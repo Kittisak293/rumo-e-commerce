@@ -12,4 +12,12 @@ export class CreateCategoryDto {
   })
   @IsString()
   slug: string;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'รูปภาพ',
+    required: false,
+  })
+  imageUrl: string;
 }
