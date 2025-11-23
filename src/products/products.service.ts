@@ -3,7 +3,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { Category } from 'src/categories/entities/category.entity';
 import { StoreType } from 'src/common/enums/store-type.enum';
 
@@ -71,9 +71,14 @@ export class ProductsService {
     const qb = this.productsRepository.createQueryBuilder('p');
 
     // ค้นหา
-    qb.where('LOWER(p.name) LIKE LOWER(:q)', { q: `%${filters.q}%` }).orWhere(
-      'LOWER(p.description) LIKE LOWER(:q)',
-      { q: `%${filters.q}%` },
+    qb.where(
+      new Brackets((qb1) => {
+        qb1
+          .where('LOWER(p.name) LIKE LOWER(:q)', { q: `%${filters.q}%` })
+          .orWhere('LOWER(p.description) LIKE LOWER(:q)', {
+            q: `%${filters.q}%`,
+          });
+      }),
     );
 
     // ประเภทร้าน
