@@ -141,6 +141,12 @@
       </q-card-section>
 
       <q-separator />
+
+      <div class="product-grid">
+        <div v-for="p in categories" :key="p.id">
+          <CategoryCard :key="p.id" :image="'http://localhost:3000' + p.imageUrl" :name="p.name" />
+        </div>
+      </div>
     </q-card>
   </q-dialog>
 </template>
@@ -150,10 +156,12 @@ import ProductCard from 'src/components/ProductCard.vue';
 import { useProductStore } from 'src/stores/productStore';
 import { onMounted, ref } from 'vue';
 import likeLogo from 'src/assets/ui/like.png';
-import { type Product } from 'src/models';
+import type { Product, Category } from 'src/models';
 import { api } from 'src/boot/axios';
+import CategoryCard from 'src/components/CategoryCard.vue';
 
 const products = ref<Product[]>([]);
+const categories = ref<Category[]>([]);
 const productStore = useProductStore();
 onMounted(async () => {
   await productStore.getProducts();
