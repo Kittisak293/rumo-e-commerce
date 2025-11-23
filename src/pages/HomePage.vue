@@ -3,10 +3,18 @@
     <div class="row items-center q-gutter-sm">
       <img :src="likeLogo" alt="" style="width: 90px; height: 90px" />
       <span style="font-size: 40px; font-weight: 700; color: #8a33ff"> สินค้าแนะนำประจำวัน </span>
+      <q-space />
+      <q-btn
+        class="filter-button"
+        label="เรียงตาม ▼"
+        @click="filterOpen = true"
+        :ripple="false"
+        rounded
+      />
     </div>
 
     <div class="product-grid">
-      <div v-for="p in productStore.products" :key="p.id">
+      <div v-for="p in products" :key="p.id">
         <ProductCard
           :key="p.id"
           :image="'http://localhost:3000' + p.imageUrl"
@@ -14,6 +22,7 @@
           :price="p.price"
           :sold="p.soldCount"
           :rating="p.ratingAvg"
+          :storeType="p.storeType"
         />
       </div>
     </div>
@@ -117,17 +126,16 @@
 import ProductCard from 'src/components/ProductCard.vue';
 import { useProductStore } from 'src/stores/productStore';
 import { onMounted, ref } from 'vue';
-const productStore = useProductStore();
-onMounted(async () => {
-  await productStore.getHomeProducts();
-});
 import likeLogo from 'src/assets/ui/like.png';
 import { type Product } from 'src/models';
-import { useRoute } from 'vue-router';
 import { api } from 'src/boot/axios';
 
-const route = useRoute();
 const products = ref<Product[]>([]);
+const productStore = useProductStore();
+onMounted(async () => {
+  await productStore.getProducts();
+  products.value = productStore.products;
+});
 const loading = ref(false);
 const filterOpen = ref(false);
 const sortBy = ref<'relevant' | 'popular' | 'latest' | 'priceAsc' | 'priceDesc'>('relevant');
@@ -152,11 +160,7 @@ const resetFilters = () => {
 };
 
 const applyFilters = async () => {
-  const q = (route.query.q || '').toString().trim();
-  if (!q) return;
-
   const params = {
-    q,
     sortBy: sortBy.value,
     storeType: storeType.value !== 'all' ? storeType.value : undefined,
     priceMin: priceMin.value ?? undefined,
@@ -166,7 +170,7 @@ const applyFilters = async () => {
 
   loading.value = true;
   try {
-    const res = await api.get('/products/search', { params });
+    const res = await api.get('/products/home', { params });
     products.value = res.data;
   } finally {
     loading.value = false;
