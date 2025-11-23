@@ -5,6 +5,13 @@
       <span style="font-size: 40px; font-weight: 700; color: #8a33ff"> สินค้าแนะนำประจำวัน </span>
       <q-space />
       <q-btn
+        class="category-button"
+        label="หมวดหมู่ ▼"
+        @click="categoryOpen = true"
+        :ripple="false"
+        rounded
+      />
+      <q-btn
         class="filter-button"
         label="เรียงตาม ▼"
         @click="filterOpen = true"
@@ -125,6 +132,17 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="categoryOpen" persistent>
+    <q-card style="width: 720px; max-width: 95vw; border-radius: 16px">
+      <q-card-section class="row items-center justify-between">
+        <div class="text-h6 text-weight-medium">หมวดหมู่</div>
+        <q-btn flat round icon="X" @click="categoryOpen = false" />
+      </q-card-section>
+
+      <q-separator />
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
@@ -143,6 +161,7 @@ onMounted(async () => {
 });
 const loading = ref(false);
 const filterOpen = ref(false);
+const categoryOpen = ref(false);
 const sortBy = ref<'relevant' | 'popular' | 'latest' | 'priceAsc' | 'priceDesc'>('relevant');
 const priceMin = ref<number | null>(null);
 const priceMax = ref<number | null>(null);
@@ -198,5 +217,11 @@ const toggleRating = (val: number) => {
 
 .not-found {
   margin: 10px 0 0 30px;
+}
+
+.category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 </style>
