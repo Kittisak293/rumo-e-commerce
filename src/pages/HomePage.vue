@@ -143,7 +143,13 @@
 
       <div class="category-grid">
         <div v-for="p in categories" :key="p.id">
-          <CategoryCard :key="p.id" :image="'http://localhost:3000' + p.imageUrl" :name="p.name" />
+          <CategoryCard
+            :key="p.id"
+            :id="p.id"
+            :image="'http://localhost:3000' + p.imageUrl"
+            :name="p.name"
+            @selectCategory="handleCategorySelect"
+          />
         </div>
       </div>
     </q-card>
@@ -178,6 +184,7 @@ const priceMin = ref<number | null>(null);
 const priceMax = ref<number | null>(null);
 const ratingMin = ref<number | null>(null);
 const storeType = ref<'all' | 'mall' | 'seller'>('all');
+const categoryId = ref<number | null>(null);
 const ratingOptions = [
   { label: '5★', value: 5 },
   { label: '≥4★', value: 4 },
@@ -216,6 +223,28 @@ const applyFilters = async () => {
 
 const toggleRating = (val: number) => {
   ratingMin.value = ratingMin.value === val ? null : val;
+};
+
+const handleCategorySelect = async (selectedId: number) => {
+  categoryId.value = selectedId;
+  const params = {
+    sortBy: sortBy.value,
+    storeType: storeType.value !== 'all' ? storeType.value : undefined,
+    priceMin: priceMin.value ?? undefined,
+    priceMax: priceMax.value ?? undefined,
+    ratingMin: ratingMin.value ?? undefined,
+    categoryId: categoryId.value ?? undefined,
+  };
+
+  loading.value = true;
+  try {
+    const res = await api.get('/products/category', { params });
+    products.value = res.data;
+  } finally {
+    loading.value = false;
+  }
+
+  categoryOpen.value = false;
 };
 </script>
 

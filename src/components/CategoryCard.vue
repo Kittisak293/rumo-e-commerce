@@ -1,23 +1,30 @@
 <template>
-  <div class="category-card">
-    <div class="category-card__image-wrap">
-      <img :src="image || '/category-images/unknown.jpg'" :alt="name" />
-    </div>
+  <div class="category-card" @click="handleClick">
+    <div class="category-card">
+      <div class="category-card__image-wrap">
+        <img :src="image || '/category-images/unknown.jpg'" :alt="name" />
+      </div>
 
-    <div class="category-card__body">
-      <div class="category-card__name-text">
-        {{ name }}
+      <div class="category-card__body">
+        <div class="category-card__name-text">
+          {{ name }}
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
   image: string;
   name: string;
+  id: number;
 }>();
+
+const emit = defineEmits(['selectCategory']);
+const handleClick = () => {
+  emit('selectCategory', props.id);
+};
 </script>
 
 <style scoped>
