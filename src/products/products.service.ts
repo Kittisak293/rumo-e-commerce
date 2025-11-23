@@ -171,4 +171,60 @@ export class ProductsService {
     }
     return qb.getMany();
   }
+
+  async searchCategoryProducts(filters: {
+    sortBy?: string;
+    storeType?: 'mall' | 'seller';
+    priceMin?: number;
+    priceMax?: number;
+    ratingMin?: number;
+    categoryId?: number;
+  }) {
+    const qb = this.productsRepository
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.category', 'category');
+    // ประเภทร้าน
+    if (filters.storeType) {
+      qb.andWhere('p.storeType = :storeType', { storeType: filters.storeType });
+    }
+
+    // ราคา
+    if (filters.priceMin !== null && filters.priceMin !== undefined) {
+      qb.andWhere('p.price >= :min', { min: filters.priceMin });
+    }
+
+    if (filters.priceMax !== null && filters.priceMax !== undefined) {
+      qb.andWhere('p.price <= :max', { max: filters.priceMax });
+    }
+
+    // คะแนน
+    if (filters.ratingMin !== null && filters.ratingMin !== undefined) {
+      qb.andWhere('p.ratingAvg >= :rating', { rating: filters.ratingMin });
+    }
+
+    if (filters.categoryId !== null && filters.categoryId !== undefined) {
+      qb.andWhere('p.category_id = :categoryId', {
+        categoryId: filters.categoryId,
+      });
+    }
+
+    // จัดเรียง
+    switch (filters.sortBy) {
+      case 'popular':
+        qb.orderBy('p.sold', 'DESC');
+        break;
+      case 'latest':
+        qb.orderBy('p.createdAt', 'DESC');
+        break;
+      case 'priceAsc':
+        qb.orderBy('p.price', 'ASC');
+        break;
+      case 'priceDesc':
+        qb.orderBy('p.price', 'DESC');
+        break;
+      default:
+        qb.orderBy('p.id', 'DESC');
+    }
+    return qb.getMany();
+  }
 }

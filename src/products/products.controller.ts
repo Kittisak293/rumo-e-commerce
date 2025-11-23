@@ -91,6 +91,25 @@ export class ProductsController {
     });
   }
 
+  @Get('category')
+  searchCategoryProducts(
+    @Query('sortBy') sortBy?: string,
+    @Query('storeType') storeType?: 'mall' | 'seller',
+    @Query('priceMin') priceMin?: number,
+    @Query('priceMax') priceMax?: number,
+    @Query('ratingMin') ratingMin?: number,
+    @Query('categoryId') categoryId?: number,
+  ) {
+    return this.productsService.searchCategoryProducts({
+      sortBy,
+      storeType,
+      priceMin,
+      priceMax,
+      ratingMin,
+      categoryId,
+    });
+  }
+
   @Get()
   findAll() {
     return this.productsService.findAll();
