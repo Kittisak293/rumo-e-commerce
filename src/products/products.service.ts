@@ -16,8 +16,10 @@ export class ProductsService {
     private readonly categoriesRepository: Repository<Category>,
   ) {}
 
-  async create(createProductDto: CreateProductDto) {
-    const product = this.productsRepository.create(createProductDto);
+  async create(
+    createProductDto: CreateProductDto & { imageUrl: string },
+  ): Promise<Product> {
+    const product = this.productsRepository.create({ ...createProductDto });
     const category = await this.categoriesRepository.findOneByOrFail({
       id: createProductDto.categoryId,
     });
@@ -32,18 +34,21 @@ export class ProductsService {
     return await this.productsRepository.find();
   }
 
-  async findOne(id: number) {
-    return await this.productsRepository.findOne({ where: { id: id } });
+  async findOne(id: number): Promise<Product> {
+    return await this.productsRepository.findOneOrFail({ where: { id: id } });
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto) {
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto & { imageUrl: string },
+  ): Promise<Product> {
     const product = this.productsRepository.create(updateProductDto);
     const category = await this.categoriesRepository.findOneByOrFail({
       id: updateProductDto.categoryId,
     });
     product.category = category;
     await this.productsRepository.update(id, product);
-    return await this.productsRepository.findOne({ where: { id: id } });
+    return await this.productsRepository.findOneOrFail({ where: { id: id } });
   }
 
   async remove(id: number) {

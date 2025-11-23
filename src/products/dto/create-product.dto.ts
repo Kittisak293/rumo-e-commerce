@@ -34,13 +34,18 @@ export class CreateProductDto {
   categoryId: number;
 
   @ApiProperty({
+    description: 'ใครเป็นคนขาย mall หรือ seller',
+    example: 'mall',
+  })
+  @IsString()
+  @IsEnum(StoreType)
+  storeType: StoreType;
+
+  @ApiProperty({
     type: 'string',
     format: 'binary',
     description: 'รูปภาพ',
     required: false,
   })
   imageUrl: string;
-
-  @IsEnum(StoreType)
-  storeType: StoreType;
 }
