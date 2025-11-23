@@ -20,6 +20,9 @@ export class Category {
   @Column({ unique: true })
   slug: string;
 
+  @Column({ default: '/category-images/unknown.jpg' })
+  imageUrl: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
