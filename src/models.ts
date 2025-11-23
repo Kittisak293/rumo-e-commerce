@@ -11,3 +11,9 @@ export interface Product {
   imageUrl: string;
   storeType: 'mall' | 'seller';
 }
+
+export interface Category {
+  id: number;
+  name: string;
+  imageUrl: string;
+}
