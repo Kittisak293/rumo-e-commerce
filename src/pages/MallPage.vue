@@ -8,7 +8,7 @@
     </div>
 
     <div class="product-grid">
-      <div v-for="p in productStore.products" :key="p.id">
+      <div v-for="p in products" :key="p.id">
         <ProductCard
           :key="p.id"
           :image="'http://localhost:3000' + p.imageUrl"
@@ -87,23 +87,6 @@
           :text-color="ratingMin === opt.value ? 'white' : 'black'"
           @click="toggleRating(opt.value)"
         />
-
-        <q-separator />
-
-        <div class="text-subtitle2">ร้านค้า</div>
-        <q-btn-toggle
-          :ripple="false"
-          v-model="storeType"
-          unelevated
-          rounded
-          toggle-color="primary"
-          text-color="black"
-          :options="[
-            { label: 'ทั้งหมด', value: 'all' },
-            { label: 'Mall', value: 'mall' },
-            { label: 'ร้านค้าทั่วไป', value: 'seller' },
-          ]"
-        />
       </q-card-section>
 
       <q-separator />
@@ -119,12 +102,62 @@
 <script setup lang="ts">
 import ProductCard from 'src/components/ProductCard.vue';
 import { useProductStore } from 'src/stores/productStore';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+import mallLogo from 'src/assets/ui/mall2_purple.png';
+import { type Product } from 'src/models';
+import { api } from 'src/boot/axios';
+
+const products = ref<Product[]>([]);
 const productStore = useProductStore();
 onMounted(async () => {
   await productStore.getMallProducts();
+  products.value = productStore.products;
 });
-import mallLogo from 'src/assets/ui/mall2_purple.png';
+
+const loading = ref(false);
+const filterOpen = ref(false);
+const sortBy = ref<'relevant' | 'popular' | 'latest' | 'priceAsc' | 'priceDesc'>('relevant');
+const priceMin = ref<number | null>(null);
+const priceMax = ref<number | null>(null);
+const ratingMin = ref<number | null>(null);
+const ratingOptions = [
+  { label: '5★', value: 5 },
+  { label: '≥4★', value: 4 },
+  { label: '≥3★', value: 3 },
+  { label: '≥2★', value: 2 },
+  { label: '≥1★', value: 1 },
+];
+
+const resetFilters = () => {
+  sortBy.value = 'relevant';
+  priceMin.value = null;
+  priceMax.value = null;
+  ratingMin.value = null;
+};
+
+const applyFilters = async () => {
+  const params = {
+    sortBy: sortBy.value,
+    storeType: undefined,
+    priceMin: priceMin.value ?? undefined,
+    priceMax: priceMax.value ?? undefined,
+    ratingMin: ratingMin.value ?? undefined,
+  };
+
+  loading.value = true;
+  try {
+    const res = await api.get('/products/home', { params });
+    products.value = res.data;
+  } finally {
+    loading.value = false;
+  }
+
+  filterOpen.value = false;
+};
+
+const toggleRating = (val: number) => {
+  ratingMin.value = ratingMin.value === val ? null : val;
+};
 </script>
 
 <style scoped>
