@@ -12,7 +12,9 @@ export class CategoryService {
     private readonly categoriesRepository: Repository<Category>,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(
+    createCategoryDto: CreateCategoryDto & { imageUrl: string },
+  ): Promise<Category> {
     const category = this.categoriesRepository.create(createCategoryDto);
 
     category.slug = category.name.toLowerCase().trim().replace(/\s+/g, '-');

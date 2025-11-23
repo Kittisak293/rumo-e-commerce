@@ -26,7 +26,7 @@ export class CategoryController {
   @ApiBody({ description: 'ข้อมูลหมวดหมู่', type: CreateCategoryDto })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
-    FileInterceptor('file', {
+    FileInterceptor('imageUrl', {
       storage: diskStorage({
         destination: './uploads/categories',
         filename: (req, file, callback) => {
