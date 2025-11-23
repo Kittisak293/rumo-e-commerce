@@ -5,19 +5,32 @@
       <div></div>
       <div></div>
       <span style="font-size: 40px; font-weight: 700; color: #8a33ff"> RUMO MALL </span>
+      <q-space />
+      <q-btn
+        class="filter-button"
+        label="เรียงตาม ▼"
+        @click="filterOpen = true"
+        :ripple="false"
+        rounded
+      />
     </div>
+    <div v-if="loading">กำลังค้นหา...</div>
 
-    <div class="product-grid">
-      <div v-for="p in products" :key="p.id">
-        <ProductCard
-          :key="p.id"
-          :image="'http://localhost:3000' + p.imageUrl"
-          :name="p.name"
-          :price="p.price"
-          :sold="p.soldCount"
-          :rating="p.ratingAvg"
-          :storeType="p.storeType"
-        />
+    <div v-else>
+      <div v-if="products.length === 0" class="text-grey not-found">ไม่พบสินค้า</div>
+
+      <div v-else class="product-grid">
+        <div v-for="p in products" :key="p.id">
+          <ProductCard
+            :key="p.id"
+            :image="'http://localhost:3000' + p.imageUrl"
+            :name="p.name"
+            :price="p.price"
+            :sold="p.soldCount"
+            :rating="p.ratingAvg"
+            :storeType="p.storeType"
+          />
+        </div>
       </div>
     </div>
   </q-page>
@@ -138,7 +151,7 @@ const resetFilters = () => {
 const applyFilters = async () => {
   const params = {
     sortBy: sortBy.value,
-    storeType: undefined,
+    storeType: 'mall',
     priceMin: priceMin.value ?? undefined,
     priceMax: priceMax.value ?? undefined,
     ratingMin: ratingMin.value ?? undefined,
@@ -166,5 +179,9 @@ const toggleRating = (val: number) => {
   flex-wrap: wrap; /* ทำให้สุดขอบขวาแล้วลงมาบรรทัดใหม่จดๆๆ */
   gap: 16px; /* ระยะห่างระหว่างการ์ด */
   margin-top: 17px;
+}
+
+.not-found {
+  margin: 30px 0 0 30px;
 }
 </style>
