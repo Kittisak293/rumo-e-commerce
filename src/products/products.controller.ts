@@ -74,6 +74,23 @@ export class ProductsController {
     });
   }
 
+  @Get('home')
+  searchHomeProducts(
+    @Query('sortBy') sortBy?: string,
+    @Query('storeType') storeType?: 'mall' | 'seller',
+    @Query('priceMin') priceMin?: number,
+    @Query('priceMax') priceMax?: number,
+    @Query('ratingMin') ratingMin?: number,
+  ) {
+    return this.productsService.searchHomeProducts({
+      sortBy,
+      storeType,
+      priceMin,
+      priceMax,
+      ratingMin,
+    });
+  }
+
   @Get()
   findAll() {
     return this.productsService.findAll();
