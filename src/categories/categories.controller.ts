@@ -60,11 +60,28 @@ export class CategoryController {
   }
 
   @Patch(':id')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('imageUrl', {
+      storage: diskStorage({
+        destination: './uploads/categories',
+        filename: (req, file, callback) => {
+          console.log(file);
+          const uniqueFileName = v4() + extname(file.originalname);
+          callback(null, uniqueFileName);
+        },
+      }),
+    }),
+  )
   update(
     @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoryService.update(+id, updateCategoryDto);
+    return this.categoryService.update(+id, {
+      ...updateCategoryDto,
+      imageUrl: file ? '/category-images/' + file.filename : undefined,
+    });
   }
 
   @Delete(':id')

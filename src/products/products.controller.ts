@@ -105,7 +105,7 @@ export class ProductsController {
   @ApiBody({ description: 'ข้อมูลสินค้า', type: UpdateProductDto })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
-    FileInterceptor('file', {
+    FileInterceptor('imageUrl', {
       storage: diskStorage({
         destination: './uploads/products',
         filename: (req, file, callback) => {

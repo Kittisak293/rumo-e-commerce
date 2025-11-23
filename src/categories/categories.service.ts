@@ -32,9 +32,14 @@ export class CategoryService {
     });
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+  async update(
+    id: number,
+    updateCategoryDto: UpdateCategoryDto & { imageUrl?: string },
+  ): Promise<Category> {
     await this.categoriesRepository.update(id, updateCategoryDto);
-    return await this.categoriesRepository.findOne({ where: { id: id } });
+    return await this.categoriesRepository.findOneOrFail({
+      where: { id: id },
+    });
   }
 
   async remove(id: number) {

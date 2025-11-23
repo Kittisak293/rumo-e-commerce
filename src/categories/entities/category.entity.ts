@@ -21,7 +21,7 @@ export class Category {
   slug: string;
 
   @Column({ default: '/category-images/unknown.jpg' })
-  imageUrl: string;
+  imageUrl?: string;
 
   @CreateDateColumn()
   createdAt: Date;
