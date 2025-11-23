@@ -75,6 +75,26 @@ export const useProductStore = defineStore('product', () => {
     }
   }
 
+  async function getHomeProducts() {
+    try {
+      Loading.show();
+      const res = await api.get('/products/home');
+      console.log(res.data);
+      products.value = res.data;
+    } catch (err) {
+      console.error(err);
+      Notify.create({
+        color: 'negative',
+        position: 'top',
+        message: 'Loading failed',
+        icon: 'report_problem',
+      });
+    } finally {
+      console.log('finally');
+      Loading.hide();
+    }
+  }
+
   async function getMallProducts() {
     try {
       Loading.show();
@@ -123,5 +143,6 @@ export const useProductStore = defineStore('product', () => {
     getProducts,
     getMallProducts,
     getSearchProducts,
+    getHomeProducts,
   };
 });

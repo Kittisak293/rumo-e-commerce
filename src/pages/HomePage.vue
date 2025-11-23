@@ -26,7 +26,7 @@ import { useProductStore } from 'src/stores/productStore';
 import { onMounted } from 'vue';
 const productStore = useProductStore();
 onMounted(async () => {
-  await productStore.getProducts();
+  await productStore.getHomeProducts();
 });
 import likeLogo from 'src/assets/ui/like.png';
 </script>
