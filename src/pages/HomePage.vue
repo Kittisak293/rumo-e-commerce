@@ -46,7 +46,7 @@
     <q-card style="width: 720px; max-width: 95vw; border-radius: 16px">
       <q-card-section class="row items-center justify-between">
         <div class="text-h6 text-weight-medium">เรียงตาม</div>
-        <q-btn flat round icon="X" @click="filterOpen = false" />
+        <q-btn flat round icon="X" @click="filterClose()" />
       </q-card-section>
 
       <q-separator />
@@ -55,7 +55,7 @@
         <div class="text-subtitle2">เรียงลำดับ</div>
         <q-btn-toggle
           :ripple="false"
-          v-model="sortBy"
+          v-model="localSortBy"
           unelevated
           rounded
           toggle-color="primary"
@@ -75,7 +75,7 @@
         <div class="row q-col-gutter-sm">
           <div class="col">
             <q-input
-              v-model.number="priceMin"
+              v-model.number="localPriceMin"
               type="number"
               dense
               outlined
@@ -84,7 +84,7 @@
           </div>
           <div class="col">
             <q-input
-              v-model.number="priceMax"
+              v-model.number="localPriceMax"
               type="number"
               dense
               outlined
@@ -103,8 +103,8 @@
           unelevated
           rounded
           :label="opt.label"
-          :color="ratingMin === opt.value ? 'primary' : 'grey-3'"
-          :text-color="ratingMin === opt.value ? 'white' : 'black'"
+          :color="localRatingMin === opt.value ? 'primary' : 'grey-3'"
+          :text-color="localRatingMin === opt.value ? 'white' : 'black'"
           @click="toggleRating(opt.value)"
         />
 
@@ -113,7 +113,7 @@
         <div class="text-subtitle2">ร้านค้า</div>
         <q-btn-toggle
           :ripple="false"
-          v-model="storeType"
+          v-model="localStoreType"
           unelevated
           rounded
           toggle-color="primary"
@@ -197,14 +197,19 @@ const ratingOptions = [
 ];
 
 const resetFilters = () => {
-  sortBy.value = 'relevant';
-  priceMin.value = null;
-  priceMax.value = null;
-  ratingMin.value = null;
-  storeType.value = 'all';
+  localSortBy.value = 'relevant';
+  localPriceMin.value = null;
+  localPriceMax.value = null;
+  localRatingMin.value = null;
+  localStoreType.value = 'all';
 };
 
 const applyFilters = async () => {
+  sortBy.value = localSortBy.value;
+  storeType.value = localStoreType.value;
+  priceMin.value = localPriceMin.value;
+  priceMax.value = localPriceMax.value;
+  ratingMin.value = localRatingMin.value;
   const params = {
     sortBy: sortBy.value,
     storeType: storeType.value !== 'all' ? storeType.value : undefined,
@@ -220,16 +225,25 @@ const applyFilters = async () => {
     products.value = res.data;
   } finally {
     loading.value = false;
+    localSortBy.value = sortBy.value;
+    localStoreType.value = storeType.value;
+    localPriceMin.value = priceMin.value;
+    localPriceMax.value = priceMax.value;
+    localRatingMin.value = ratingMin.value;
   }
 
   filterOpen.value = false;
 };
 
 const toggleRating = (val: number) => {
-  ratingMin.value = ratingMin.value === val ? null : val;
+  localRatingMin.value = localRatingMin.value === val ? null : val;
 };
 
 const handleCategorySelect = async (selectedId: number) => {
+  const selectCategory = categories.value.find((c) => c.id === selectedId);
+  selectedCategoryName.value = selectCategory?.name
+    ? 'หมวดหมู่' + selectCategory.name
+    : 'สินค้าแนะนำประจำวัน';
   categoryId.value = selectedId;
   const params = {
     sortBy: sortBy.value,
@@ -246,16 +260,27 @@ const handleCategorySelect = async (selectedId: number) => {
     products.value = res.data;
   } finally {
     loading.value = false;
+    resetFilters();
+    await applyFilters();
   }
-
-  const selectCategory = categories.value.find((c) => c.id === selectedId);
-  selectedCategoryName.value = selectCategory?.name
-    ? 'หมวดหมู่' + selectCategory.name
-    : 'สินค้าแนะนำประจำวัน';
-  resetFilters();
-  await applyFilters();
   categoryOpen.value = false;
 };
+
+const filterClose = () => {
+  filterOpen.value = false;
+  loading.value = false;
+  localSortBy.value = sortBy.value;
+  localStoreType.value = storeType.value;
+  localPriceMin.value = priceMin.value;
+  localPriceMax.value = priceMax.value;
+  localRatingMin.value = ratingMin.value;
+};
+
+const localSortBy = ref<'relevant' | 'popular' | 'latest' | 'priceAsc' | 'priceDesc'>('relevant');
+const localPriceMin = ref<number | null>(null);
+const localPriceMax = ref<number | null>(null);
+const localRatingMin = ref<number | null>(null);
+const localStoreType = ref<'all' | 'mall' | 'seller'>('all');
 </script>
 
 <style scoped>
