@@ -2,7 +2,9 @@
   <q-page padding>
     <div class="row items-center q-gutter-sm">
       <img :src="likeLogo" alt="" style="width: 90px; height: 90px" />
-      <span style="font-size: 40px; font-weight: 700; color: #8a33ff"> สินค้าแนะนำประจำวัน </span>
+      <span style="font-size: 40px; font-weight: 700; color: #8a33ff">
+        {{ selectedCategoryName }}
+      </span>
       <q-space />
       <q-btn
         class="category-button"
@@ -176,6 +178,7 @@ onMounted(async () => {
   products.value = productStore.products;
   categories.value = categoryStore.categories;
 });
+const selectedCategoryName = ref('สินค้าแนะนำประจำวัน');
 const loading = ref(false);
 const filterOpen = ref(false);
 const categoryOpen = ref(false);
@@ -244,6 +247,10 @@ const handleCategorySelect = async (selectedId: number) => {
     loading.value = false;
   }
 
+  const selectCategory = categories.value.find((c) => c.id === selectedId);
+  selectedCategoryName.value = selectCategory?.name
+    ? 'หมวดหมู่' + selectCategory.name
+    : 'สินค้าแนะนำประจำวัน';
   categoryOpen.value = false;
 };
 </script>
