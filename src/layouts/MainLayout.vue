@@ -52,7 +52,7 @@
       <q-list class="q-pt-md q-px-sm">
         <q-item
           clickable
-          :to="{ name: 'home' }"
+          @click="navigateTo('home')"
           :active="$route.name === 'home'"
           active-class="drawer-item--active"
           class="drawer-item q-mb-sm menu-item"
@@ -65,7 +65,7 @@
 
         <q-item
           clickable
-          :to="{ name: 'mall' }"
+          @click="navigateTo('mall')"
           :active="$route.name === 'mall'"
           active-class="drawer-item--active"
           class="drawer-item q-mb-sm menu-item"
@@ -78,7 +78,7 @@
 
         <q-item
           clickable
-          :to="{ name: 'coupon' }"
+          @click="navigateTo('coupon')"
           :active="$route.name === 'coupon'"
           active-class="drawer-item--active"
           class="drawer-item q-mb-sm menu-item"
@@ -92,7 +92,7 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view :key="$route.fullPath" />
     </q-page-container>
   </q-layout>
 </template>
@@ -107,16 +107,26 @@ import couponPurpleLogo from 'src/assets/icons/coupon2_purple.png';
 import bellLogo from 'src/assets/icons/bell.png';
 import cartLogo from 'src/assets/icons/cart.png';
 import peopleLogo from 'src/assets/icons/people.png';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const leftOpen = ref(true); // ให้ drawer โชว์บน desktop
 const search = ref('');
 const router = useRouter();
+const route = useRoute();
 
 const onSearch = async () => {
   const q = search.value.trim();
   if (!q) return;
   await router.push({ name: 'search', query: { q } });
+};
+
+const navigateTo = async (routeName: string) => {
+  if (route.name === routeName) {
+    await router.replace({ name: routeName, query: { refresh: Date.now() } });
+    await router.replace({ name: routeName });
+  } else {
+    await router.push({ name: routeName });
+  }
 };
 </script>
 
