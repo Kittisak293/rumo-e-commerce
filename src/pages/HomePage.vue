@@ -211,6 +211,7 @@ const applyFilters = async () => {
     priceMin: priceMin.value ?? undefined,
     priceMax: priceMax.value ?? undefined,
     ratingMin: ratingMin.value ?? undefined,
+    categoryId: categoryId.value ?? undefined,
   };
 
   loading.value = true;
