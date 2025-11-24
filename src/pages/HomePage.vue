@@ -252,6 +252,8 @@ const handleCategorySelect = async (selectedId: number) => {
   selectedCategoryName.value = selectCategory?.name
     ? 'หมวดหมู่' + selectCategory.name
     : 'สินค้าแนะนำประจำวัน';
+  resetFilters();
+  await applyFilters();
   categoryOpen.value = false;
 };
 </script>
