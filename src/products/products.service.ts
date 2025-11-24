@@ -131,6 +131,7 @@ export class ProductsService {
     priceMin?: number;
     priceMax?: number;
     ratingMin?: number;
+    categoryId?: number;
   }) {
     const qb = this.productsRepository.createQueryBuilder('p');
     // ประเภทร้าน
@@ -150,6 +151,12 @@ export class ProductsService {
     // คะแนน
     if (filters.ratingMin !== null && filters.ratingMin !== undefined) {
       qb.andWhere('p.ratingAvg >= :rating', { rating: filters.ratingMin });
+    }
+
+    if (filters.categoryId !== null && filters.categoryId !== undefined) {
+      qb.andWhere('p.category_id = :categoryId', {
+        categoryId: filters.categoryId,
+      });
     }
 
     // จัดเรียง

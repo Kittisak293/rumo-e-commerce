@@ -81,6 +81,7 @@ export class ProductsController {
     @Query('priceMin') priceMin?: number,
     @Query('priceMax') priceMax?: number,
     @Query('ratingMin') ratingMin?: number,
+    @Query('categoryId') categoryId?: number,
   ) {
     return this.productsService.searchHomeProducts({
       sortBy,
@@ -88,6 +89,7 @@ export class ProductsController {
       priceMin,
       priceMax,
       ratingMin,
+      categoryId,
     });
   }
 
