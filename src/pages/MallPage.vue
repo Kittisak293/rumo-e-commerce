@@ -4,8 +4,17 @@
       <img :src="mallLogo" alt="" style="width: 42px; height: 42px" />
       <div></div>
       <div></div>
-      <span style="font-size: 40px; font-weight: 700; color: #8a33ff"> RUMO MALL </span>
+      <span style="font-size: 40px; font-weight: 700; color: #8a33ff">
+        {{ selectedCategoryName }}
+      </span>
       <q-space />
+      <q-btn
+        class="category-button"
+        label="หมวดหมู่ ▼"
+        @click="categoryOpen = true"
+        :ripple="false"
+        rounded
+      />
       <q-btn
         class="filter-button"
         label="เรียงตาม ▼"
@@ -110,6 +119,28 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="categoryOpen" persistent>
+    <q-card style="width: 1300px; max-width: 95vw; border-radius: 16px">
+      <q-card-section class="row items-center justify-between">
+        <div></div>
+        <div class="text-h4 text-weight-medium">หมวดหมู่สินค้า</div>
+        <q-btn flat round icon="X" @click="categoryOpen = false" />
+      </q-card-section>
+
+      <div class="category-grid">
+        <div v-for="p in categories" :key="p.id">
+          <CategoryCard
+            :key="p.id"
+            :id="p.id"
+            :image="'http://localhost:3000' + p.imageUrl"
+            :name="p.name"
+            @selectCategory="handleCategorySelect"
+          />
+        </div>
+      </div>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
@@ -117,14 +148,20 @@ import ProductCard from 'src/components/ProductCard.vue';
 import { useProductStore } from 'src/stores/productStore';
 import { onMounted, ref } from 'vue';
 import mallLogo from 'src/assets/ui/mall2_purple.png';
-import { type Product } from 'src/models';
+import type { Product, Category } from 'src/models';
 import { api } from 'src/boot/axios';
+import { useCategoryStore } from 'src/stores/categoryStore';
+import CategoryCard from 'src/components/CategoryCard.vue';
 
 const products = ref<Product[]>([]);
+const categories = ref<Category[]>([]);
 const productStore = useProductStore();
+const categoryStore = useCategoryStore();
 onMounted(async () => {
   await productStore.getMallProducts();
+  await categoryStore.getCategories();
   products.value = productStore.products;
+  categories.value = categoryStore.categories;
 });
 
 const loading = ref(false);
@@ -141,20 +178,39 @@ const ratingOptions = [
   { label: '≥1★', value: 1 },
 ];
 
+const localSortBy = ref<'relevant' | 'popular' | 'latest' | 'priceAsc' | 'priceDesc'>('relevant');
+const localPriceMin = ref<number | null>(null);
+const localPriceMax = ref<number | null>(null);
+const localRatingMin = ref<number | null>(null);
+const localStoreType = ref<'all' | 'mall' | 'seller'>('all');
+const storeType = ref<'all' | 'mall' | 'seller'>('all');
+
+const categoryOpen = ref(false);
+
+const selectedCategoryName = ref('RUMO MALL');
+const categoryId = ref<number | null>(null);
+
 const resetFilters = () => {
-  sortBy.value = 'relevant';
-  priceMin.value = null;
-  priceMax.value = null;
-  ratingMin.value = null;
+  localSortBy.value = 'relevant';
+  localPriceMin.value = null;
+  localPriceMax.value = null;
+  localRatingMin.value = null;
+  localStoreType.value = 'all';
 };
 
 const applyFilters = async () => {
+  sortBy.value = localSortBy.value;
+  storeType.value = localStoreType.value;
+  priceMin.value = localPriceMin.value;
+  priceMax.value = localPriceMax.value;
+  ratingMin.value = localRatingMin.value;
   const params = {
     sortBy: sortBy.value,
     storeType: 'mall',
     priceMin: priceMin.value ?? undefined,
     priceMax: priceMax.value ?? undefined,
     ratingMin: ratingMin.value ?? undefined,
+    categoryId: categoryId.value ?? undefined,
   };
 
   loading.value = true;
@@ -163,6 +219,11 @@ const applyFilters = async () => {
     products.value = res.data;
   } finally {
     loading.value = false;
+    localSortBy.value = sortBy.value;
+    localStoreType.value = storeType.value;
+    localPriceMin.value = priceMin.value;
+    localPriceMax.value = priceMax.value;
+    localRatingMin.value = ratingMin.value;
   }
 
   filterOpen.value = false;
@@ -170,6 +231,33 @@ const applyFilters = async () => {
 
 const toggleRating = (val: number) => {
   ratingMin.value = ratingMin.value === val ? null : val;
+};
+
+const handleCategorySelect = async (selectedId: number) => {
+  const selectCategory = categories.value.find((c) => c.id === selectedId);
+  selectedCategoryName.value = selectCategory?.name
+    ? 'หมวดหมู่' + selectCategory.name
+    : 'สินค้าแนะนำประจำวัน';
+  categoryId.value = selectedId;
+  const params = {
+    sortBy: sortBy.value,
+    storeType: storeType.value !== 'all' ? storeType.value : undefined,
+    priceMin: priceMin.value ?? undefined,
+    priceMax: priceMax.value ?? undefined,
+    ratingMin: ratingMin.value ?? undefined,
+    categoryId: categoryId.value ?? undefined,
+  };
+
+  loading.value = true;
+  try {
+    const res = await api.get('/products/category', { params });
+    products.value = res.data;
+  } finally {
+    loading.value = false;
+    resetFilters();
+    await applyFilters();
+  }
+  categoryOpen.value = false;
 };
 </script>
 
@@ -183,5 +271,13 @@ const toggleRating = (val: number) => {
 
 .not-found {
   margin: 30px 0 0 30px;
+}
+
+.category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  text-align: center;
+  margin: 0 50px 70px 70px;
 }
 </style>
