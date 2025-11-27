@@ -2,6 +2,7 @@ import { CartItem } from 'src/cart-items/entities/cart-item.entity';
 import { Category } from 'src/categories/entities/category.entity';
 import { StoreType } from 'src/common/enums/store-type.enum';
 import { OrderItem } from 'src/order_items/entities/order_item.entity';
+import { ProductImage } from 'src/product-images/entities/product-image.entity';
 import {
   Column,
   CreateDateColumn,
@@ -68,4 +69,7 @@ export class Product {
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
   orderItems: OrderItem[];
+
+  @OneToMany(() => ProductImage, (productImage) => productImage.product)
+  productImages: ProductImage[];
 }
