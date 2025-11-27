@@ -23,6 +23,7 @@ import { CarriersModule } from './carriers/carriers.module';
 import { Carrier } from './carriers/entities/carrier.entity';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ProductItemsModule } from './product-items/product-items.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     ShipmentsModule,
     ShipmentEventsModule,
     CarriersModule,
+    ProductItemsModule,
   ],
   controllers: [],
   providers: [],
