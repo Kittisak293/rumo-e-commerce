@@ -15,6 +15,9 @@ export class ProductImage {
   @Column({ default: '/product-images/unknown.jpg' })
   imageUrl: string;
 
+  @Column({ default: 0 })
+  index: number;
+
   @ManyToOne(() => Product, (product) => product.productImages)
   @JoinColumn({ name: 'product_id' })
   product: Product;
