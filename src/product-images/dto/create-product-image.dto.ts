@@ -14,4 +14,12 @@ export class CreateProductImageDto {
   @IsNumber()
   @Min(1)
   index: number;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'รูปภาพ',
+    required: false,
+  })
+  imageUrl?: string;
 }
