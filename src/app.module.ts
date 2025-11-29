@@ -28,6 +28,7 @@ import { ProductImage } from './product-images/entities/product-image.entity';
 import { ProductOptionsModule } from './product-options/product-options.module';
 import { ProductOption } from './product-options/entities/product-option.entity';
 import { ProductOptionValuesModule } from './product-option-values/product-option-values.module';
+import { ProductOptionValue } from './product-option-values/entities/product-option-value.entity';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ProductOptionValuesModule } from './product-option-values/product-optio
         Carrier,
         ProductImage,
         ProductOption,
+        ProductOptionValue,
       ],
       synchronize: true,
     }),
