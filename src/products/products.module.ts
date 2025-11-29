@@ -8,7 +8,7 @@ import { CartItem } from 'src/cart-items/entities/cart-item.entity';
 import { OrderItem } from 'src/order_items/entities/order_item.entity';
 import { ProductImage } from 'src/product-images/entities/product-image.entity';
 import { ProductOption } from 'src/product-options/entities/product-option.entity';
-import { ProductSku } from 'src/product-skus/entities/product-skus.entity';
+import { ProductSku } from 'src/product-skus/entities/product-sku.entity';
 
 @Module({
   imports: [

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProductSku } from './entities/product-skus.entity';
+import { ProductSku } from './entities/product-sku.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { CreateProductSkusDto } from './dto/create-product-skus.dto';
 import { UpdateProductSkusDto } from './dto/update-product-skus.dto';

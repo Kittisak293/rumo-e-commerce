@@ -4,7 +4,7 @@ import { StoreType } from 'src/common/enums/store-type.enum';
 import { OrderItem } from 'src/order_items/entities/order_item.entity';
 import { ProductImage } from 'src/product-images/entities/product-image.entity';
 import { ProductOption } from 'src/product-options/entities/product-option.entity';
-import { ProductSku } from 'src/product-skus/entities/product-skus.entity';
+import { ProductSku } from 'src/product-skus/entities/product-sku.entity';
 import {
   Column,
   CreateDateColumn,

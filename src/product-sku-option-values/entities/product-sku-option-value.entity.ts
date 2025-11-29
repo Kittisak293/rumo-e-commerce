@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { ProductSku } from 'src/product-skus/entities/product-skus.entity';
+import { ProductSku } from 'src/product-skus/entities/product-sku.entity';
 import { ProductOptionValue } from 'src/product-option-values/entities/product-option-value.entity';
 
 @Entity('product_sku_option_value')

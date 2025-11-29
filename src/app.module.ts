@@ -30,7 +30,7 @@ import { ProductOption } from './product-options/entities/product-option.entity'
 import { ProductOptionValuesModule } from './product-option-values/product-option-values.module';
 import { ProductOptionValue } from './product-option-values/entities/product-option-value.entity';
 import { ProductSkusModule } from './product-skus/product-skus.module';
-import { ProductSku } from './product-skus/entities/product-skus.entity';
+import { ProductSku } from './product-skus/entities/product-sku.entity';
 import { ProductSkuOptionValuesModule } from './product-sku-option-values/product-sku-option-values.module';
 import { ProductSkuOptionValue } from './product-sku-option-values/entities/product-sku-option-value.entity';
 
