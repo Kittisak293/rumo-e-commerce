@@ -83,7 +83,7 @@ export class ProductSkuOptionValuesService {
   }
 
   async remove(id: number) {
-    await this.repo.delete(id);
+    await this.repo.softDelete(id);
     return { message: 'Deleted' };
   }
 }
