@@ -7,8 +7,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Product } from 'src/products/entities/product.entity';
+import { ProductOptionValue } from 'src/product-option-values/entities/product-option-value.entity';
 
 @Entity('product_option')
 export class ProductOption {
@@ -41,4 +43,7 @@ export class ProductOption {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @OneToMany(() => ProductOptionValue, (value) => value.productOption)
+  value: ProductOptionValue[];
 }

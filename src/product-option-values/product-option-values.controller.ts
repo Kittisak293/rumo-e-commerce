@@ -1,11 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ProductOptionValuesService } from './product-option-values.service';
 import { CreateProductOptionValueDto } from './dto/create-product-option-value.dto';
 import { UpdateProductOptionValueDto } from './dto/update-product-option-value.dto';
 
 @Controller('product-option-values')
 export class ProductOptionValuesController {
-  constructor(private readonly productOptionValuesService: ProductOptionValuesService) {}
+  constructor(
+    private readonly productOptionValuesService: ProductOptionValuesService,
+  ) {}
 
   @Post()
   create(@Body() createProductOptionValueDto: CreateProductOptionValueDto) {
@@ -23,8 +33,14 @@ export class ProductOptionValuesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductOptionValueDto: UpdateProductOptionValueDto) {
-    return this.productOptionValuesService.update(+id, updateProductOptionValueDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateProductOptionValueDto: UpdateProductOptionValueDto,
+  ) {
+    return this.productOptionValuesService.update(
+      +id,
+      updateProductOptionValueDto,
+    );
   }
 
   @Delete(':id')

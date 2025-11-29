@@ -11,7 +11,9 @@ describe('ProductOptionValuesController', () => {
       providers: [ProductOptionValuesService],
     }).compile();
 
-    controller = module.get<ProductOptionValuesController>(ProductOptionValuesController);
+    controller = module.get<ProductOptionValuesController>(
+      ProductOptionValuesController,
+    );
   });
 
   it('should be defined', () => {
