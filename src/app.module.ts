@@ -30,6 +30,7 @@ import { ProductOption } from './product-options/entities/product-option.entity'
 import { ProductOptionValuesModule } from './product-option-values/product-option-values.module';
 import { ProductOptionValue } from './product-option-values/entities/product-option-value.entity';
 import { ProductSkusModule } from './product-skus/product-skus.module';
+import { ProductSkus } from './product-skus/entities/product-skus.entity';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ProductSkusModule } from './product-skus/product-skus.module';
         ProductImage,
         ProductOption,
         ProductOptionValue,
+        ProductSkus,
       ],
       synchronize: true,
     }),
