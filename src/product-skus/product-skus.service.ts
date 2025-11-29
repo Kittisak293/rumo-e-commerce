@@ -25,12 +25,12 @@ export class ProductSkusService {
 
     const sku = this.skuRepo.create({
       skuCode: dto.skuCode,
-      barcode: dto.barcode ?? null,
+      barcode: dto.barcode,
       price: dto.price.toString(),
       compareAtPrice: dto.compareAtPrice?.toString() ?? null,
       stockQty: dto.stockQty,
       weight: dto.weight.toString(),
-      imageUrl: dto.imageUrl ?? null,
+      imageUrl: dto.imageUrl,
       isActive: dto.isActive ?? true,
       product,
     });

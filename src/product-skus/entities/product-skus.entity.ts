@@ -24,8 +24,13 @@ export class ProductSkus {
   @Column()
   skuCode: string;
 
-  @Column({ nullable: true })
-  barcode: string | null;
+  @Column({
+    name: 'barcode',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
+  barcode?: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: string;
@@ -46,7 +51,7 @@ export class ProductSkus {
   weight: string;
 
   @Column({ name: 'image_url', nullable: true })
-  imageUrl: string | null;
+  imageUrl?: string;
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
