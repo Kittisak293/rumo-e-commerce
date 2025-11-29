@@ -1,26 +1,92 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ProductSkus } from './entities/product-skus.entity';
+import { Product } from 'src/products/entities/product.entity';
 import { CreateProductSkusDto } from './dto/create-product-skus.dto';
 import { UpdateProductSkusDto } from './dto/update-product-skus.dto';
 
 @Injectable()
 export class ProductSkusService {
-  create(createProductSkusDto: CreateProductSkusDto) {
-    return 'This action adds a new productSkus';
+  constructor(
+    @InjectRepository(ProductSkus)
+    private readonly skuRepo: Repository<ProductSkus>,
+
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
+  ) {}
+
+  async create(dto: CreateProductSkusDto): Promise<ProductSkus> {
+    const product = await this.productRepo.findOne({
+      where: { id: dto.productId },
+    });
+
+    if (!product) throw new NotFoundException('Product not found');
+
+    const sku = this.skuRepo.create({
+      skuCode: dto.skuCode,
+      barcode: dto.barcode ?? null,
+      price: dto.price.toString(),
+      compareAtPrice: dto.compareAtPrice?.toString() ?? null,
+      stockQty: dto.stockQty,
+      weight: dto.weight.toString(),
+      imageUrl: dto.imageUrl ?? null,
+      isActive: dto.isActive ?? true,
+      product,
+    });
+
+    return this.skuRepo.save(sku);
   }
 
-  findAll() {
-    return `This action returns all productSkus`;
+  async findAll(productId?: number): Promise<ProductSkus[]> {
+    const qb = this.skuRepo
+      .createQueryBuilder('sku')
+      .leftJoinAndSelect('sku.product', 'product');
+
+    if (productId) {
+      qb.where('sku.product_id = :productId', { productId });
+    }
+
+    return qb.getMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} productSkus`;
+  async findOne(id: number): Promise<ProductSkus> {
+    const sku = await this.skuRepo.findOne({
+      where: { id },
+      relations: ['product'],
+    });
+
+    if (!sku) throw new NotFoundException('Product SKU not found');
+    return sku;
   }
 
-  update(id: number, updateProductSkusDto: UpdateProductSkusDto) {
-    return `This action updates a #${id} productSkus`;
+  async update(id: number, dto: UpdateProductSkusDto): Promise<ProductSkus> {
+    const sku = await this.findOne(id);
+
+    // change product
+    if (dto.productId) {
+      const product = await this.productRepo.findOne({
+        where: { id: dto.productId },
+      });
+
+      if (!product) throw new NotFoundException('Product not found');
+      sku.product = product;
+    }
+
+    if (dto.skuCode !== undefined) sku.skuCode = dto.skuCode;
+    if (dto.barcode !== undefined) sku.barcode = dto.barcode;
+    if (dto.price !== undefined) sku.price = dto.price.toString();
+    if (dto.compareAtPrice !== undefined)
+      sku.compareAtPrice = dto.compareAtPrice?.toString() ?? null;
+    if (dto.stockQty !== undefined) sku.stockQty = dto.stockQty;
+    if (dto.weight !== undefined) sku.weight = dto.weight.toString();
+    if (dto.imageUrl !== undefined) sku.imageUrl = dto.imageUrl;
+    if (dto.isActive !== undefined) sku.isActive = dto.isActive;
+
+    return this.skuRepo.save(sku);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} productSkus`;
+  async remove(id: number): Promise<void> {
+    await this.skuRepo.softDelete(id);
   }
 }
