@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProductOptionsService } from './product-options.service';
 import { CreateProductOptionDto } from './dto/create-product-option.dto';
@@ -16,30 +18,32 @@ export class ProductOptionsController {
   constructor(private readonly productOptionsService: ProductOptionsService) {}
 
   @Post()
-  create(@Body() createProductOptionDto: CreateProductOptionDto) {
-    return this.productOptionsService.create(createProductOptionDto);
+  create(@Body() dto: CreateProductOptionDto) {
+    return this.productOptionsService.create(dto);
   }
 
+  // GET /product-options?productId=123
   @Get()
-  findAll() {
-    return this.productOptionsService.findAll();
+  findAll(@Query('productId') productId?: string) {
+    const pid = productId ? Number(productId) : undefined;
+    return this.productOptionsService.findAll(pid);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productOptionsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.productOptionsService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
-    @Body() updateProductOptionDto: UpdateProductOptionDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateProductOptionDto,
   ) {
-    return this.productOptionsService.update(+id, updateProductOptionDto);
+    return this.productOptionsService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productOptionsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.productOptionsService.remove(id);
   }
 }

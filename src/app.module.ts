@@ -26,6 +26,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { ProductImagesModule } from './product-images/product-images.module';
 import { ProductImage } from './product-images/entities/product-image.entity';
 import { ProductOptionsModule } from './product-options/product-options.module';
+import { ProductOption } from './product-options/entities/product-option.entity';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ProductOptionsModule } from './product-options/product-options.module';
         ShipmentEvent,
         Carrier,
         ProductImage,
+        ProductOption,
       ],
       synchronize: true,
     }),

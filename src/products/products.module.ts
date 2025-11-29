@@ -7,6 +7,7 @@ import { Category } from 'src/categories/entities/category.entity';
 import { CartItem } from 'src/cart-items/entities/cart-item.entity';
 import { OrderItem } from 'src/order_items/entities/order_item.entity';
 import { ProductImage } from 'src/product-images/entities/product-image.entity';
+import { ProductOption } from 'src/product-options/entities/product-option.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ProductImage } from 'src/product-images/entities/product-image.entity';
       CartItem,
       OrderItem,
       ProductImage,
+      ProductOption,
     ]),
   ],
   controllers: [ProductsController],
