@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProductSkus } from './entities/product-skus.entity';
+import { ProductSku } from './entities/product-skus.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { CreateProductSkusDto } from './dto/create-product-skus.dto';
 import { UpdateProductSkusDto } from './dto/update-product-skus.dto';
@@ -9,14 +9,14 @@ import { UpdateProductSkusDto } from './dto/update-product-skus.dto';
 @Injectable()
 export class ProductSkusService {
   constructor(
-    @InjectRepository(ProductSkus)
-    private readonly skuRepo: Repository<ProductSkus>,
+    @InjectRepository(ProductSku)
+    private readonly skuRepo: Repository<ProductSku>,
 
     @InjectRepository(Product)
     private readonly productRepo: Repository<Product>,
   ) {}
 
-  async create(dto: CreateProductSkusDto): Promise<ProductSkus> {
+  async create(dto: CreateProductSkusDto): Promise<ProductSku> {
     const product = await this.productRepo.findOne({
       where: { id: dto.productId },
     });
@@ -38,7 +38,7 @@ export class ProductSkusService {
     return this.skuRepo.save(sku);
   }
 
-  async findAll(productId?: number): Promise<ProductSkus[]> {
+  async findAll(productId?: number): Promise<ProductSku[]> {
     const qb = this.skuRepo
       .createQueryBuilder('sku')
       .leftJoinAndSelect('sku.product', 'product');
@@ -50,7 +50,7 @@ export class ProductSkusService {
     return qb.getMany();
   }
 
-  async findOne(id: number): Promise<ProductSkus> {
+  async findOne(id: number): Promise<ProductSku> {
     const sku = await this.skuRepo.findOne({
       where: { id },
       relations: ['product'],
@@ -60,7 +60,7 @@ export class ProductSkusService {
     return sku;
   }
 
-  async update(id: number, dto: UpdateProductSkusDto): Promise<ProductSkus> {
+  async update(id: number, dto: UpdateProductSkusDto): Promise<ProductSku> {
     const sku = await this.findOne(id);
 
     // change product

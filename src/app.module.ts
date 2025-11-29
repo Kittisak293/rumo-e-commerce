@@ -30,9 +30,9 @@ import { ProductOption } from './product-options/entities/product-option.entity'
 import { ProductOptionValuesModule } from './product-option-values/product-option-values.module';
 import { ProductOptionValue } from './product-option-values/entities/product-option-value.entity';
 import { ProductSkusModule } from './product-skus/product-skus.module';
-import { ProductSkus } from './product-skus/entities/product-skus.entity';
-import { ProductSkuOptionValuesModule } from './product-sku-options/product-sku-option-values.module';
-import { ProductSkuOptionValue } from './product-sku-options/entities/product-sku-option-value.entity';
+import { ProductSku } from './product-skus/entities/product-skus.entity';
+import { ProductSkuOptionValuesModule } from './product-sku-option-values/product-sku-option-values.module';
+import { ProductSkuOptionValue } from './product-sku-option-values/entities/product-sku-option-value.entity';
 
 @Module({
   imports: [
@@ -53,7 +53,7 @@ import { ProductSkuOptionValue } from './product-sku-options/entities/product-sk
         ProductImage,
         ProductOption,
         ProductOptionValue,
-        ProductSkus,
+        ProductSku,
         ProductSkuOptionValue,
       ],
       synchronize: true,

@@ -4,7 +4,7 @@ import { StoreType } from 'src/common/enums/store-type.enum';
 import { OrderItem } from 'src/order_items/entities/order_item.entity';
 import { ProductImage } from 'src/product-images/entities/product-image.entity';
 import { ProductOption } from 'src/product-options/entities/product-option.entity';
-import { ProductSkus } from 'src/product-skus/entities/product-skus.entity';
+import { ProductSku } from 'src/product-skus/entities/product-skus.entity';
 import {
   Column,
   CreateDateColumn,
@@ -78,6 +78,6 @@ export class Product {
   @OneToMany(() => ProductOption, (option) => option.product)
   productOptions: ProductOption[];
 
-  @OneToMany(() => ProductSkus, (sku) => sku.product)
-  skus: ProductSkus[];
+  @OneToMany(() => ProductSku, (sku) => sku.product)
+  skus: ProductSku[];
 }

@@ -7,11 +7,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Product } from 'src/products/entities/product.entity';
+import { ProductSkuOptionValue } from 'src/product-sku-option-values/entities/product-sku-option-value.entity';
 
 @Entity('product_sku')
-export class ProductSkus {
+export class ProductSku {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -20,6 +22,9 @@ export class ProductSkus {
   })
   @JoinColumn({ name: 'product_id' })
   product: Product;
+
+  @OneToMany(() => ProductSkuOptionValue, (skuVal) => skuVal.productSku)
+  optionValues: ProductSkuOptionValue[];
 
   @Column()
   skuCode: string;

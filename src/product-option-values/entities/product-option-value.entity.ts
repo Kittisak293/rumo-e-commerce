@@ -7,8 +7,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { ProductOption } from 'src/product-options/entities/product-option.entity';
+import { ProductSkuOptionValue } from 'src/product-sku-option-values/entities/product-sku-option-value.entity';
 
 @Entity('product_option_value')
 export class ProductOptionValue {
@@ -20,6 +22,9 @@ export class ProductOptionValue {
   })
   @JoinColumn({ name: 'product_option_id' })
   productOption: ProductOption;
+
+  @OneToMany(() => ProductSkuOptionValue, (skuVal) => skuVal.productOptionValue)
+  skuValues: ProductSkuOptionValue[];
 
   @Column({ length: 100 })
   value: string; // ค่าที่โชว์ เช่น "ดำ", "M"
