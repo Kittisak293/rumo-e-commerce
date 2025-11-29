@@ -31,6 +31,7 @@ import { ProductOptionValuesModule } from './product-option-values/product-optio
 import { ProductOptionValue } from './product-option-values/entities/product-option-value.entity';
 import { ProductSkusModule } from './product-skus/product-skus.module';
 import { ProductSkus } from './product-skus/entities/product-skus.entity';
+import { ProductSkuOptionsModule } from './product-sku-options/product-sku-options.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { ProductSkus } from './product-skus/entities/product-skus.entity';
     ProductOptionsModule,
     ProductOptionValuesModule,
     ProductSkusModule,
+    ProductSkuOptionsModule,
   ],
   controllers: [],
   providers: [],
