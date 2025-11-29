@@ -27,8 +27,7 @@ export class ProductOptionsService {
 
     const option = this.productOptionRepo.create({
       ...dto,
-      productId: dto.productId,
-      product,
+      product: product,
     });
 
     return this.productOptionRepo.save(option);
@@ -41,7 +40,7 @@ export class ProductOptionsService {
       .orderBy('option.sortOrder', 'ASC');
 
     if (productId) {
-      qb.andWhere('option.productId = :productId', { productId });
+      qb.andWhere('option.product.id = :productId', { productId });
     }
 
     return qb.getMany();
@@ -67,7 +66,7 @@ export class ProductOptionsService {
     const option = await this.findOne(id);
 
     // ถ้าให้แก้ productId ต้องเช็คว่า product ใหม่มีจริง
-    if (dto.productId && dto.productId !== option.productId) {
+    if (dto.productId && dto.productId !== option.product.id) {
       const product = await this.productRepo.findOne({
         where: { id: dto.productId },
       });
@@ -75,7 +74,6 @@ export class ProductOptionsService {
         throw new NotFoundException('Product not found');
       }
       option.product = product;
-      option.productId = dto.productId;
     }
 
     Object.assign(option, dto);
@@ -83,8 +81,9 @@ export class ProductOptionsService {
     return this.productOptionRepo.save(option);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number) {
     const option = await this.findOne(id);
-    await this.productOptionRepo.softDelete(option);
+    await this.productOptionRepo.softDelete(id);
+    return option;
   }
 }

@@ -21,9 +21,6 @@ export class ProductOption {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @Column({ name: 'product_id' })
-  productId: number;
-
   @Column({ length: 100 })
   name: string; // ชื่อภายใน เช่น "color", "size"
 
@@ -36,12 +33,12 @@ export class ProductOption {
   @Column({ name: 'is_required', type: 'boolean', default: false })
   isRequired: boolean; // ต้องเลือกหรือไม่
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
+  @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp' })
+  @DeleteDateColumn()
   deletedAt: Date;
 }

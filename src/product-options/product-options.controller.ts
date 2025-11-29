@@ -24,9 +24,11 @@ export class ProductOptionsController {
 
   // GET /product-options?productId=123
   @Get()
-  findAll(@Query('productId') productId?: string) {
-    const pid = productId ? Number(productId) : undefined;
-    return this.productOptionsService.findAll(pid);
+  findAll(
+    @Query('productId', new ParseIntPipe({ optional: true }))
+    productId?: number,
+  ) {
+    return this.productOptionsService.findAll(productId);
   }
 
   @Get(':id')
