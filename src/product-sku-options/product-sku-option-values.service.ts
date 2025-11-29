@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProductSkuOptionDto } from './dto/create-product-sku-option.dto';
-import { UpdateProductSkuOptionDto } from './dto/update-product-sku-option.dto';
+import { CreateProductSkuOptionValueDto } from './dto/create-product-sku-option-value.dto';
+import { UpdateProductSkuOptionValueDto } from './dto/update-product-sku-option-value.dto';
 
 @Injectable()
-export class ProductSkuOptionsService {
-  create(createProductSkuOptionDto: CreateProductSkuOptionDto) {
+export class ProductSkuOptionValuesService {
+  create(createProductSkuOptionValueDto: CreateProductSkuOptionValueDto) {
     return 'This action adds a new productSkuOption';
   }
 
@@ -16,7 +16,10 @@ export class ProductSkuOptionsService {
     return `This action returns a #${id} productSkuOption`;
   }
 
-  update(id: number, updateProductSkuOptionDto: UpdateProductSkuOptionDto) {
+  update(
+    id: number,
+    updateProductSkuOptionValueDto: UpdateProductSkuOptionValueDto,
+  ) {
     return `This action updates a #${id} productSkuOption`;
   }
 

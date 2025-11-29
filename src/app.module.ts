@@ -31,7 +31,8 @@ import { ProductOptionValuesModule } from './product-option-values/product-optio
 import { ProductOptionValue } from './product-option-values/entities/product-option-value.entity';
 import { ProductSkusModule } from './product-skus/product-skus.module';
 import { ProductSkus } from './product-skus/entities/product-skus.entity';
-import { ProductSkuOptionsModule } from './product-sku-options/product-sku-options.module';
+import { ProductSkuOptionValuesModule } from './product-sku-options/product-sku-option-values.module';
+import { ProductSkuOptionValue } from './product-sku-options/entities/product-sku-option-value.entity';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ProductSkuOptionsModule } from './product-sku-options/product-sku-optio
         ProductOption,
         ProductOptionValue,
         ProductSkus,
+        ProductSkuOptionValue,
       ],
       synchronize: true,
     }),
@@ -79,7 +81,7 @@ import { ProductSkuOptionsModule } from './product-sku-options/product-sku-optio
     ProductOptionsModule,
     ProductOptionValuesModule,
     ProductSkusModule,
-    ProductSkuOptionsModule,
+    ProductSkuOptionValuesModule,
   ],
   controllers: [],
   providers: [],

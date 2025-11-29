@@ -1,15 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductSkuOptionsService } from './product-sku-options.service';
+import { ProductSkuOptionValuesService } from './product-sku-option-values.service';
 
 describe('ProductSkuOptionsService', () => {
-  let service: ProductSkuOptionsService;
+  let service: ProductSkuOptionValuesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProductSkuOptionsService],
+      providers: [ProductSkuOptionValuesService],
     }).compile();
 
-    service = module.get<ProductSkuOptionsService>(ProductSkuOptionsService);
+    service = module.get<ProductSkuOptionValuesService>(
+      ProductSkuOptionValuesService,
+    );
   });
 
   it('should be defined', () => {
