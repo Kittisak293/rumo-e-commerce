@@ -44,8 +44,8 @@ export class ProductImagesController {
     return this.productImagesService.create({
       ...createProductImageDto,
       imageUrl: file
-        ? '/product-images/' + file.filename
-        : '/product-images/unknown.jpg',
+        ? '/static-images/' + file.filename
+        : '/static-images/unknown.jpg',
     });
   }
 
@@ -55,7 +55,7 @@ export class ProductImagesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.productImagesService.findOne(+id);
   }
 
@@ -82,7 +82,7 @@ export class ProductImagesController {
     console.log(file);
     return this.productImagesService.update(+id, {
       ...updateProductDto,
-      imageUrl: file ? '/product-images/' + file.filename : undefined,
+      imageUrl: file ? '/static-images/' + file.filename : undefined,
     });
   }
 

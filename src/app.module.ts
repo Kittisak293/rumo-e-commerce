@@ -60,7 +60,7 @@ import { ProductSkuOptionValue } from './product-sku-option-values/entities/prod
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads/products'),
-      serveRoot: '/product-images',
+      serveRoot: '/static-images',
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads/categories'),

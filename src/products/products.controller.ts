@@ -45,8 +45,8 @@ export class ProductsController {
     return this.productsService.create({
       ...createProductDto,
       imageUrl: file
-        ? '/product-images/' + file.filename
-        : '/product-images/unknown.jpg',
+        ? '/static-images/' + file.filename
+        : '/static-images/unknown.jpg',
     });
   }
 
@@ -145,7 +145,7 @@ export class ProductsController {
     console.log(file);
     return this.productsService.update(+id, {
       ...updateProductDto,
-      imageUrl: file ? '/product-images/' + file.filename : undefined,
+      imageUrl: file ? '/static-images/' + file.filename : undefined,
     });
   }
 
