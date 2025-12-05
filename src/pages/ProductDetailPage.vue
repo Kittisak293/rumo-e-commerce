@@ -12,7 +12,10 @@
     <div class="row q-col-gutter-lg">
       <!-- ซ้าย: รูปสินค้า + thumbnail -->
       <div class="col-12 col-md-5">
-        <ProductGallery :images="productImages.map((p) => 'http://localhost:3000' + p.imageUrl)" />
+        <ProductGallery
+          :images="productImages.map((p) => 'http://localhost:3000' + p.imageUrl)"
+          :name="product?.name ?? ''"
+        />
 
         <div class="row q-mt-md">
           <!-- ปุ่มเลื่อนขึ้นลง (ใน figma อยู่ซ้าย) -->

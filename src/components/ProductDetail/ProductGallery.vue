@@ -1,6 +1,6 @@
 <template>
   <div class="row q-col-gutter-md">
-    <div class="col-auto">
+    <div class="col-auto self-center">
       <div class="column q-gutter-y-sm items-center">
         <button
           class="icon-click"
@@ -36,7 +36,9 @@
           <img :src="arrowDownIcon" alt="arrowIcon" style="width: 12px" class="arrowIcon" />
         </button>
 
-        <q-chip clickable color="grey-2" text-color="black" size="sm"> ดูรูปทั้งหมด </q-chip>
+        <q-chip clickable color="grey-2" text-color="black" size="sm" @click="openDialog()">
+          ดูรูปทั้งหมด
+        </q-chip>
       </div>
     </div>
 
@@ -51,6 +53,65 @@
       </div>
     </div>
   </div>
+
+  <q-dialog v-model="dialogOpen" transition-show="scale" transition-hide="scale">
+    <q-card
+      style="width: 1200px; max-width: 90vw; height: 80vh; border-radius: 20px; overflow: hidden"
+    >
+      <q-btn
+        icon="X"
+        flat
+        round
+        dense
+        v-close-popup
+        class="absolute-top-right q-ma-md"
+        style="z-index: 10; color: #333"
+        size="lg"
+      />
+
+      <div class="row full-height">
+        <div class="col-12 col-md-8 bg-grey-2 relative-position flex flex-center">
+          <q-btn
+            round
+            flat
+            color="white"
+            text-color="grey-8"
+            icon="arrow_back"
+            class="absolute-left q-ml-md shadow-2 bg-white"
+            @click="prevDialogImage"
+          />
+
+          <q-img :src="images[dialogIndex]" fit="contain" style="max-height: 90%; max-width: 90%" />
+
+          <q-btn
+            round
+            flat
+            color="white"
+            text-color="grey-8"
+            icon="arrow_forward"
+            class="absolute-right q-mr-md shadow-2 bg-white"
+            @click="nextDialogImage"
+          />
+        </div>
+
+        <div class="col-12 col-md-4 bg-white q-pa-lg scroll">
+          <div class="text-h6 q-mb-lg">{{ name || 'อัลบั้มภาพสินค้า' }}</div>
+
+          <div class="row q-col-gutter-sm">
+            <div v-for="(img, idx) in images" :key="idx" class="col-4">
+              <div
+                class="dialog-thumbnail cursor-pointer"
+                :class="{ 'dialog-active': dialogIndex === idx }"
+                @click="dialogIndex = idx"
+              >
+                <q-img :src="img" ratio="1" fit="contain" class="rounded-borders" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
@@ -61,11 +122,12 @@ import arrowDownIcon from 'src/assets/icons/arrow_down.png';
 // รับ Props เป็น Array ของ URL รูปภาพ (String)
 const props = defineProps<{
   images: string[];
+  name: string;
 }>();
 
 const selectedIndex = ref(0);
 const scrollIndex = ref(0); // ตัวแปรเก็บตำแหน่งเริ่มต้นของการโชว์รูป
-const VISIBLE_COUNT = 4; // จำนวนรูปที่จะโชว์
+const visibleCount = 4; // จำนวนรูปที่จะโชว์
 
 // Computed: ตัดมาเฉพาะรูปที่จะโชว์ และแปะ index เดิมไปด้วย (เพื่อให้ highlight ถูกต้อง)
 const visibleThumbnails = computed(() => {
@@ -73,13 +135,13 @@ const visibleThumbnails = computed(() => {
 
   return props.images
     .map((img, index) => ({ img, originalIndex: index })) // เก็บ index เดิมไว้
-    .slice(scrollIndex.value, scrollIndex.value + VISIBLE_COUNT); // ตัดเฉพาะส่วนที่จะโชว์
+    .slice(scrollIndex.value, scrollIndex.value + visibleCount); // ตัดเฉพาะส่วนที่จะโชว์
 });
 
 // คำนวณขอบเขตการเลื่อนลงสูงสุด
 const maxScrollIndex = computed(() => {
   if (!props.images) return 0;
-  return Math.max(0, props.images.length - VISIBLE_COUNT);
+  return Math.max(0, props.images.length - visibleCount);
 });
 
 // ฟังก์ชันเลื่อนขึ้น
@@ -111,6 +173,29 @@ watch(
     selectedIndex.value = 0;
   },
 );
+
+const dialogOpen = ref(false);
+const dialogIndex = ref(0);
+const openDialog = () => {
+  dialogIndex.value = selectedIndex.value; // ซิงค์รูปปัจจุบันไปโชว์ใน popup
+  dialogOpen.value = true;
+};
+
+const nextDialogImage = () => {
+  if (dialogIndex.value < props.images.length - 1) {
+    dialogIndex.value++;
+  } else {
+    dialogIndex.value = 0; // วนกลับรูปแรก
+  }
+};
+
+const prevDialogImage = () => {
+  if (dialogIndex.value > 0) {
+    dialogIndex.value--;
+  } else {
+    dialogIndex.value = props.images.length - 1; // วนไปรูปสุดท้าย
+  }
+};
 </script>
 
 <style scoped>
@@ -164,5 +249,10 @@ watch(
   cursor: not-allowed; /* เปลี่ยนเมาส์เป็นเครื่องหมายห้าม */
   box-shadow: none; /* เอาเงาออกเพื่อให้ดูแบนลง (User รู้สึกว่ากดไม่ได้) */
   opacity: 1; /* ป้องกันไม่ให้ Browser ปรับความจางเอง */
+}
+
+.allImagesDialog {
+  width: 500px;
+  height: 300px;
 }
 </style>
