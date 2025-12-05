@@ -70,28 +70,31 @@
       />
 
       <div class="row full-height">
-        <div class="col-12 col-md-8 bg-grey-2 relative-position flex flex-center">
-          <q-btn
-            round
-            flat
-            color="white"
-            text-color="grey-8"
-            icon="arrow_back"
-            class="absolute-left q-ml-md shadow-2 bg-white"
-            @click="prevDialogImage"
-          />
+        <div class="col-12 col-md-8 bg-grey-2 flex flex-center row no-wrap q-pa-md">
+          <button class="icon-click" @click="prevDialogImage" style="margin-right: 15px">
+            <img :src="arrowDownIcon" alt="arrowIcon" style="width: 12px" class="arrowIconLeft" />
+          </button>
 
-          <q-img :src="images[dialogIndex]" fit="contain" style="max-height: 90%; max-width: 90%" />
+          <div
+            class="bg-white flex flex-center relative-position"
+            style="
+              width: 90%;
+              height: 90%;
+              border-radius: 24px; /* กำหนดความโค้งที่กล่องขาวนี้แทน */
+              overflow: hidden; /* ตัดส่วนเกินทิ้ง */
+              border: 1px solid #cacaca;
+            "
+          >
+            <q-img
+              :src="images[dialogIndex]"
+              fit="contain"
+              style="height: max-content; width: 100%"
+            />
+          </div>
 
-          <q-btn
-            round
-            flat
-            color="white"
-            text-color="grey-8"
-            icon="arrow_forward"
-            class="absolute-right q-mr-md shadow-2 bg-white"
-            @click="nextDialogImage"
-          />
+          <button class="icon-click" @click="nextDialogImage" style="margin-left: 15px">
+            <img :src="arrowDownIcon" alt="arrowIcon" style="width: 12px" class="arrowIconRight" />
+          </button>
         </div>
 
         <div class="col-12 col-md-4 bg-white q-pa-lg scroll">
@@ -104,7 +107,13 @@
                 :class="{ 'dialog-active': dialogIndex === idx }"
                 @click="dialogIndex = idx"
               >
-                <q-img :src="img" ratio="1" fit="contain" class="rounded-borders" />
+                <q-img
+                  :src="img"
+                  ratio="1"
+                  fit="contain"
+                  class="rounded-borders"
+                  style="border: 1px solid #cacaca; border-radius: 10px"
+                />
               </div>
             </div>
           </div>
@@ -254,5 +263,23 @@ const prevDialogImage = () => {
 .allImagesDialog {
   width: 500px;
   height: 300px;
+}
+
+.arrowIconLeft {
+  transform: rotate(90deg);
+  display: block;
+}
+
+.arrowIconRight {
+  transform: rotate(-90deg);
+  display: block;
+}
+
+.icon-click:active .arrowIconLeft {
+  transform: rotate(90deg) scale(0.9); /* ถ้าอยากให้มี effect ยุบด้วย ให้ใส่ scale ต่อท้าย */
+}
+
+.icon-click:active .arrowIconRight {
+  transform: rotate(-90deg) scale(0.9);
 }
 </style>
