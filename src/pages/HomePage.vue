@@ -36,6 +36,8 @@
             :sold="p.soldCount"
             :rating="p.ratingAvg"
             :storeType="p.storeType"
+            @click="goToProductDetail(p.id)"
+            class="cursor-pointer"
           />
         </div>
       </div>
@@ -167,17 +169,24 @@ import type { Product, Category } from 'src/models';
 import { api } from 'src/boot/axios';
 import CategoryCard from 'src/components/CategoryCard.vue';
 import { useCategoryStore } from 'src/stores/categoryStore';
+import { useRouter } from 'vue-router';
 
 const products = ref<Product[]>([]);
 const categories = ref<Category[]>([]);
 const productStore = useProductStore();
 const categoryStore = useCategoryStore();
+const router = useRouter();
+
 onMounted(async () => {
   await productStore.getProducts();
   await categoryStore.getCategories();
   products.value = productStore.products;
   categories.value = categoryStore.categories;
 });
+const goToProductDetail = async (id: number) => {
+  await router.push(`/products/${id}`);
+};
+
 const selectedCategoryName = ref('สินค้าแนะนำประจำวัน');
 const loading = ref(false);
 const filterOpen = ref(false);

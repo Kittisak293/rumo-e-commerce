@@ -5,7 +5,7 @@ import type { ProductImage } from 'src/models';
 import { ref } from 'vue';
 
 export const useProductImageStore = defineStore('ProductImage', () => {
-  const products = ref<ProductImage[]>([]);
+  const productImages = ref<ProductImage[]>([]);
 
   async function addProduct(p: ProductImage, file: File | null) {
     const formData = new FormData();
@@ -54,7 +54,7 @@ export const useProductImageStore = defineStore('ProductImage', () => {
       Loading.show();
       const res = await api.get('/product-images');
       console.log(res.data);
-      products.value = res.data;
+      productImages.value = res.data;
     } catch (err) {
       console.error(err);
       Notify.create({
@@ -70,7 +70,7 @@ export const useProductImageStore = defineStore('ProductImage', () => {
   }
 
   return {
-    products,
+    productImages,
     addProduct,
     delProductImage,
     updateProduct,
