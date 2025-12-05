@@ -1,32 +1,29 @@
 import { defineStore } from 'pinia';
 import { Loading, Notify } from 'quasar';
 import { api } from 'src/boot/axios';
-import type { Product } from 'src/models';
+import type { ProductImage } from 'src/models';
 import { ref } from 'vue';
 
 export const useProductImageStore = defineStore('ProductImage', () => {
-  const products = ref<Product[]>([]);
+  const products = ref<ProductImage[]>([]);
 
-  async function addProduct(p: Product, file: File | null) {
+  async function addProduct(p: ProductImage, file: File | null) {
     const formData = new FormData();
-    formData.append('name', p.name);
-    formData.append('description', p.description);
-    formData.append('price', String(p.price));
-    formData.append('stock', String(p.stock));
-    formData.append('categoryId', String(p.categoryId));
+    formData.append('productId', String(p.productId));
+    formData.append('index', String(p.index));
     if (file) {
       formData.append('file', file);
     }
     await api.post('/product-images', formData);
-    await getProducts();
+    await getProductImages();
   }
 
-  async function delProduct(p: Product) {
+  async function delProductImage(p: ProductImage) {
     try {
       Loading.show();
       const res = await api.delete('/product-images/' + p.id);
       console.log(res.data);
-      await getProducts();
+      await getProductImages();
     } catch (err) {
       console.error(err);
       Notify.create({
@@ -41,21 +38,18 @@ export const useProductImageStore = defineStore('ProductImage', () => {
     }
   }
 
-  async function updateProduct(id: number, p: Product, file: File | null) {
+  async function updateProduct(id: number, p: ProductImage, file: File | null) {
     const formData = new FormData();
-    formData.append('name', p.name);
-    formData.append('description', p.description);
-    formData.append('price', String(p.price));
-    formData.append('stock', String(p.stock));
-    formData.append('categoryId', String(p.categoryId));
+    formData.append('productId', String(p.productId));
+    formData.append('index', String(p.index));
     if (file) {
       formData.append('file', file);
     }
-    await api.patch(`/products/${id}`, formData);
-    await getProducts();
+    await api.patch(`/product-images/${id}`, formData);
+    await getProductImages();
   }
 
-  async function getProducts() {
+  async function getProductImages() {
     try {
       Loading.show();
       const res = await api.get('/product-images');
@@ -75,53 +69,11 @@ export const useProductImageStore = defineStore('ProductImage', () => {
     }
   }
 
-  async function getMallProducts() {
-    try {
-      Loading.show();
-      const res = await api.get('/product-images/mall');
-      console.log(res.data);
-      products.value = res.data;
-    } catch (err) {
-      console.error(err);
-      Notify.create({
-        color: 'negative',
-        position: 'top',
-        message: 'Loading failed',
-        icon: 'report_problem',
-      });
-    } finally {
-      console.log('finally');
-      Loading.hide();
-    }
-  }
-
-  async function getSearchProducts() {
-    try {
-      Loading.show();
-      const res = await api.get('/product-images/search');
-      console.log(res.data);
-      products.value = res.data;
-    } catch (err) {
-      console.error(err);
-      Notify.create({
-        color: 'negative',
-        position: 'top',
-        message: 'Loading failed',
-        icon: 'report_problem',
-      });
-    } finally {
-      console.log('finally');
-      Loading.hide();
-    }
-  }
-
   return {
     products,
     addProduct,
-    delProduct,
+    delProductImage,
     updateProduct,
-    getProducts,
-    getMallProducts,
-    getSearchProducts,
+    getProductImages,
   };
 });
