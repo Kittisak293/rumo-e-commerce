@@ -32,8 +32,9 @@ export class ProductImagesService {
   }
 
   async findOne(id: number) {
-    return await this.productImagesRepo.findOneOrFail({
-      where: { id },
+    const product = await this.productsRepo.findOneByOrFail({ id });
+    return await this.productImagesRepo.find({
+      where: { product: { id: product.id } },
       relations: ['product'],
     });
   }
