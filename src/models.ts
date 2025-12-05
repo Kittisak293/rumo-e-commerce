@@ -17,3 +17,11 @@ export interface Category {
   name: string;
   imageUrl: string;
 }
+
+export interface ProductImage {
+  id: number;
+  imageUrl: string;
+  productId: number;
+  index: number;
+  storeType: 'mall' | 'seller';
+}
