@@ -4,8 +4,8 @@
     <div class="q-mb-md">
       <q-breadcrumbs class="text-grey-7 text-body2">
         <q-breadcrumbs-el label="หน้าหลัก" />
-        <q-breadcrumbs-el label="รองเท้า" />
-        <q-breadcrumbs-el :label="product?.name" />
+        <q-breadcrumbs-el :label="product?.category.name || 'กำลังโหลด...'" />
+        <q-breadcrumbs-el :label="product?.name || 'กำลังโหลด...'" />
       </q-breadcrumbs>
     </div>
 

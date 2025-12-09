@@ -10,11 +10,13 @@ export interface Product {
   soldCount: number;
   imageUrl: string;
   storeType: 'mall' | 'seller';
+  category: Category;
 }
 
 export interface Category {
   id: number;
   name: string;
+  slug: string;
   imageUrl: string;
 }
 
