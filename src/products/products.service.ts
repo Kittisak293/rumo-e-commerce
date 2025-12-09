@@ -31,11 +31,14 @@ export class ProductsService {
   }
 
   async findAll() {
-    return await this.productsRepository.find();
+    return await this.productsRepository.find({ relations: ['category'] });
   }
 
   async findOne(id: number): Promise<Product> {
-    return await this.productsRepository.findOneOrFail({ where: { id: id } });
+    return await this.productsRepository.findOneOrFail({
+      where: { id: id },
+      relations: ['category'],
+    });
   }
 
   async update(
@@ -62,6 +65,7 @@ export class ProductsService {
   async findMallProducts() {
     return await this.productsRepository.find({
       where: { storeType: StoreType.MALL },
+      relations: ['category'],
     });
   }
 
