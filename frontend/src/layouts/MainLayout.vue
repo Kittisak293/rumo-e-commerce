@@ -1,0 +1,262 @@
+<template>
+  <q-layout view="hHh Lpr fFf" class="bg-grey-1">
+    <q-header elevated class="bg-primary text-white">
+      <q-toolbar class="q-px-lg q-py-xss">
+        <div class="row items-center full-width no-wrap">
+          <div class="row items-center">
+            <img :src="RumoLogo" alt="RUMO" style="width: 200px" />
+          </div>
+
+          <div class="search-wrapper">
+            <div class="search-pill">
+              <q-input
+                v-model="search"
+                borderless
+                dense
+                placeholder="ค้นหาสินค้า"
+                class="search-input2"
+                input-class="search-input-inner"
+                @keyup.enter="onSearch"
+              />
+
+              <q-btn label="ค้นหา" class="search-btn2" unelevated no-caps @click="onSearch" />
+            </div>
+          </div>
+          <q-space />
+
+          <div class="row items-center q-gutter-md">
+            <button class="icon-click">
+              <img :src="bellLogo" alt="BELL" style="width: 35px" />
+            </button>
+
+            <button class="icon-click">
+              <img :src="cartLogo" alt="CART" style="width: 35px" />
+            </button>
+
+            <button class="icon-click">
+              <img :src="peopleLogo" alt="PEOPLE" style="width: 30px" />
+            </button>
+          </div>
+        </div>
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer
+      v-model="leftOpen"
+      side="left"
+      show-if-above
+      :width="220"
+      class="bg-grey-4 app-drawer"
+      bordered
+    >
+      <q-list class="q-pt-md q-px-sm">
+        <q-item
+          clickable
+          @click="navigateTo('home')"
+          :active="$route.name === 'home'"
+          active-class="drawer-item--active"
+          class="drawer-item q-mb-sm menu-item"
+        >
+          <q-item-section avatar>
+            <img :src="homePurpleLogo" alt="HOME" style="width: 30px" />
+          </q-item-section>
+          <q-item-section class="drawer-text">หน้าหลัก</q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          @click="navigateTo('mall')"
+          :active="$route.name === 'mall'"
+          active-class="drawer-item--active"
+          class="drawer-item q-mb-sm menu-item"
+        >
+          <q-item-section avatar>
+            <img :src="mallPurpleLogo" alt="HOME" style="width: 30px" />
+          </q-item-section>
+          <q-item-section class="drawer-text">Mall</q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          @click="navigateTo('coupon')"
+          :active="$route.name === 'coupon'"
+          active-class="drawer-item--active"
+          class="drawer-item q-mb-sm menu-item"
+        >
+          <q-item-section avatar>
+            <img :src="couponPurpleLogo" alt="HOME" style="width: 30px" />
+          </q-item-section>
+          <q-item-section class="drawer-text">เก็บโค้ด</q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
+
+    <q-page-container>
+      <router-view :key="$route.fullPath" />
+    </q-page-container>
+  </q-layout>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import RumoLogo from 'src/assets/logos/Rumo.png';
+import homePurpleLogo from 'src/assets/icons/home_purple.png';
+import mallPurpleLogo from 'src/assets/icons/mall_purple.png';
+import couponPurpleLogo from 'src/assets/icons/coupon2_purple.png';
+
+import bellLogo from 'src/assets/icons/bell.png';
+import cartLogo from 'src/assets/icons/cart.png';
+import peopleLogo from 'src/assets/icons/people.png';
+import { useRouter, useRoute } from 'vue-router';
+
+const leftOpen = ref(true); // ให้ drawer โชว์บน desktop
+const search = ref('');
+const router = useRouter();
+const route = useRoute();
+
+const onSearch = async () => {
+  const q = search.value.trim();
+  if (!q) return;
+  await router.push({ name: 'search', query: { q } });
+};
+
+const navigateTo = async (routeName: string) => {
+  if (route.name === routeName) {
+    await router.replace({ name: routeName, query: { refresh: Date.now() } });
+    await router.replace({ name: routeName });
+  } else {
+    await router.push({ name: routeName });
+  }
+};
+</script>
+
+<style scoped>
+.search-area {
+  max-width: 640px;
+  width: 100%;
+}
+
+.search-input :deep(.q-field__control) {
+  border-radius: 999px;
+}
+
+.search-btn {
+  min-width: 80px;
+  border-radius: 999px;
+}
+
+.app-drawer {
+  padding-top: 64px; /* ให้รู้สึกต่อจาก header */
+}
+
+.drawer-item {
+  border-radius: 18px;
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.25);
+}
+
+.full-width {
+  background: #6d28d9;
+  color: white;
+}
+
+.no-wrap {
+  background: #6d28d9;
+  color: white;
+}
+
+.my-toolbar {
+  background-color: #d4d4d4;
+  color: white;
+}
+
+.menu-item {
+  background-color: white;
+  color: #8e4dff;
+}
+
+.drawer-text {
+  font-size: 20px;
+  font-weight: 501;
+  color: #8e4dff;
+}
+
+.search-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.search-pill {
+  width: 100%;
+  max-width: 650px;
+  background: #ffffff;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  padding-left: 18px;
+  padding-right: 4px;
+}
+
+.search-input2 :deep(.q-field__control) {
+  background: white;
+  box-shadow: none !important;
+}
+
+.search-input2 {
+  flex: 1;
+}
+
+.search-btn2 {
+  border-radius: 999px;
+  padding: 0 20px;
+  font-weight: 600;
+  background-color: #8e4dff;
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.25);
+}
+
+.search-input-inner::placeholder {
+  color: #9ca3af;
+}
+
+.icon-click {
+  background: none; /* ไม่มีพื้นหลัง */
+  border: none; /* ไม่มีขอบ */
+  padding: 0; /* ไม่ดันรูปให้เพี้ยน */
+  cursor: pointer; /* แสดงเป็นปุ่มเมื่อ hover */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0px 5px 4px rgba(0, 0, 0, 0.25));
+  margin-right: 20px;
+}
+
+/* รูปมีเงาตาม PNG */
+.icon-click img {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25)); /* เงาตามขอบรูป */
+  transition: 0.01s ease;
+}
+
+/* effect ตอนกด */
+.icon-click:active img {
+  transform: scale(0.92); /* ยุบตอนกดเหมือนปุ่มมือถือ */
+}
+
+.menu-item:active {
+  transform: scale(0.92);
+}
+
+.drawer-item--active {
+  background-color: #8e4dff !important;
+  color: white !important;
+  border-radius: 18px;
+  box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.25);
+}
+
+.drawer-item--active .drawer-text {
+  color: white !important;
+}
+
+.drawer-item--active img {
+  filter: brightness(0) invert(1); /* ไอคอนเป็นสีขาว */
+}
+</style>
