@@ -1,0 +1,58 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  DeleteDateColumn,
+} from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Order } from 'src/orders/entities/order.entity';
+
+@Entity()
+export class Address {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @ManyToOne(() => User, (user) => user.addresses, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @OneToMany(() => Order, (order) => order.address)
+  orders: Order[];
+
+  @Column({ name: 'full_name', type: 'varchar', length: 120 })
+  fullName: string;
+
+  @Column({ type: 'varchar', length: 20 })
+  phone: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  province: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  district: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  subdistrict: string;
+
+  @Column({ name: 'postal_code', type: 'varchar', length: 10 })
+  postalCode: string;
+
+  @Column({ name: 'is_default', type: 'boolean', default: false })
+  isDefault: boolean;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
+}
