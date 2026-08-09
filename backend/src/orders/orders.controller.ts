@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('orders')
 export class OrdersController {
@@ -23,6 +26,18 @@ export class OrdersController {
   @Get()
   findAll() {
     return this.ordersService.findAll();
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('checkout')
+  async checkout(@Request() req: any, @Body() body: { addressId: number }) {
+    return this.ordersService.checkout(req.user.sub, body.addressId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('my-orders')
+  findMyOrders(@Request() req: any) {
+    return this.ordersService.findByUser(req.user.sub);
   }
 
   @Get(':id')

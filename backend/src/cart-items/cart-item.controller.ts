@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { CartItemService } from './cart-items.service';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('cart-item')
 export class CartItemController {
@@ -23,6 +26,12 @@ export class CartItemController {
   @Get()
   findAll() {
     return this.cartItemService.findAll();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('my-cart')
+  findMyCart(@Request() req: any) {
+    return this.cartItemService.findByUserId(req.user.sub);
   }
 
   @Get(':id')
