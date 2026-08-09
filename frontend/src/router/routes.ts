@@ -9,6 +9,18 @@ const routes: RouteRecordRaw[] = [
       { path: 'mall', name: 'mall', component: () => import('pages/MallPage.vue') },
       { path: 'coupon', name: 'coupon', component: () => import('pages/CouponPage.vue') },
       { path: 'search', name: 'search', component: () => import('pages/SearchPage.vue') },
+      { path: 'notifications', name: 'notifications', component: () => import('pages/NotificationsPage.vue') },
+      { path: 'checkout', name: 'checkout', component: () => import('pages/CheckoutPage.vue') },
+      {
+        path: 'checkout/confirm',
+        name: 'checkoutConfirm',
+        component: () => import('pages/CheckoutConfirmPage.vue'),
+      },
+      {
+        path: 'payment-success/:orderId',
+        name: 'paymentSuccess',
+        component: () => import('pages/PaymentSuccessPage.vue'),
+      },
       { path: 'product', name: 'product', component: () => import('pages/ProductDetailPage.vue') },
       {
         path: 'products/:id',
