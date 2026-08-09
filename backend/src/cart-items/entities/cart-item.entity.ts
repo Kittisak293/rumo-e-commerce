@@ -18,7 +18,9 @@ export class CartItem {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: 1 })
+  // Explicit type: a bare `number` design type resolves to different native
+  // columns per driver (sqlite -> float, postgres -> integer).
+  @Column({ type: 'int', default: 1 })
   quantity: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })

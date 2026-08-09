@@ -28,19 +28,38 @@ export class Product {
   @Column()
   description: string;
 
-  @Column()
+  // `type` is explicit everywhere below: a bare `@Column() foo: number` lets
+  // TypeORM guess the native type from the driver, and sqlite's guess (float)
+  // silently diverges from postgres's guess (integer) for the exact same
+  // entity. That divergence is invisible until real decimal data — ratingAvg
+  // here — hits the postgres integer column and the insert fails.
+  @Column({ type: 'int' })
   price: number;
 
-  @Column()
+  @Column({ type: 'int' })
   stock: number;
 
-  @Column({ name: 'rating_avg' })
+  // node-postgres returns `decimal`/`numeric` columns as strings (it can't
+  // safely coerce arbitrary precision to a JS number), unlike sqlite which
+  // handed back a real number for this same untyped column. The transformer
+  // restores the number-in, number-out contract the frontend's `ratingAvg:
+  // number` and its rating filter already assume.
+  @Column({
+    name: 'rating_avg',
+    type: 'decimal',
+    precision: 2,
+    scale: 1,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string | null) => (value === null ? null : parseFloat(value)),
+    },
+  })
   ratingAvg: number;
 
-  @Column({ name: 'rating_count' })
+  @Column({ name: 'rating_count', type: 'int' })
   ratingCount: number;
 
-  @Column({ name: 'sold_count' })
+  @Column({ name: 'sold_count', type: 'int' })
   soldCount: number;
 
   @Column({ default: '/product-images/unknown.jpg' })

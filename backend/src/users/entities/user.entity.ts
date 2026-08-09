@@ -21,6 +21,13 @@ export class User {
   @Column({ name: 'password_hash' })
   passwordHash: string;
 
+  /**
+   * False until the address is proven via an email_verify OTP challenge.
+   * Login refuses to send a second factor while this is false.
+   */
+  @Column({ name: 'email_verified', type: 'boolean', default: false })
+  emailVerified: boolean;
+
   @Column({
     type: 'simple-enum',
     enum: ['admin', 'customer'],
@@ -31,8 +38,14 @@ export class User {
   @Column()
   name: string;
 
-  @Column()
-  age: number;
+  /**
+   * Nullable because self-registration does not ask for it — the signup form
+   * collects name, email and password only.
+   */
+  // `type` must be explicit: TypeORM cannot infer a column type from the
+  // `number | null` union and rejects it as an unsupported Object.
+  @Column({ type: 'int', nullable: true })
+  age: number | null;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -63,7 +63,9 @@ export class Order {
   })
   shippingFee: number;
 
-  @Column({ default: 0, name: 'total_quantity' })
+  // Explicit type: a bare `number` design type resolves to different native
+  // columns per driver (sqlite -> float, postgres -> integer).
+  @Column({ type: 'int', default: 0, name: 'total_quantity' })
   totalQuantity: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })

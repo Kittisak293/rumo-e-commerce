@@ -18,7 +18,9 @@ export class ProductImage {
   @Column({ default: '/product-images/unknown.jpg' })
   imageUrl: string;
 
-  @Column({ default: 0 })
+  // Explicit type: a bare `number` design type resolves to different native
+  // columns per driver (sqlite -> float, postgres -> integer).
+  @Column({ type: 'int', default: 0 })
   index: number;
 
   @ManyToOne(() => Product, (product) => product.productImages)
