@@ -10,6 +10,7 @@ import {
   DeleteDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Notification } from 'src/notifications/entities/notification.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -64,4 +65,7 @@ export class User {
 
   @OneToMany(() => Address, (address) => address.user)
   addresses: Address[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 }
