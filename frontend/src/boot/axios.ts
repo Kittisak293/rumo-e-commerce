@@ -16,16 +16,47 @@ declare module 'vue' {
 // for each client)
 const api = axios.create({ baseURL: import.meta.env.VITE_API || 'http://localhost:3000' });
 
-export default defineBoot(({ app }) => {
+// Read straight from storage rather than the Pinia store: boot files run before
+// any store exists, and this avoids a circular import with authStore.
+const TOKEN_KEY = 'rumo.accessToken';
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default defineBoot(({ app, router }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios;
   // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
+  //       so you won't necessarily have to use this.$axios in each vue file
 
   app.config.globalProperties.$api = api;
   // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
   //       so you can easily perform requests against your app's API
+
+  // An expired or rejected access token means the stored session is dead. Drop
+  // it and send the user to login — but never bounce them out of the auth
+  // screens themselves, where 401 is an ordinary "wrong code" answer.
+  api.interceptors.response.use(
+    (response) => response,
+    (error: unknown) => {
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      const url = axios.isAxiosError(error) ? (error.config?.url ?? '') : '';
+      if (status === 401 && !url.startsWith('/auth/')) {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem('rumo.user');
+        void router.push({ name: 'login' });
+      }
+      return Promise.reject(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+    },
+  );
 });
 
 export { api };

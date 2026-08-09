@@ -116,7 +116,9 @@ export default defineConfig((ctx) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: [],
+      // Loading/Notify are used by the Pinia stores; without registering them
+      // here the imperative `Notify.create` / `Loading.show` calls are no-ops.
+      plugins: ['Notify', 'Loading'],
     },
 
     // animations: 'all', // --- includes all animations

@@ -1,0 +1,320 @@
+// Auth screens — values transcribed from the Claude Design mockup
+// (Everything/RUMO Authentication Design/Authentication.dc.html).
+// Kanit is already forced globally in app.scss, so no font-family here.
+
+$auth-bg: #f5f5f5;
+$auth-brand: #6d28d9;
+$auth-primary: #8e4dff;
+$auth-text: #1d1d1d;
+$auth-label: #6b7280;
+$auth-muted: #9ca3af;
+$auth-border: #e5e7eb;
+$auth-error: #ef4444;
+$auth-field-bg: #fafafa;
+$auth-resend-off: #c4c4c4;
+$auth-btn-shadow: 0 5px 14px rgba(142, 77, 255, 0.35);
+
+.auth-page {
+  min-height: 100vh;
+  width: 100%;
+  background: $auth-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  box-sizing: border-box;
+}
+
+.auth-shell {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-brand {
+  text-align: center;
+  margin-bottom: 20px;
+
+  &__mark {
+    font-size: 34px;
+    font-weight: 800;
+    color: $auth-brand;
+    letter-spacing: 1px;
+  }
+}
+
+.auth-card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 36px 32px;
+}
+
+.auth-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: $auth-text;
+  margin-bottom: 4px;
+}
+
+// The mockup renders an empty fixed-width spacer here. Width is dropped so the
+// card can still shrink; the vertical rhythm it produced is preserved.
+.auth-subtitle-spacer {
+  height: 8px;
+  margin-bottom: 24px;
+}
+
+.auth-subtitle {
+  font-size: 13.5px;
+  color: $auth-label;
+  line-height: 1.6;
+  margin-bottom: 28px;
+
+  &--muted {
+    color: $auth-muted;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  &--tight {
+    margin-bottom: 24px;
+  }
+
+  strong {
+    font-weight: 600;
+    color: $auth-text;
+  }
+}
+
+.auth-field {
+  margin-bottom: 16px;
+
+  &--tight {
+    margin-bottom: 8px;
+  }
+
+  &--last {
+    margin-bottom: 20px;
+  }
+
+  &__label {
+    display: block;
+    font-size: 13px;
+    color: $auth-label;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  &__wrap {
+    position: relative;
+  }
+
+  &__input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 18px;
+    border-radius: 14px;
+    border: 1.5px solid $auth-border;
+    font-size: 15px;
+    color: $auth-text;
+    background: $auth-field-bg;
+
+    &--with-toggle {
+      padding-right: 44px;
+    }
+
+    &--invalid {
+      border-color: $auth-error;
+    }
+
+    // The mockup removes the outline entirely. Keep that, but keep focus
+    // visible by borrowing the brand border the filled OTP boxes already use.
+    &:focus {
+      outline: none;
+      border-color: $auth-primary;
+    }
+  }
+
+  &__toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: $auth-muted;
+    font-size: 13px;
+  }
+
+  &__error {
+    font-size: 12.5px;
+    color: $auth-error;
+    margin-top: 6px;
+  }
+}
+
+.auth-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  > * {
+    flex: 1;
+    margin-bottom: 0;
+  }
+}
+
+.auth-forgot {
+  text-align: right;
+  margin-bottom: 22px;
+
+  a {
+    font-size: 13px;
+    font-weight: 500;
+  }
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 14px;
+  border-radius: 999px;
+  border: none;
+  background: $auth-primary;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: $auth-btn-shadow;
+
+  &:disabled {
+    background: $auth-border;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.auth-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 24px;
+  cursor: pointer;
+
+  input {
+    margin-top: 3px;
+    width: 17px;
+    height: 17px;
+    accent-color: $auth-primary;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  span {
+    font-size: 13.5px;
+    color: $auth-label;
+    line-height: 1.5;
+  }
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: $auth-label;
+
+  a {
+    font-weight: 600;
+  }
+}
+
+.auth-back {
+  text-align: center;
+  margin-top: 18px;
+
+  a {
+    font-size: 13px;
+    color: $auth-muted;
+  }
+}
+
+// --- OTP -------------------------------------------------------------------
+
+.auth-otp {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+
+  &--tight {
+    margin-bottom: 16px;
+  }
+
+  &__digit {
+    width: 46px;
+    height: 54px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 600;
+    color: $auth-text;
+    border-radius: 14px;
+    border: 1.5px solid $auth-border;
+    background: $auth-field-bg;
+
+    &--filled {
+      border-color: $auth-primary;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $auth-primary;
+    }
+  }
+
+  // Six 46px boxes plus five 10px gaps need 326px; below that, shrink rather
+  // than overflow the card.
+  @media (max-width: 379px) {
+    gap: 8px;
+
+    &__digit {
+      width: 40px;
+      height: 48px;
+      font-size: 19px;
+    }
+  }
+}
+
+.auth-timer {
+  text-align: center;
+  font-size: 13.5px;
+  color: $auth-muted;
+  margin-bottom: 26px;
+  font-weight: 500;
+
+  &--expired {
+    color: $auth-error;
+  }
+
+  &--tight {
+    margin-bottom: 10px;
+  }
+}
+
+.auth-resend {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+
+  a {
+    font-weight: 600;
+  }
+
+  &__off {
+    color: $auth-resend-off;
+  }
+
+  &--above-form {
+    margin-top: 0;
+    margin-bottom: 24px;
+  }
+}

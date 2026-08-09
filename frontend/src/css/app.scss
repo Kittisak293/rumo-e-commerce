@@ -1,5 +1,25 @@
 // app global css in SCSS form
+@use 'auth';
+
 body,
 * {
   font-family: 'Kanit', sans-serif !important;
+}
+
+// The blanket rule above also clobbers Quasar's own icon font (same
+// !important weight, so the later rule wins) — every <q-icon>/q-btn icon
+// renders as literal text ("shopping_cart") instead of a glyph without this.
+.material-icons {
+  font-family: 'Material Icons' !important;
+}
+
+// Link colours from the auth mockup, applied app-wide as in the original.
+a {
+  color: #8e4dff;
+  text-decoration: none;
+
+  &:hover {
+    color: #6d28d9;
+    text-decoration: underline;
+  }
 }
