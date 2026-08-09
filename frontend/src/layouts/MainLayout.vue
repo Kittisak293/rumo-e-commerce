@@ -25,16 +25,28 @@
           <q-space />
 
           <div class="row items-center q-gutter-md">
-            <button class="icon-click">
+            <button class="icon-click" @click="navigateTo('notifications')">
               <img :src="bellLogo" alt="BELL" style="width: 35px" />
             </button>
 
-            <button class="icon-click">
+            <button class="icon-click cart-icon" @click="navigateTo('checkout')">
               <img :src="cartLogo" alt="CART" style="width: 35px" />
+              <span v-if="cart.count > 0" class="cart-badge">{{ cart.count > 99 ? '99+' : cart.count }}</span>
             </button>
 
-            <button class="icon-click">
+            <button class="icon-click" @click="onAccountClick">
               <img :src="peopleLogo" alt="PEOPLE" style="width: 30px" />
+              <q-menu v-if="auth.isAuthenticated" anchor="bottom right" self="top right">
+                <q-list style="min-width: 160px">
+                  <q-item class="text-grey-8">
+                    <q-item-section>{{ auth.user?.name }}</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <q-item clickable v-close-popup @click="onLogout">
+                    <q-item-section>ออกจากระบบ</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
             </button>
           </div>
         </div>
@@ -98,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import RumoLogo from 'src/assets/logos/Rumo.png';
 import homePurpleLogo from 'src/assets/icons/home_purple.png';
 import mallPurpleLogo from 'src/assets/icons/mall_purple.png';
@@ -108,11 +120,38 @@ import bellLogo from 'src/assets/icons/bell.png';
 import cartLogo from 'src/assets/icons/cart.png';
 import peopleLogo from 'src/assets/icons/people.png';
 import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from 'src/stores/authStore';
+import { useCartStore } from 'src/stores/cartStore';
 
 const leftOpen = ref(true); // ให้ drawer โชว์บน desktop
 const search = ref('');
 const router = useRouter();
 const route = useRoute();
+const auth = useAuthStore();
+const cart = useCartStore();
+
+onMounted(() => {
+  if (auth.isAuthenticated) void cart.fetchCount();
+});
+
+watch(
+  () => auth.isAuthenticated,
+  (loggedIn) => {
+    if (loggedIn) void cart.fetchCount();
+    else cart.reset();
+  },
+);
+
+const onAccountClick = () => {
+  if (!auth.isAuthenticated) void router.push({ name: 'login' });
+  // when authenticated, the q-menu anchored to this button opens on click
+};
+
+const onLogout = () => {
+  auth.logout();
+  cart.reset();
+  void router.push({ name: 'login' });
+};
 
 const onSearch = async () => {
   const q = search.value.trim();
@@ -228,6 +267,24 @@ const navigateTo = async (routeName: string) => {
   justify-content: center;
   filter: drop-shadow(0px 5px 4px rgba(0, 0, 0, 0.25));
   margin-right: 20px;
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  filter: none;
 }
 
 /* รูปมีเงาตาม PNG */
