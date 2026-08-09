@@ -27,14 +27,14 @@ export class UsersService {
 
   async findAll() {
     return await this.usersRepository.find({
-      select: ['id', 'email', 'name', 'role', 'age'],
+      select: ['id', 'email', 'name', 'role', 'age', 'emailVerified'],
     });
   }
 
   async findOne(id: number) {
     return await this.usersRepository.findOne({
       where: { id: id },
-      select: ['id', 'email', 'name', 'role', 'age'],
+      select: ['id', 'email', 'name', 'role', 'age', 'emailVerified'],
     });
   }
 
@@ -43,6 +43,33 @@ export class UsersService {
       where: { email: email },
     });
     return user;
+  }
+
+  /**
+   * Auth-facing lookup: returns null instead of throwing.
+   *
+   * findOneByEmail throws EntityNotFoundError, which Nest maps to a 500 while a
+   * wrong password returns 401 — that status difference tells an attacker which
+   * addresses have accounts. Auth must not be able to leak that.
+   */
+  async findOneByEmailForAuth(email: string): Promise<User | null> {
+    // Only trimmed, not lower-cased: existing rows were stored with whatever
+    // casing they registered with, and SQLite compares strings case-sensitively.
+    return await this.usersRepository.findOne({
+      where: { email: email.trim() },
+    });
+  }
+
+  async markEmailVerified(id: number): Promise<void> {
+    await this.usersRepository.update(id, { emailVerified: true });
+  }
+
+  /**
+   * Narrow write for the password-reset flow. Kept separate from update() so a
+   * reset can never touch email, role or any other column.
+   */
+  async updatePasswordHash(id: number, passwordHash: string): Promise<void> {
+    await this.usersRepository.update(id, { passwordHash });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
