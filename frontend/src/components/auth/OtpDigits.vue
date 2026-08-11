@@ -12,6 +12,7 @@
       :class="['auth-otp__digit', { 'auth-otp__digit--filled': digit !== '' }]"
       @input="onInput(index, $event)"
       @keydown="onKeyDown(index, $event)"
+      @paste="onPaste(index, $event)"
     />
   </div>
 </template>
@@ -68,6 +69,28 @@ function onInput(index: number, event: Event) {
     return;
   }
 
+  let cursor = index;
+  for (const d of entered) {
+    if (cursor >= OTP_LENGTH) break;
+    next[cursor] = d;
+    cursor++;
+  }
+  commit(next);
+  focusBox(Math.min(cursor, OTP_LENGTH - 1));
+}
+
+/**
+ * `maxlength="1"` truncates pasted text to a single character before the
+ * `input` event fires, so a multi-digit paste must be read from
+ * clipboardData directly instead of relying on onInput.
+ */
+function onPaste(index: number, event: ClipboardEvent) {
+  const raw = event.clipboardData?.getData('text') ?? '';
+  const entered = raw.replace(/\D/g, '').split('');
+  if (entered.length === 0) return;
+
+  event.preventDefault();
+  const next = [...digits.value];
   let cursor = index;
   for (const d of entered) {
     if (cursor >= OTP_LENGTH) break;
