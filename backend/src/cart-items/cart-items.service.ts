@@ -66,8 +66,15 @@ export class CartItemService {
     return await this.cartItemsRepository.findOne({ where: { id: id } });
   }
 
-  async update(id: number, updateCartItemDto: UpdateCartItemDto) {
-    const item = await this.cartItemsRepository.findOneByOrFail({ id });
+  async update(
+    id: number,
+    updateCartItemDto: UpdateCartItemDto,
+    userId: number,
+  ) {
+    const item = await this.cartItemsRepository.findOneByOrFail({
+      id,
+      user: { id: userId },
+    });
 
     item.quantity = updateCartItemDto.quantity ?? item.quantity;
     item.price = updateCartItemDto.price ?? item.price;
@@ -75,8 +82,11 @@ export class CartItemService {
     return await this.cartItemsRepository.save(item);
   }
 
-  async remove(id: number) {
-    const item = await this.cartItemsRepository.findOneByOrFail({ id });
+  async remove(id: number, userId: number) {
+    const item = await this.cartItemsRepository.findOneByOrFail({
+      id,
+      user: { id: userId },
+    });
     await this.cartItemsRepository.softDelete(id);
     return item;
   }

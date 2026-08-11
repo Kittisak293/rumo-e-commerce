@@ -39,16 +39,19 @@ export class CartItemController {
     return this.cartItemService.findOne(+id);
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateCartItemDto: UpdateCartItemDto,
+    @Request() req: any,
   ) {
-    return this.cartItemService.update(+id, updateCartItemDto);
+    return this.cartItemService.update(+id, updateCartItemDto, req.user.sub);
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartItemService.remove(+id);
+  remove(@Param('id') id: string, @Request() req: any) {
+    return this.cartItemService.remove(+id, req.user.sub);
   }
 }
