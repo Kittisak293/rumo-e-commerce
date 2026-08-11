@@ -83,12 +83,16 @@ export class Order {
   })
   stripePaymentIntentId?: string | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  // Explicit timestamptz: TypeORM's Postgres default for these is `timestamp`
+  // (no zone). Node writes UTC digits into it, but `pg` reads them back as
+  // local server time on the way out, shifting every value by the server's
+  // UTC offset. timestamptz stores the zone so there's no round-trip to lose.
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ type: 'timestamptz' })
   deletedAt: Date;
 }
