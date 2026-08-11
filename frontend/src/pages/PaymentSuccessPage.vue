@@ -6,12 +6,12 @@
     </div>
 
     <!-- Success Content -->
-    <div v-else-if="store.lastOrder" class="success-container">
+    <div v-else-if="store.lastOrder && !isFailed" class="success-container">
       <!-- Success Icon -->
       <div class="success-icon-wrapper">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+        <svg width="84" height="84" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" />
-          <path d="M8 12.5l2.5 2.5L16 9.5" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M8 12.5l2.5 2.5L16 9.5" stroke="#16a34a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </div>
 
@@ -78,6 +78,55 @@
       </div>
     </div>
 
+    <!-- Fail Content -->
+    <div v-else-if="store.lastOrder && isFailed" class="success-container">
+      <div class="success-icon-wrapper">
+        <svg width="84" height="84" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" fill="#fee2e2" />
+          <path d="M9 9l6 6M15 9l-6 6" stroke="#dc2626" stroke-width="2.6" stroke-linecap="round" />
+        </svg>
+      </div>
+
+      <div style="font-size: 24px; font-weight: 700; color: #1d1d1d; margin-bottom: 6px;">ชำระเงินไม่สำเร็จ</div>
+      <div style="font-size: 14px; color: #6b7280; margin-bottom: 20px;">ยังไม่มีการตัดเงินจากบัญชีของคุณ</div>
+
+      <div class="payment-error-banner">
+        <div class="payment-error-banner__icon">!</div>
+        <div class="payment-error-banner__text">กรุณาลองชำระเงินอีกครั้ง หรือเลือกวิธีชำระเงินอื่น</div>
+      </div>
+
+      <div class="success-card">
+        <div style="font-size: 15px; font-weight: 600; color: #1d1d1d; margin-bottom: 16px;">รายละเอียดคำสั่งซื้อ</div>
+
+        <div class="detail-row">
+          <span class="detail-label">หมายเลขคำสั่งซื้อ</span>
+          <span class="detail-value" style="color: #6d28d9; font-weight: 600;">{{ store.lastOrder.orderNumber }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">วันที่สั่งซื้อ</span>
+          <span class="detail-value">{{ formatDate(store.lastOrder.createdAt) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">สถานะ</span>
+          <span class="status-badge">{{ getStatusLabel(store.lastOrder.status) }}</span>
+        </div>
+
+        <div style="border-top: 1px solid #e5e7eb; margin: 14px 0;" />
+        <div class="detail-row">
+          <span style="font-size: 16px; font-weight: 600; color: #1d1d1d;">ยอดที่ต้องชำระ</span>
+          <span style="font-size: 18px; font-weight: 700; color: #1d1d1d;">฿{{ Number(store.lastOrder.total).toLocaleString() }}</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button
+          class="action-btn primary"
+          @click="$router.push({ name: 'checkoutConfirm', query: { retryOrderId: String(store.lastOrder!.id) } })"
+        >ลองใหม่</button>
+        <button class="action-btn secondary" @click="$router.push({ name: 'checkout' })">กลับหน้าตะกร้า</button>
+      </div>
+    </div>
+
     <!-- Error -->
     <div v-else style="text-align: center; padding: 80px 20px;">
       <div style="font-size: 16px; color: #ef4444;">ไม่พบข้อมูลคำสั่งซื้อ</div>
@@ -87,18 +136,30 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCheckoutStore } from 'src/stores/checkoutStore';
+import { useCartStore } from 'src/stores/cartStore';
 
 const store = useCheckoutStore();
+const cart = useCartStore();
 const route = useRoute();
+
+// Stripe appends `redirect_status` to `return_url` after an off-site
+// PromptPay/redirect confirmation — `failed` is the only outcome that
+// needs the fail branch; anything else (incl. absent, for card payments
+// that never redirect) reads as success.
+const isFailed = computed(() => route.query.redirect_status === 'failed');
 
 onMounted(() => {
   const orderId = Number(route.params.orderId);
   if (orderId && !store.lastOrder) {
     void store.fetchOrder(orderId);
   }
+  // The confirm page already re-queried the cart count, but the Stripe
+  // webhook that actually deletes the paid rows can still be in flight at
+  // that point — reconcile again once landed here.
+  void cart.fetchCount();
 });
 
 const formatDate = (dateString: string) => {
@@ -212,8 +273,49 @@ const getImageUrl = (url: string) => {
   box-shadow: 0 6px 20px rgba(109, 40, 217, 0.4);
 }
 
+.action-btn.secondary {
+  background: #fff;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
+.action-btn.secondary:hover {
+  background: #f9fafb;
+}
+
 .action-btn:active {
   transform: scale(0.98);
+}
+
+.payment-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.payment-error-banner__icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-error-banner__text {
+  font-size: 13px;
+  color: #b91c1c;
 }
 
 @media (max-width: 860px) {

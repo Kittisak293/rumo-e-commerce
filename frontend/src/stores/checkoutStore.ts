@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { api } from 'src/boot/axios';
+import { useCartStore } from 'src/stores/cartStore';
 
 export interface CartItemData {
   id: number;
@@ -66,6 +67,8 @@ export const useCheckoutStore = defineStore('checkout', {
     error: null as string | null,
     appliedDiscountCode: null as string | null,
     discountError: null as string | null,
+    paymentError: null as { message: string; code: string } | null,
+    clientSecret: null as string | null,
   }),
 
   getters: {
@@ -120,14 +123,31 @@ export const useCheckoutStore = defineStore('checkout', {
       try {
         const res = await api.post<OrderResult>('/orders/checkout', { addressId });
         this.lastOrder = res.data;
-        this.cartItems = [];
+        // Backend already deletes the cart rows on checkout — keep the
+        // in-memory snapshot so the confirm page's item list and totals
+        // stay intact while the payment step is still in progress.
         return res.data;
       } catch (err: unknown) {
-        const error = err as { response?: { data?: { message?: string } }; message?: string };
-        this.error = error.response?.data?.message || error.message || 'Checkout failed';
+        const error = err as { response?: { status?: number; data?: { message?: string } }; message?: string };
+        const message = error.response?.data?.message || error.message || 'Checkout failed';
+        this.error = message;
+        this.paymentError = { message, code: String(error.response?.status ?? 'ERR') };
         return null;
       } finally {
         this.checkoutLoading = false;
+      }
+    },
+
+    async createPaymentIntent(orderId: number): Promise<string | null> {
+      try {
+        const res = await api.post<{ clientSecret: string }>('/payments/create-intent', { orderId });
+        this.clientSecret = res.data.clientSecret;
+        return res.data.clientSecret;
+      } catch (err: unknown) {
+        const error = err as { response?: { status?: number; data?: { message?: string } }; message?: string };
+        const message = error.response?.data?.message || error.message || 'Failed to start payment';
+        this.paymentError = { message, code: String(error.response?.status ?? 'ERR') };
+        return null;
       }
     },
 
@@ -135,11 +155,18 @@ export const useCheckoutStore = defineStore('checkout', {
       this.selectedAddressId = addressId;
     },
 
+    clearPaymentError() {
+      this.paymentError = null;
+    },
+
     async updateItemQuantity(itemId: number, quantity: number): Promise<boolean> {
       try {
         const res = await api.patch<CartItemData>(`/cart-item/${itemId}`, { quantity });
         const idx = this.cartItems.findIndex((i) => i.id === itemId);
         if (idx !== -1) this.cartItems[idx] = res.data;
+        // Header badge is a separate store/query — nudge it so the count
+        // reflects the change immediately instead of on next page load.
+        void useCartStore().fetchCount();
         return true;
       } catch (err: unknown) {
         const error = err as { response?: { data?: { message?: string } }; message?: string };
@@ -152,6 +179,7 @@ export const useCheckoutStore = defineStore('checkout', {
       try {
         await api.delete(`/cart-item/${itemId}`);
         this.cartItems = this.cartItems.filter((i) => i.id !== itemId);
+        void useCartStore().fetchCount();
         return true;
       } catch (err: unknown) {
         const error = err as { response?: { data?: { message?: string } }; message?: string };
