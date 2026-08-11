@@ -1,5 +1,6 @@
 import { defineBoot } from '#q-app/wrappers';
 import axios, { type AxiosInstance } from 'axios';
+import { useAuthStore } from 'src/stores/authStore';
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -48,8 +49,11 @@ export default defineBoot(({ app, router }) => {
       const status = axios.isAxiosError(error) ? error.response?.status : undefined;
       const url = axios.isAxiosError(error) ? (error.config?.url ?? '') : '';
       if (status === 401 && !url.startsWith('/auth/')) {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem('rumo.user');
+        // Clear the Pinia store, not just storage — leaving the store's
+        // accessToken/user refs stale kept isAuthenticated truthy after an
+        // expired token was rejected, so the UI still showed the account
+        // menu while every subsequent request kept 401ing.
+        useAuthStore().logout();
         void router.push({ name: 'login' });
       }
       return Promise.reject(
