@@ -62,7 +62,7 @@ export const useCategoryStore = defineStore('Category', () => {
         icon: 'report_problem',
       });
     } finally {
-      console.log('finally');
+      // console.log('finally');
       Loading.hide();
     }
   }

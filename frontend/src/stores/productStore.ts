@@ -59,7 +59,7 @@ export const useProductStore = defineStore('product', () => {
     try {
       Loading.show();
       const res = await api.get('/products');
-      console.log(res.data);
+      // console.log(res.data);
       products.value = res.data;
     } catch (err) {
       console.error(err);
