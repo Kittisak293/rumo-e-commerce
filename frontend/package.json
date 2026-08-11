@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.17.0",
+    "@stripe/stripe-js": "^9.13.0",
     "axios": "^1.2.1",
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
