@@ -10,16 +10,23 @@ const routes: RouteRecordRaw[] = [
       { path: 'coupon', name: 'coupon', component: () => import('pages/CouponPage.vue') },
       { path: 'search', name: 'search', component: () => import('pages/SearchPage.vue') },
       { path: 'notifications', name: 'notifications', component: () => import('pages/NotificationsPage.vue') },
-      { path: 'checkout', name: 'checkout', component: () => import('pages/CheckoutPage.vue') },
+      {
+        path: 'checkout',
+        name: 'checkout',
+        component: () => import('pages/CheckoutPage.vue'),
+        meta: { requiresAuth: true },
+      },
       {
         path: 'checkout/confirm',
         name: 'checkoutConfirm',
         component: () => import('pages/CheckoutConfirmPage.vue'),
+        meta: { requiresAuth: true },
       },
       {
         path: 'payment-success/:orderId',
         name: 'paymentSuccess',
         component: () => import('pages/PaymentSuccessPage.vue'),
+        meta: { requiresAuth: true },
       },
       { path: 'product', name: 'product', component: () => import('pages/ProductDetailPage.vue') },
       {
