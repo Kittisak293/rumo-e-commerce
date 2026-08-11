@@ -71,9 +71,9 @@ export class CartItemService {
     updateCartItemDto: UpdateCartItemDto,
     userId: number,
   ) {
-    const item = await this.cartItemsRepository.findOneByOrFail({
-      id,
-      user: { id: userId },
+    const item = await this.cartItemsRepository.findOneOrFail({
+      where: { id, user: { id: userId } },
+      relations: ['product', 'user'],
     });
 
     item.quantity = updateCartItemDto.quantity ?? item.quantity;
