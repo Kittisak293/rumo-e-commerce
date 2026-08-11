@@ -44,7 +44,9 @@ export class Order {
   @Column({ default: 'pending' })
   status:
     | 'pending'
+    | 'processing'
     | 'paid'
+    | 'failed'
     | 'shipped'
     | 'delivered'
     | 'cancelled'
@@ -73,6 +75,13 @@ export class Order {
 
   @Column({ unique: true, name: 'order_number' })
   orderNumber?: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    name: 'stripe_payment_intent_id',
+  })
+  stripePaymentIntentId?: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

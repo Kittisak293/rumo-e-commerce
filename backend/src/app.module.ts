@@ -38,6 +38,8 @@ import { ProductSkuOptionValuesModule } from './product-sku-option-values/produc
 import { ProductSkuOptionValue } from './product-sku-option-values/entities/product-sku-option-value.entity';
 import { NotificationsModule } from './notifications/notifications.module';
 import { Notification } from './notifications/entities/notification.entity';
+import { PaymentsModule } from './payments/payments.module';
+import { ProcessedEvent } from './stripe/processed-event.entity';
 
 @Module({
   imports: [
@@ -104,6 +106,7 @@ import { Notification } from './notifications/entities/notification.entity';
         ProductSku,
         ProductSkuOptionValue,
         Notification,
+        ProcessedEvent,
       ],
       synchronize: true,
     }),
@@ -132,6 +135,7 @@ import { Notification } from './notifications/entities/notification.entity';
     ProductSkusModule,
     ProductSkuOptionValuesModule,
     NotificationsModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],

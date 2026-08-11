@@ -1,9 +1,16 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
+import Stripe from 'stripe';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { OrderStatus, ALLOWED_TRANSITIONS } from './order-status.enum';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Address } from 'src/addresses/entities/address.entity';
 import { CartItem } from 'src/cart-items/entities/cart-item.entity';
@@ -11,6 +18,8 @@ import { OrderItem } from 'src/order_items/entities/order_item.entity';
 import { Product } from 'src/products/entities/product.entity';
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     @InjectRepository(Order)
     private readonly ordersRepo: Repository<Order>,
@@ -28,7 +37,10 @@ export class OrdersService {
 
   async checkout(userId: number, addressId: number) {
     const user = await this.usersRepo.findOneByOrFail({ id: userId });
-    const address = await this.addresssRepo.findOneByOrFail({ id: addressId, user: { id: userId } });
+    const address = await this.addresssRepo.findOneByOrFail({
+      id: addressId,
+      user: { id: userId },
+    });
     const cartItems = await this.cartItemsRepo.find({
       where: { user: { id: userId } },
       relations: ['product'],
@@ -41,7 +53,10 @@ export class OrdersService {
     const subtotal = cartItems.reduce((acc, item) => acc + item.subtotal, 0);
     const shippingFee = 0;
     const total = subtotal + shippingFee;
-    const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+    const totalQuantity = cartItems.reduce(
+      (acc, item) => acc + item.quantity,
+      0,
+    );
 
     const date = new Date();
     const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
@@ -157,5 +172,95 @@ export class OrdersService {
     const order = await this.ordersRepo.findOneByOrFail({ id });
     await this.ordersRepo.softDelete(id);
     return order;
+  }
+
+  async findOwnedOrFail(orderId: number, userId: number) {
+    const order = await this.ordersRepo.findOne({
+      where: { id: orderId, user: { id: userId } },
+      relations: ['user'],
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    return order;
+  }
+
+  // total is stored as a Postgres decimal, which comes back as a string —
+  // coerce before doing arithmetic on it.
+  async calculateTotalInSatang(orderId: number): Promise<number> {
+    const order = await this.ordersRepo.findOneByOrFail({ id: orderId });
+    return Math.round(Number(order.total) * 100);
+  }
+
+  async attachPaymentIntent(orderId: number, paymentIntentId: string) {
+    await this.ordersRepo.update(
+      { id: orderId },
+      { stripePaymentIntentId: paymentIntentId },
+    );
+  }
+
+  // No-op (not a throw) on a disallowed transition — a late webhook retry
+  // arriving after the order has already moved on is expected, not an error.
+  // Accepts an optional EntityManager so callers (the webhook handler) can
+  // run this inside their own transaction instead of this.ordersRepo's own.
+  async transitionStatus(
+    orderId: number,
+    target: OrderStatus,
+    manager?: EntityManager,
+  ): Promise<void> {
+    const repo = manager ? manager.getRepository(Order) : this.ordersRepo;
+    const order = await repo.findOneByOrFail({ id: orderId });
+    const allowed = ALLOWED_TRANSITIONS[order.status as OrderStatus];
+    if (!allowed || !allowed.includes(target)) {
+      this.logger.warn(
+        `Ignored order #${orderId} transition ${order.status} -> ${target}`,
+      );
+      return;
+    }
+    order.status = target;
+    await repo.save(order);
+  }
+
+  async markPaid(
+    paymentIntent: Stripe.PaymentIntent,
+    manager?: EntityManager,
+  ): Promise<void> {
+    const orderId = this.orderIdFromIntent(paymentIntent);
+    if (orderId === null) return;
+    await this.transitionStatus(orderId, OrderStatus.PAID, manager);
+  }
+
+  // PromptPay confirms but doesn't settle immediately — this is the
+  // in-between state before the succeeded/failed webhook lands.
+  async markProcessing(
+    paymentIntent: Stripe.PaymentIntent,
+    manager?: EntityManager,
+  ): Promise<void> {
+    const orderId = this.orderIdFromIntent(paymentIntent);
+    if (orderId === null) return;
+    await this.transitionStatus(orderId, OrderStatus.PROCESSING, manager);
+  }
+
+  async markFailed(
+    paymentIntent: Stripe.PaymentIntent,
+    manager?: EntityManager,
+  ): Promise<void> {
+    const orderId = this.orderIdFromIntent(paymentIntent);
+    if (orderId === null) return;
+    await this.transitionStatus(orderId, OrderStatus.FAILED, manager);
+  }
+
+  private orderIdFromIntent(
+    paymentIntent: Stripe.PaymentIntent,
+  ): number | null {
+    const raw = paymentIntent.metadata?.orderId;
+    const orderId = Number(raw);
+    if (!raw || Number.isNaN(orderId)) {
+      this.logger.error(
+        `PaymentIntent ${paymentIntent.id} has no valid metadata.orderId`,
+      );
+      return null;
+    }
+    return orderId;
   }
 }

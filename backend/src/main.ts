@@ -16,7 +16,10 @@ function assertSecretsAreDistinct() {
 async function bootstrap() {
   assertSecretsAreDistinct();
 
-  const app = await NestFactory.create(AppModule);
+  // rawBody: true stashes the raw request buffer on req.rawBody alongside
+  // the normal parsed req.body — needed to verify the Stripe webhook
+  // signature, which is computed over the exact bytes Stripe sent.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const config = new DocumentBuilder()
     .setTitle('RUMO API')
     .setDescription('API documentation for my project')
