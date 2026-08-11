@@ -10,7 +10,7 @@ import { OrderStatus, ALLOWED_TRANSITIONS } from './order-status.enum';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Address } from 'src/addresses/entities/address.entity';
 import { CartItem } from 'src/cart-items/entities/cart-item.entity';
@@ -50,7 +50,7 @@ export class OrdersService {
       throw new BadRequestException('Cart is empty');
     }
 
-    const subtotal = cartItems.reduce((acc, item) => acc + item.subtotal, 0);
+    const subtotal = cartItems.reduce((acc, item) => acc + Number(item.subtotal), 0);
     const shippingFee = 0;
     const total = subtotal + shippingFee;
     const totalQuantity = cartItems.reduce(
@@ -86,7 +86,10 @@ export class OrdersService {
     });
 
     await this.orderItemsRepo.save(orderItemsToSave);
-    await this.cartItemsRepo.delete({ user: { id: userId } });
+    // Cart rows are intentionally left alone here — they're only removed once
+    // the payment actually succeeds (see markPaid), so the confirm page can
+    // still show the items/total while the PaymentIntent is in flight, and a
+    // failed/abandoned payment leaves the cart untouched.
 
     return this.ordersRepo.findOne({
       where: { id: order.id },
@@ -196,7 +199,7 @@ export class OrdersService {
     await this.ordersRepo.update(
       { id: orderId },
       { stripePaymentIntentId: paymentIntentId },
-    );
+    ); 
   }
 
   // No-op (not a throw) on a disallowed transition — a late webhook retry
@@ -228,6 +231,31 @@ export class OrdersService {
     const orderId = this.orderIdFromIntent(paymentIntent);
     if (orderId === null) return;
     await this.transitionStatus(orderId, OrderStatus.PAID, manager);
+    await this.clearCartForOrder(orderId, manager);
+  }
+
+  // Only removes the cart rows for products that were actually part of this
+  // order — not the user's whole cart — so anything added after checkout but
+  // before the PaymentIntent settled survives.
+  private async clearCartForOrder(
+    orderId: number,
+    manager?: EntityManager,
+  ): Promise<void> {
+    const orderRepo = manager ? manager.getRepository(Order) : this.ordersRepo;
+    const order = await orderRepo.findOne({
+      where: { id: orderId },
+      relations: ['user', 'orderItems', 'orderItems.product'],
+    });
+    const productIds = order?.orderItems.map((item) => item.product.id) ?? [];
+    if (!order || productIds.length === 0) return;
+
+    const cartRepo = manager
+      ? manager.getRepository(CartItem)
+      : this.cartItemsRepo;
+    await cartRepo.delete({
+      user: { id: order.user.id },
+      product: { id: In(productIds) },
+    });
   }
 
   // PromptPay confirms but doesn't settle immediately — this is the
