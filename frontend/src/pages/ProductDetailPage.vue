@@ -1,13 +1,5 @@
 <template>
   <q-page class="product-detail-page q-pa-lg bg-grey-2">
-    <!-- breadcrumb -->
-    <div class="q-mb-md">
-      <q-breadcrumbs class="text-grey-7 text-body2">
-        <q-breadcrumbs-el label="หน้าหลัก" />
-        <q-breadcrumbs-el :label="product?.category.name || 'กำลังโหลด...'" />
-        <q-breadcrumbs-el :label="product?.name || 'กำลังโหลด...'" />
-      </q-breadcrumbs>
-    </div>
     <div class="product-main-card q-mb-md q-pa-md">
       <div class="row q-col-gutter-lg">
         <!-- ซ้าย: รูปสินค้า + thumbnail -->

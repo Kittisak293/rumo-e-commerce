@@ -11,6 +11,7 @@ import Stripe from 'stripe';
 import { STRIPE_CLIENT } from './stripe.provider';
 import { ProcessedEvent } from './processed-event.entity';
 import { OrdersService } from 'src/orders/orders.service';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class StripeService {
@@ -20,6 +21,7 @@ export class StripeService {
     @Inject(STRIPE_CLIENT) private readonly stripe: Stripe,
     private readonly config: ConfigService,
     private readonly ordersService: OrdersService,
+    private readonly mailService: MailService,
     @InjectRepository(ProcessedEvent)
     private readonly processedEventRepo: Repository<ProcessedEvent>,
     @InjectDataSource() private readonly dataSource: DataSource,
@@ -77,6 +79,55 @@ export class StripeService {
         );
     });
 
+    // Deliberately after the commit, never inside it: an SMTP failure must not
+    // roll back an order that Stripe has already taken the money for.
+    if (event.type === 'payment_intent.succeeded') {
+      await this.sendOrderConfirmation(event.data.object);
+    }
+
     return { received: true };
+  }
+
+  private async sendOrderConfirmation(
+    paymentIntent: Stripe.PaymentIntent,
+  ): Promise<void> {
+    try {
+      const orderId = Number(paymentIntent.metadata?.orderId);
+      if (!orderId || Number.isNaN(orderId)) return;
+
+      const order = await this.ordersService.findWithItems(orderId);
+      if (!order) {
+        this.logger.error(`Order #${orderId} vanished before its email`);
+        return;
+      }
+
+      await this.mailService.sendOrderConfirmation(order.user.email, {
+        orderNumber: order.orderNumber ?? `#${order.id}`,
+        items: order.orderItems.map((item) => ({
+          name: item.product.name,
+          quantity: item.quantity,
+          lineTotal: Number(item.lineTotal),
+        })),
+        subtotal: Number(order.subtotal),
+        shippingFee: Number(order.shippingFee),
+        total: Number(order.total),
+        address: {
+          fullName: order.address.fullName,
+          phone: order.address.phone,
+          subdistrict: order.address.subdistrict,
+          district: order.address.district,
+          province: order.address.province,
+          postalCode: order.address.postalCode,
+        },
+      });
+    } catch (err) {
+      // Swallowed on purpose. The event is already marked processed, so
+      // throwing would only make Stripe retry a webhook that short-circuits
+      // at the idempotency check — the mail would never be resent anyway,
+      // and the 500 would misreport a payment that did settle.
+      this.logger.error(
+        `Order confirmation email failed: ${(err as Error).message}`,
+      );
+    }
   }
 }

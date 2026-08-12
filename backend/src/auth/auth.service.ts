@@ -179,11 +179,7 @@ export class AuthService {
       OTP_TOKEN_TYPE,
     );
     await this.deliver(challenge.email, challenge, OTP_TOKEN_TYPE);
-    return this.challengeResponse(
-      challenge,
-      OTP_TOKEN_TYPE,
-      challenge.email,
-    );
+    return this.challengeResponse(challenge, OTP_TOKEN_TYPE, challenge.email);
   }
 
   // ---------------------------------------------------------------------------

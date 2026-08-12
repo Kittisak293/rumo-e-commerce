@@ -44,12 +44,7 @@
 
     <div class="col">
       <div class="main-image-container bg-grey-2 rounded-borders flex flex-center">
-        <q-img
-          :src="currentImage"
-          fit="contain"
-          style="max-height: 500px; width: 100%"
-          spinner-color="primary"
-        />
+        <q-img :src="currentImage" fit="cover" style="height: 100%; width: 100%" spinner-color="primary" />
       </div>
     </div>
   </div>
@@ -221,8 +216,8 @@ const prevDialogImage = () => {
 }
 
 .main-image-container {
-  min-height: 400px; /* ความสูงขั้นต่ำของรูปใหญ่ */
-  padding: 20px;
+  height: 500px; /* กรอบรูปใหญ่คงที่ ให้รูป cover เต็มกรอบพอดี */
+  overflow: hidden;
 }
 
 /* รูปมีเงาตาม PNG */

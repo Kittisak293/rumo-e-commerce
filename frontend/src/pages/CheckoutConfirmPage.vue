@@ -383,6 +383,7 @@ const handleConfirm = async () => {
       store.cartItems = [];
       // Re-query rather than guess locally, so leftover items (added after
       // this order was placed, or not part of it) show their real count.
+      
       void cart.fetchCount();
       await router.push({ name: 'paymentSuccess', params: { orderId: String(orderId.value) } });
     }

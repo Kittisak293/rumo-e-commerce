@@ -51,7 +51,8 @@ export class Product {
     scale: 1,
     transformer: {
       to: (value: number) => value,
-      from: (value: string | null) => (value === null ? null : parseFloat(value)),
+      from: (value: string | null) =>
+        value === null ? null : parseFloat(value),
     },
   })
   ratingAvg: number;

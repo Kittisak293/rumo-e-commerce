@@ -30,10 +30,7 @@ export class NotificationsController {
   }
 
   @Patch(':id/read')
-  async markAsRead(
-    @Param('id', ParseIntPipe) id: number,
-    @Request() req: any,
-  ) {
+  async markAsRead(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
     return this.notificationsService.markAsRead(id, req.user.sub);
   }
 }

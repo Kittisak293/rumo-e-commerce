@@ -144,9 +144,9 @@ describe('OtpService', () => {
   describe('verifyChallenge', () => {
     it('rejects a missing challenge without counting an attempt', async () => {
       redis.hgetall.mockResolvedValue({});
-      await expect(service.verifyChallenge(JTI, '123456')).rejects.toBeInstanceOf(
-        UnauthorizedException,
-      );
+      await expect(
+        service.verifyChallenge(JTI, '123456'),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
       expect(redis.hincrby).not.toHaveBeenCalled();
     });
 

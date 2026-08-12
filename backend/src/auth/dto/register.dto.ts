@@ -7,7 +7,10 @@ import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
  * collects: name (first + last joined by the client), email, password.
  */
 export class RegisterDto {
-  @ApiProperty({ description: 'อีเมลสำหรับเข้าสู่ระบบ', example: 'user@example.com' })
+  @ApiProperty({
+    description: 'อีเมลสำหรับเข้าสู่ระบบ',
+    example: 'user@example.com',
+  })
   @IsEmail()
   @IsNotEmpty()
   email: string;

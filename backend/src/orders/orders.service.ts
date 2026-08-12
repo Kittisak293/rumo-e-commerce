@@ -50,7 +50,10 @@ export class OrdersService {
       throw new BadRequestException('Cart is empty');
     }
 
-    const subtotal = cartItems.reduce((acc, item) => acc + Number(item.subtotal), 0);
+    const subtotal = cartItems.reduce(
+      (acc, item) => acc + Number(item.subtotal),
+      0,
+    );
     const shippingFee = 0;
     const total = subtotal + shippingFee;
     const totalQuantity = cartItems.reduce(
@@ -188,6 +191,16 @@ export class OrdersService {
     return order;
   }
 
+  // The confirmation email needs the whole graph — the plain findOne only
+  // loads user and address. Returns null rather than throwing: the caller is
+  // the webhook, where a missing order must not fail the request.
+  async findWithItems(orderId: number): Promise<Order | null> {
+    return this.ordersRepo.findOne({
+      where: { id: orderId },
+      relations: ['user', 'address', 'orderItems', 'orderItems.product'],
+    });
+  }
+
   // total is stored as a Postgres decimal, which comes back as a string —
   // coerce before doing arithmetic on it.
   async calculateTotalInSatang(orderId: number): Promise<number> {
@@ -199,7 +212,7 @@ export class OrdersService {
     await this.ordersRepo.update(
       { id: orderId },
       { stripePaymentIntentId: paymentIntentId },
-    ); 
+    );
   }
 
   // No-op (not a throw) on a disallowed transition — a late webhook retry

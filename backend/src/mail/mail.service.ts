@@ -2,6 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createTransport, type Transporter } from 'nodemailer';
 import { buildOtpEmail } from './templates/otp-email';
+import {
+  buildOrderConfirmationEmail,
+  type OrderConfirmationData,
+} from './templates/order-confirmation-email';
+import {
+  buildShipmentNotificationEmail,
+  type ShipmentNotificationData,
+} from './templates/shipment-notification-email';
 import { OTP_TOKEN_TYPE, type OtpPurpose } from 'src/auth/otp.constants';
 
 type MailTransport = 'smtp' | 'log';
@@ -53,6 +61,44 @@ export class MailService {
 
     if (this.mode === 'log') {
       this.logger.warn(`[DEV MAIL] to=${to} purpose=${purpose} code=${code}`);
+      return;
+    }
+
+    await this.transporter!.sendMail({
+      from: this.configService.get<string>('MAIL_FROM'),
+      to,
+      ...mail,
+    });
+  }
+
+  async sendOrderConfirmation(
+    to: string,
+    order: OrderConfirmationData,
+  ): Promise<void> {
+    const mail = buildOrderConfirmationEmail(order);
+
+    if (this.mode === 'log') {
+      this.logger.warn(`[DEV MAIL] to=${to} order=${order.orderNumber}`);
+      return;
+    }
+
+    await this.transporter!.sendMail({
+      from: this.configService.get<string>('MAIL_FROM'),
+      to,
+      ...mail,
+    });
+  }
+
+  async sendShipmentNotification(
+    to: string,
+    shipment: ShipmentNotificationData,
+  ): Promise<void> {
+    const mail = buildShipmentNotificationEmail(shipment);
+
+    if (this.mode === 'log') {
+      this.logger.warn(
+        `[DEV MAIL] to=${to} shipment order=${shipment.orderNumber} tracking=${shipment.trackingNumber}`,
+      );
       return;
     }
 

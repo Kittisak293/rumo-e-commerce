@@ -124,7 +124,9 @@ describe('AuthService', () => {
       password: 'password123',
     };
 
-    beforeEach(() => usersService.findOneByEmailForAuth.mockResolvedValue(null));
+    beforeEach(() =>
+      usersService.findOneByEmailForAuth.mockResolvedValue(null),
+    );
 
     it('creates the account and issues an email_verify challenge', async () => {
       const result = await service.register(DTO);
@@ -445,7 +447,11 @@ describe('AuthService', () => {
     beforeEach(() => incomingToken(PASSWORD_RESET_TOKEN_TYPE));
 
     it('hashes the new password and writes only the hash column', async () => {
-      const result = await service.resetPassword('token', '042917', 'newpass123');
+      const result = await service.resetPassword(
+        'token',
+        '042917',
+        'newpass123',
+      );
 
       expect(otpService.verifyChallenge).toHaveBeenCalledWith(
         'challenge-1',
@@ -453,7 +459,10 @@ describe('AuthService', () => {
         PASSWORD_RESET_TOKEN_TYPE,
       );
       expect(hash).toHaveBeenCalledWith('newpass123', 10);
-      expect(usersService.updatePasswordHash).toHaveBeenCalledWith(7, 'new-hash');
+      expect(usersService.updatePasswordHash).toHaveBeenCalledWith(
+        7,
+        'new-hash',
+      );
       expect(result.passwordReset).toBe(true);
     });
 

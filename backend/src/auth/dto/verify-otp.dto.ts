@@ -10,7 +10,10 @@ export class VerifyOtpDto {
   @IsNotEmpty()
   otpToken: string;
 
-  @ApiProperty({ description: 'The 6-digit code from the email', example: '042917' })
+  @ApiProperty({
+    description: 'The 6-digit code from the email',
+    example: '042917',
+  })
   @IsString()
   @Matches(/^\d{6}$/, { message: 'code must be 6 digits' })
   code: string;

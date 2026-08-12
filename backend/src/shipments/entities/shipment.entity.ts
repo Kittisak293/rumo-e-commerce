@@ -35,6 +35,13 @@ export class Shipment {
   })
   shipmentEvents: ShipmentEvent[];
 
+  // Nullable: rows created before this column existed have none, and
+  // `synchronize` can't backfill a NOT NULL default on an ALTER TABLE.
+  // Explicit type: TypeORM can't infer a native column type from a
+  // `string | null` union design type (same issue as `User.age`).
+  @Column({ name: 'tracking_number', type: 'varchar', nullable: true })
+  trackingNumber: string | null;
+
   @Column()
   status: string;
 

@@ -59,7 +59,9 @@ export class AuthController {
     );
   }
 
-  @ApiOperation({ summary: 'Send a fresh verification code and burn the old one' })
+  @ApiOperation({
+    summary: 'Send a fresh verification code and burn the old one',
+  })
   @ApiResponse({ status: 429, description: 'Still inside the resend cooldown' })
   @UseGuards(ThrottlerGuard)
   @Throttle({ ip: { limit: 10, ttl: 60_000 } })
@@ -87,7 +89,10 @@ export class AuthController {
   })
   @ApiResponse({ status: 429, description: 'Resend cooldown or rate limit' })
   @UseGuards(ThrottlerGuard)
-  @Throttle({ ip: { limit: 20, ttl: 60_000 }, email: { limit: 5, ttl: 60_000 } })
+  @Throttle({
+    ip: { limit: 20, ttl: 60_000 },
+    email: { limit: 5, ttl: 60_000 },
+  })
   @HttpCode(HttpStatus.OK)
   @Post('login')
   signIn(@Body() signInDto: SignInDto) {
@@ -130,9 +135,15 @@ export class AuthController {
       'Always answers 200 with the same body shape whether or not the address ' +
       'exists, so it cannot be used to discover which emails have accounts.',
   })
-  @ApiResponse({ status: 200, description: 'Handled (identical for unknown addresses)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Handled (identical for unknown addresses)',
+  })
   @UseGuards(ThrottlerGuard)
-  @Throttle({ ip: { limit: 10, ttl: 60_000 }, email: { limit: 5, ttl: 60_000 } })
+  @Throttle({
+    ip: { limit: 10, ttl: 60_000 },
+    email: { limit: 5, ttl: 60_000 },
+  })
   @HttpCode(HttpStatus.OK)
   @Post('forgot-password')
   forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {

@@ -32,7 +32,7 @@ export const useCategoryStore = defineStore('Category', () => {
         icon: 'report_problem',
       });
     } finally {
-      console.log('finally');
+      // console.log('finally');
       Loading.hide();
     }
   }
@@ -51,7 +51,7 @@ export const useCategoryStore = defineStore('Category', () => {
     try {
       Loading.show();
       const res = await api.get('/category');
-      console.log(res.data);
+      // console.log(res.data);
       categories.value = res.data;
     } catch (err) {
       console.error(err);
