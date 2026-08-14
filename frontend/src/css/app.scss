@@ -1,6 +1,15 @@
 // app global css in SCSS form
 @use 'auth';
 
+// Reserve the vertical scrollbar's width at all times, so navigating between
+// pages of different heights (e.g. a loading state vs. a full product grid)
+// never toggles the scrollbar on/off — that toggle changes the viewport
+// width and shifts every centered/flex element horizontally.
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 body,
 * {
   font-family: 'Kanit', sans-serif !important;
