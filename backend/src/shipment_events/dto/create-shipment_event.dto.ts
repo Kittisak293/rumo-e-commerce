@@ -1,6 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNumber, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
+import { ShipmentStatus } from 'src/shipments/shipment-status.enum';
 
 export class CreateShipmentEventDto {
   @ApiProperty({ description: 'id ของ shipment', example: 1, minimum: 1 })
@@ -11,21 +20,35 @@ export class CreateShipmentEventDto {
 
   @ApiProperty({
     description: 'สถานะของการจัดส่ง ณ เวลานั้น',
-    example: 'pending',
-    enum: ['pending', 'paid', 'shipped', 'shipping', 'delivered', 'cancelled'],
-    default: 'pending',
+    example: ShipmentStatus.IN_TRANSIT,
+    enum: ShipmentStatus,
   })
-  status: string;
+  @IsEnum(ShipmentStatus)
+  status: ShipmentStatus;
 
   @ApiProperty({
     description: 'รายละเอียดของเหตุการณ์นั้นๆ',
     example: 'พัสดุถูกสร้างในระบบ',
   })
-  desciption: string;
+  @IsString()
+  @IsNotEmpty()
+  description: string;
 
   @ApiProperty({
     description: 'ตำแหน่งที่เกิดเหตุการณ์นั้นๆของพัสดุ',
     example: 'สาขาบางนา',
+    required: false,
   })
-  location: string;
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @ApiProperty({
+    description: 'เวลาที่เกิดเหตุการณ์ตามที่ขนส่งแจ้ง (ไม่ใส่ = เวลาปัจจุบัน)',
+    example: '2026-08-11T18:24:00Z',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  occurredAt?: string;
 }

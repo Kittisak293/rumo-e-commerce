@@ -1,6 +1,7 @@
 import { Carrier } from 'src/carriers/entities/carrier.entity';
 import { Order } from 'src/orders/entities/order.entity';
 import { ShipmentEvent } from 'src/shipment_events/entities/shipment_event.entity';
+import { ShipmentStatus } from '../shipment-status.enum';
 import {
   Column,
   CreateDateColumn,
@@ -42,21 +43,32 @@ export class Shipment {
   @Column({ name: 'tracking_number', type: 'varchar', nullable: true })
   trackingNumber: string | null;
 
-  @Column()
-  status: string;
+  @Column({ type: 'varchar', default: ShipmentStatus.PENDING })
+  status: ShipmentStatus;
 
-  @Column({ name: 'last_location' })
-  lastLocation: string;
+  // Nullable: a shipment exists the moment the seller hands it over, which is
+  // before the carrier has scanned it anywhere. The DTO already marks both of
+  // these optional — the entity used to disagree and every insert that omitted
+  // them failed on the NOT NULL constraint.
+  @Column({ name: 'last_location', type: 'varchar', nullable: true })
+  lastLocation: string | null;
 
-  @Column()
-  estimatedDeliveryAt: string;
+  // Explicit name + type: a bare `@Column()` on a `string` design type gave us
+  // a camelCase *varchar* column, so the ETA could never be compared or sorted
+  // as a date (see CLAUDE.md on declaring column types explicitly).
+  @Column({
+    name: 'estimated_delivery_at',
+    type: 'timestamptz',
+    nullable: true,
+  })
+  estimatedDeliveryAt: Date | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ type: 'timestamptz' })
   deletedAt: Date;
 }

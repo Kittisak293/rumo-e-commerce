@@ -131,7 +131,15 @@ export class OrdersService {
   async findByUser(userId: number) {
     return await this.ordersRepo.find({
       where: { user: { id: userId } },
-      relations: ['user', 'address', 'orderItems', 'orderItems.product'],
+      relations: [
+        'user',
+        'address',
+        'orderItems',
+        'orderItems.product',
+        'shipments',
+        'shipments.carrier',
+      ],
+      order: { createdAt: 'DESC' },
     });
   }
 
@@ -140,6 +148,48 @@ export class OrdersService {
       where: { id: id },
       relations: ['user', 'address'],
     });
+  }
+
+  // Same as findOne but scoped to the caller — the order-detail page uses
+  // this so one customer can't page through another's order by guessing ids.
+  async findOneForUser(id: number, userId: number) {
+    const order = await this.ordersRepo.findOne({
+      where: { id, user: { id: userId } },
+      relations: [
+        'user',
+        'address',
+        'orderItems',
+        'orderItems.product',
+        'shipments',
+        'shipments.carrier',
+      ],
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    return order;
+  }
+
+  // The tracking page's single read: the order plus every shipment's full
+  // event history, scoped to the requesting user. `shipmentEvents` sorts
+  // newest-first to match how the timeline renders (mockup 3a).
+  async findTracking(id: number, userId: number) {
+    const order = await this.ordersRepo.findOne({
+      where: { id, user: { id: userId } },
+      relations: [
+        'address',
+        'orderItems',
+        'orderItems.product',
+        'shipments',
+        'shipments.carrier',
+        'shipments.shipmentEvents',
+      ],
+      order: { shipments: { shipmentEvents: { occurredAt: 'DESC' } } },
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    return order;
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {

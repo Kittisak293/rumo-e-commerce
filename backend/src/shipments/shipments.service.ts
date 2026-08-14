@@ -2,11 +2,15 @@ import { Repository } from 'typeorm';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { UpdateShipmentDto } from './dto/update-shipment.dto';
 import { Shipment } from './entities/shipment.entity';
+import { ShipmentStatus } from './shipment-status.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, Logger } from '@nestjs/common';
 import { Order } from 'src/orders/entities/order.entity';
 import { Carrier } from 'src/carriers/entities/carrier.entity';
+import { buildTrackingUrl } from 'src/carriers/tracking-url.util';
 import { MailService } from 'src/mail/mail.service';
+import { OrdersService } from 'src/orders/orders.service';
+import { OrderStatus } from 'src/orders/order-status.enum';
 
 @Injectable()
 export class ShipmentsService {
@@ -20,6 +24,7 @@ export class ShipmentsService {
     @InjectRepository(Carrier)
     private readonly carriersRepo: Repository<Carrier>,
     private readonly mailService: MailService,
+    private readonly ordersService: OrdersService,
   ) {}
   async create(createShipmentDto: CreateShipmentDto) {
     // relations: ['user'] — the dispatch email needs an address to send to,
@@ -31,10 +36,21 @@ export class ShipmentsService {
     const carrier = await this.carriersRepo.findOneByOrFail({
       id: createShipmentDto.carrierId,
     });
-    const shipment = this.shipmentsRepo.create(createShipmentDto);
-    shipment.order = order;
-    shipment.carrier = carrier;
+    const shipment = this.shipmentsRepo.create({
+      trackingNumber: createShipmentDto.trackingNumber,
+      status: createShipmentDto.status ?? ShipmentStatus.PENDING,
+      lastLocation: createShipmentDto.lastLocation ?? null,
+      estimatedDeliveryAt: createShipmentDto.estimatedDeliveryAt
+        ? new Date(createShipmentDto.estimatedDeliveryAt)
+        : null,
+      order,
+      carrier,
+    });
     const saved = await this.shipmentsRepo.save(shipment);
+
+    // Handing the parcel to a carrier is what makes an order 'shipped' —
+    // nothing else in the system writes that status.
+    await this.ordersService.transitionStatus(order.id, OrderStatus.SHIPPED);
 
     await this.sendDispatchNotification(order, carrier, createShipmentDto);
 
@@ -56,12 +72,7 @@ export class ShipmentsService {
         orderNumber: order.orderNumber ?? `#${order.id}`,
         carrierName: carrier.name,
         trackingNumber: dto.trackingNumber,
-        trackingUrl: carrier.trackingUrlTemplate
-          ? carrier.trackingUrlTemplate.replace(
-              '{trackingNumber}',
-              encodeURIComponent(dto.trackingNumber),
-            )
-          : null,
+        trackingUrl: buildTrackingUrl(carrier, dto.trackingNumber),
         estimatedDeliveryAt: dto.estimatedDeliveryAt,
       });
     } catch (err) {
@@ -78,23 +89,37 @@ export class ShipmentsService {
   async findOne(id: number) {
     return await this.shipmentsRepo.findOne({
       where: { id: id },
-      relations: ['order', 'carrier'],
+      relations: ['order', 'carrier', 'shipmentEvents'],
+      order: { shipmentEvents: { occurredAt: 'DESC' } },
     });
   }
 
   async update(id: number, updateShipmentDto: UpdateShipmentDto) {
-    const shipment = await this.shipmentsRepo.findOne({
+    const shipment = await this.shipmentsRepo.findOneOrFail({
       where: { id: id },
       relations: ['order', 'carrier'],
     });
-    if (shipment) {
-      shipment.status = updateShipmentDto.status ?? shipment.status;
-      await this.shipmentsRepo.save(shipment);
+
+    if (updateShipmentDto.carrierId !== undefined) {
+      shipment.carrier = await this.carriersRepo.findOneByOrFail({
+        id: updateShipmentDto.carrierId,
+      });
     }
-    return await this.shipmentsRepo.findOne({
-      where: { id: id },
-      relations: ['order', 'carrier'],
-    });
+    if (updateShipmentDto.trackingNumber !== undefined) {
+      shipment.trackingNumber = updateShipmentDto.trackingNumber;
+    }
+    if (updateShipmentDto.lastLocation !== undefined) {
+      shipment.lastLocation = updateShipmentDto.lastLocation;
+    }
+    if (updateShipmentDto.estimatedDeliveryAt !== undefined) {
+      shipment.estimatedDeliveryAt = new Date(
+        updateShipmentDto.estimatedDeliveryAt,
+      );
+    }
+    shipment.status = updateShipmentDto.status ?? shipment.status;
+    await this.shipmentsRepo.save(shipment);
+
+    return await this.findOne(id);
   }
 
   async remove(id: number) {

@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString, IsOptional, IsDateString } from 'class-validator';
+import {
+  IsInt,
+  IsString,
+  IsOptional,
+  IsDateString,
+  IsEnum,
+} from 'class-validator';
+import { ShipmentStatus } from '../shipment-status.enum';
 
 export class CreateShipmentDto {
   @ApiProperty({ example: 1, description: 'ID ของออเดอร์' })
@@ -14,9 +21,15 @@ export class CreateShipmentDto {
   @IsString()
   trackingNumber: string;
 
-  @ApiProperty({ example: 'in_transit', description: 'สถานะการจัดส่ง' })
-  @IsString()
-  status: string;
+  @ApiProperty({
+    example: ShipmentStatus.PENDING,
+    description: 'สถานะการจัดส่ง',
+    enum: ShipmentStatus,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(ShipmentStatus)
+  status?: ShipmentStatus;
 
   @ApiProperty({
     example: 'Bangkok Distribution Center',

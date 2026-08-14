@@ -13,16 +13,26 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { buildTrackingUrl } from 'src/carriers/tracking-url.util';
+// `import type`: a type used in a decorated signature can't be a value import
+// while isolatedModules + emitDecoratorMetadata are both on (TS1272).
+import type { AuthenticatedRequest } from 'src/auth/authenticated-request';
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(createOrderDto);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Get()
   findAll() {
     return this.ordersService.findAll();
@@ -30,26 +40,53 @@ export class OrdersController {
 
   @UseGuards(AuthGuard)
   @Post('checkout')
-  async checkout(@Request() req: any, @Body() body: { addressId: number }) {
+  async checkout(
+    @Request() req: AuthenticatedRequest,
+    @Body() body: { addressId: number },
+  ) {
     return this.ordersService.checkout(req.user.sub, body.addressId);
   }
 
   @UseGuards(AuthGuard)
   @Get('my-orders')
-  findMyOrders(@Request() req: any) {
+  findMyOrders(@Request() req: AuthenticatedRequest) {
     return this.ordersService.findByUser(req.user.sub);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
+  @UseGuards(AuthGuard)
+  @Get(':id/tracking')
+  async getTracking(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    const order = await this.ordersService.findTracking(+id, req.user.sub);
+    return {
+      ...order,
+      shipments: order.shipments.map((shipment) => ({
+        ...shipment,
+        trackingUrl: buildTrackingUrl(
+          shipment.carrier,
+          shipment.trackingNumber,
+        ),
+      })),
+    };
   }
 
+  @UseGuards(AuthGuard)
+  @Get(':id')
+  findOne(@Request() req: AuthenticatedRequest, @Param('id') id: string) {
+    return this.ordersService.findOneForUser(+id, req.user.sub);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     return this.ordersService.update(+id, updateOrderDto);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.ordersService.remove(+id);
