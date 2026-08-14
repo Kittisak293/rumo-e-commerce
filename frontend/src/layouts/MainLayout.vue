@@ -100,6 +100,24 @@
           </q-item-section>
           <q-item-section class="drawer-text">เก็บโค้ด</q-item-section>
         </q-item>
+
+        <!-- No dedicated PNG icon exists for this entry — inline SVG instead
+             of adding a new binary asset, styled to match the others. -->
+        <q-item
+          v-if="auth.isAuthenticated"
+          clickable
+          @click="navigateTo('orders')"
+          :active="ordersActive"
+          active-class="drawer-item--active"
+          class="drawer-item q-mb-sm menu-item"
+        >
+          <q-item-section avatar>
+            <svg class="drawer-svg-icon" width="26" height="26" viewBox="0 0 24 24" fill="none">
+              <path d="M3 7h18M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 11v5M15 11v5" stroke="#8e4dff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </q-item-section>
+          <q-item-section class="drawer-text">คำสั่งซื้อของฉัน</q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -110,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import RumoLogo from 'src/assets/logos/Rumo.png';
 import homePurpleLogo from 'src/assets/icons/home_purple.png';
 import mallPurpleLogo from 'src/assets/icons/mall_purple.png';
@@ -124,6 +142,9 @@ import { useAuthStore } from 'src/stores/authStore';
 import { useCartStore } from 'src/stores/cartStore';
 
 const leftOpen = ref(true); // ให้ drawer โชว์บน desktop
+const ordersActive = computed(
+  () => typeof route.name === 'string' && ['orders', 'orderDetail', 'orderTracking'].includes(route.name),
+);
 const search = ref('');
 const router = useRouter();
 const route = useRoute();
@@ -315,5 +336,9 @@ const navigateTo = async (routeName: string) => {
 
 .drawer-item--active img {
   filter: brightness(0) invert(1); /* ไอคอนเป็นสีขาว */
+}
+
+.drawer-item--active .drawer-svg-icon path {
+  stroke: white;
 }
 </style>

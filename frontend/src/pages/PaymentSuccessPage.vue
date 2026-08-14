@@ -1,12 +1,33 @@
 <template>
   <q-page class="success-page">
-    <!-- Loading -->
-    <div v-if="store.loading" style="display: flex; justify-content: center; padding: 80px 0;">
+    <!-- Verifying: waiting for the Stripe webhook to actually land before
+         we claim success, rather than trusting the client-side confirm -->
+    <div v-if="phase === 'verifying' || store.loading" style="display: flex; flex-direction: column; align-items: center; padding: 80px 0;">
       <q-spinner-dots size="48px" color="purple" />
+      <div style="margin-top: 16px; font-size: 14px; color: #6b7280;">กำลังตรวจสอบการชำระเงิน...</div>
+    </div>
+
+    <!-- Timeout: webhook hasn't landed after MAX_POLL_ATTEMPTS — don't spin forever -->
+    <div v-else-if="phase === 'timeout'" class="success-container">
+      <div class="success-icon-wrapper">
+        <svg width="84" height="84" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" />
+          <path d="M12 7v5l3 3" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div style="font-size: 24px; font-weight: 700; color: #1d1d1d; margin-bottom: 6px;">การยืนยันใช้เวลานานกว่าปกติ</div>
+      <div style="font-size: 14px; color: #6b7280; margin-bottom: 28px;">ถ้าตัดเงินสำเร็จแล้ว ระบบจะอัปเดตสถานะให้ในไม่ช้า</div>
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button class="action-btn primary" @click="retryVerify">ตรวจสอบอีกครั้ง</button>
+        <button
+          class="action-btn secondary"
+          @click="$router.push({ name: 'orderDetail', params: { orderId: String(route.params.orderId) } })"
+        >ดูคำสั่งซื้อ</button>
+      </div>
     </div>
 
     <!-- Success Content -->
-    <div v-else-if="store.lastOrder && !isFailed" class="success-container">
+    <div v-else-if="phase === 'success' && store.lastOrder" class="success-container">
       <!-- Success Icon -->
       <div class="success-icon-wrapper">
         <svg width="84" height="84" viewBox="0 0 24 24" fill="none">
@@ -74,12 +95,16 @@
 
       <!-- Actions -->
       <div style="display: flex; gap: 12px; margin-top: 24px;">
-        <button class="action-btn primary" @click="$router.push({ name: 'home' })">กลับหน้าหลัก</button>
+        <button
+          class="action-btn primary"
+          @click="$router.push({ name: 'orderDetail', params: { orderId: store.lastOrder!.id } })"
+        >ดูรายละเอียดคำสั่งซื้อ</button>
+        <button class="action-btn secondary" @click="$router.push({ name: 'home' })">กลับหน้าหลัก</button>
       </div>
     </div>
 
     <!-- Fail Content -->
-    <div v-else-if="store.lastOrder && isFailed" class="success-container">
+    <div v-else-if="phase === 'failed' && store.lastOrder" class="success-container">
       <div class="success-icon-wrapper">
         <svg width="84" height="84" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" fill="#fee2e2" />
@@ -136,10 +161,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCheckoutStore } from 'src/stores/checkoutStore';
 import { useCartStore } from 'src/stores/cartStore';
+import { getStatusLabel } from 'src/composables/useOrderStatus';
+import { getImageUrl } from 'src/utils/imageUrl';
 
 const store = useCheckoutStore();
 const cart = useCartStore();
@@ -151,15 +178,65 @@ const route = useRoute();
 // that never redirect) reads as success.
 const isFailed = computed(() => route.query.redirect_status === 'failed');
 
+// Stripe confirms the payment client-side (that's why this page loads at
+// all), but order.status only flips to paid once the async webhook lands —
+// so a single fetch right after redirect can still read it as 'pending'.
+// Withhold the success screen and poll instead of showing a "success" badge
+// next to a stale "pending" status.
+const phase = ref<'verifying' | 'success' | 'failed' | 'timeout' | 'error'>('verifying');
+const POLL_INTERVAL_MS = 1500;
+const MAX_POLL_ATTEMPTS = 10;
+let pollTimer: ReturnType<typeof setTimeout> | null = null;
+
+async function pollUntilSettled(orderId: number, attempt = 0) {
+  await store.fetchOrder(orderId);
+  const status = store.lastOrder?.status;
+  if (!store.lastOrder) {
+    phase.value = 'error';
+    return;
+  }
+  if (status === 'failed') {
+    phase.value = 'failed';
+    return;
+  }
+  if (status === 'pending' || status === 'processing') {
+    if (attempt >= MAX_POLL_ATTEMPTS) {
+      phase.value = 'timeout';
+      return;
+    }
+    pollTimer = setTimeout(() => void pollUntilSettled(orderId, attempt + 1), POLL_INTERVAL_MS);
+    return;
+  }
+  phase.value = 'success';
+}
+
+function retryVerify() {
+  const orderId = Number(route.params.orderId);
+  if (!orderId) return;
+  phase.value = 'verifying';
+  void pollUntilSettled(orderId);
+}
+
 onMounted(() => {
   const orderId = Number(route.params.orderId);
-  if (orderId && !store.lastOrder) {
+  if (!orderId) {
+    phase.value = 'error';
+    return;
+  }
+  if (isFailed.value) {
+    phase.value = 'failed';
     void store.fetchOrder(orderId);
+  } else {
+    void pollUntilSettled(orderId);
   }
   // The confirm page already re-queried the cart count, but the Stripe
   // webhook that actually deletes the paid rows can still be in flight at
   // that point — reconcile again once landed here.
   void cart.fetchCount();
+});
+
+onBeforeUnmount(() => {
+  if (pollTimer) clearTimeout(pollTimer);
 });
 
 const formatDate = (dateString: string) => {
@@ -173,24 +250,6 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const getStatusLabel = (status: string) => {
-  const map: Record<string, string> = {
-    pending: 'รอชำระเงิน',
-    paid: 'ชำระเงินแล้ว',
-    shipped: 'จัดส่งแล้ว',
-    shipping: 'กำลังจัดส่ง',
-    delivered: 'ส่งถึงแล้ว',
-    cancelled: 'ยกเลิก',
-    refunded: 'คืนเงินแล้ว',
-  };
-  return map[status] ?? status;
-};
-
-const getImageUrl = (url: string) => {
-  if (url.startsWith('http')) return url;
-  const base = import.meta.env.VITE_API as string || 'http://localhost:3000';
-  return `${base}${url}`;
-};
 </script>
 
 <style scoped>

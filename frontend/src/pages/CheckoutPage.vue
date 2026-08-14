@@ -114,6 +114,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Notify } from 'quasar';
 import { useCheckoutStore, type CartItemData } from 'src/stores/checkoutStore';
+import { getImageUrl } from 'src/utils/imageUrl';
 
 const store = useCheckoutStore();
 const router = useRouter();
@@ -121,12 +122,6 @@ const router = useRouter();
 onMounted(() => {
   void store.fetchCheckoutData();
 });
-
-const getImageUrl = (url: string) => {
-  if (url.startsWith('http')) return url;
-  const base = import.meta.env.VITE_API as string || 'http://localhost:3000';
-  return `${base}${url}`;
-};
 
 // Address is picked on the confirm step, not here — no gate before proceeding.
 const handleCheckout = async () => {

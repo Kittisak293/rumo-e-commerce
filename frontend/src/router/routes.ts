@@ -28,6 +28,24 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/PaymentSuccessPage.vue'),
         meta: { requiresAuth: true },
       },
+      {
+        path: 'orders',
+        name: 'orders',
+        component: () => import('pages/OrdersPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'orders/:orderId',
+        name: 'orderDetail',
+        component: () => import('pages/OrderDetailPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'orders/:orderId/tracking',
+        name: 'orderTracking',
+        component: () => import('pages/OrderTrackingPage.vue'),
+        meta: { requiresAuth: true },
+      },
       { path: 'product', name: 'product', component: () => import('pages/ProductDetailPage.vue') },
       {
         path: 'products/:id',

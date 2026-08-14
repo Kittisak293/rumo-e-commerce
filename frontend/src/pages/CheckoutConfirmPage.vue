@@ -153,6 +153,7 @@ import { useCheckoutStore } from 'src/stores/checkoutStore';
 import { useCartStore } from 'src/stores/cartStore';
 import { useAuthStore } from 'src/stores/authStore';
 import { useAddressAutofill, type AddressMatch } from 'src/composables/useAddressAutofill';
+import { getImageUrl } from 'src/utils/imageUrl';
 
 const store = useCheckoutStore();
 const cart = useCartStore();
@@ -280,12 +281,6 @@ const handleSubdistrictSelect = (value: string) => {
     form.district = match.district;
     form.province = match.province;
   }
-};
-
-const getImageUrl = (url: string) => {
-  if (url.startsWith('http')) return url;
-  const base = import.meta.env.VITE_API as string || 'http://localhost:3000';
-  return `${base}${url}`;
 };
 
 onMounted(() => {
