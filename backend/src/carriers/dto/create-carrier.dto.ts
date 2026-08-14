@@ -37,9 +37,9 @@ export class CreateCarrierDto {
   website?: string;
 
   @ApiProperty({
-    example: 'https://th.kerryexpress.com/track/?track={tracking}',
+    example: 'https://th.kerryexpress.com/track/?track={trackingNumber}',
     description:
-      'ลิงก์ template สำหรับติดตามพัสดุ โดยใช้ {tracking} แทนหมายเลขพัสดุ',
+      'ลิงก์ template สำหรับติดตามพัสดุ โดยใช้ {trackingNumber} แทนหมายเลขพัสดุ',
     required: false,
   })
   @IsOptional()

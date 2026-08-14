@@ -20,6 +20,14 @@ export class CarriersService {
     return await this.carriersRepo.find();
   }
 
+  /** Public listing: carriers we still hand parcels to. */
+  async findAllActive() {
+    return await this.carriersRepo.find({
+      where: { isActive: true },
+      order: { name: 'ASC' },
+    });
+  }
+
   async findOne(id: number) {
     return await this.carriersRepo.findOne({ where: { id: id } });
   }
