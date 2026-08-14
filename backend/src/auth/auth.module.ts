@@ -27,5 +27,9 @@ import { OtpService } from './otp.service';
   ],
   controllers: [AuthController],
   providers: [AuthService, OtpService],
+  // Re-exported so any module that imports AuthModule to get AuthGuard also
+  // has UsersService in scope — RolesGuard is instantiated by the *consuming*
+  // module and resolves its dependencies from there, not from here.
+  exports: [UsersModule],
 })
 export class AuthModule {}
