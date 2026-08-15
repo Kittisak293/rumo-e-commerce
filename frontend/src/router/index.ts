@@ -44,6 +44,10 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     }
 
     if (to.meta.guestOnly && auth.isAuthenticated) {
+      return auth.user?.role === 'admin' ? { name: 'account' } : { name: 'home' };
+    }
+
+    if (to.meta.requiresAdmin && auth.user?.role !== 'admin') {
       return { name: 'home' };
     }
 

@@ -83,7 +83,11 @@ async function onSubmit() {
       message: 'เข้าสู่ระบบสำเร็จ',
       icon: 'check_circle',
     });
-    await router.push({ name: 'home' });
+    if (auth.user?.role === 'admin') {
+      await router.push({ name: 'account' });
+    } else {
+      await router.push({ name: 'home' });
+    }
   }
 }
 

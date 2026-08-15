@@ -3,7 +3,7 @@
     <q-header elevated class="bg-primary text-white">
       <q-toolbar class="q-px-lg q-py-xss">
         <div class="row items-center full-width no-wrap">
-          <div class="row items-center">
+          <div class="row items-center cursor-pointer" @click="onLogoClick">
             <img :src="RumoLogo" alt="RUMO" style="width: 200px" />
           </div>
 
@@ -36,7 +36,7 @@
 
             <button class="icon-click" @click="onAccountClick">
               <img :src="peopleLogo" alt="PEOPLE" style="width: 30px" />
-              <q-menu v-if="auth.isAuthenticated" anchor="bottom right" self="top right">
+              <q-menu v-if="auth.isAuthenticated && auth.user?.role !== 'admin'" anchor="bottom right" self="top right">
                 <q-list style="min-width: 160px">
                   <q-item class="text-grey-8">
                     <q-item-section>{{ auth.user?.name }}</q-item-section>
@@ -116,7 +116,7 @@
               <path d="M3 7h18M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 11v5M15 11v5" stroke="#8e4dff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </q-item-section>
-          <q-item-section class="drawer-text">คำสั่งซื้อของฉัน</q-item-section>
+          <q-item-section class="drawer-text drawer-text--sm">คำสั่งซื้อของฉัน</q-item-section>
         </q-item>
       </q-list>
     </q-drawer>
@@ -163,9 +163,21 @@ watch(
   },
 );
 
+const onLogoClick = () => {
+  if (auth.isAuthenticated && auth.user?.role === 'admin') {
+    void navigateTo('account');
+  } else {
+    void navigateTo('home');
+  }
+};
+
 const onAccountClick = () => {
-  if (!auth.isAuthenticated) void router.push({ name: 'login' });
-  // when authenticated, the q-menu anchored to this button opens on click
+  if (!auth.isAuthenticated) {
+    void router.push({ name: 'login' });
+  } else if (auth.user?.role === 'admin') {
+    void router.push({ name: 'account' });
+  }
+  // when authenticated non-admin, the q-menu anchored to this button opens on click
 };
 
 const onLogout = () => {
@@ -238,6 +250,10 @@ const navigateTo = async (routeName: string) => {
   font-size: 20px;
   font-weight: 501;
   color: #8e4dff;
+}
+
+.drawer-text--sm {
+  font-size: 16px;
 }
 
 .search-wrapper {
