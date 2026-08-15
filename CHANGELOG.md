@@ -4,6 +4,35 @@ All notable changes to this project. Format loosely follows [Keep a Changelog](h
 
 ## [Unreleased]
 
+### Payments: Stripe checkout (added)
+
+- `POST /payments/create-intent` and `POST /payments/webhook` (`payments`/`stripe` modules). Amount is always server-derived from `OrdersService.calculateTotalInSatang`, never taken from the client; an open PaymentIntent is reused rather than duplicated, and creation is idempotent per order
+- Webhook verifies the Stripe signature (`STRIPE_WEBHOOK_SECRET`) and dedupes on a `ProcessedEvent` row keyed by `event.id` (Stripe retries at-least-once), written in the same transaction as the order status change so a failure leaves the event retryable. `payment_intent.succeeded/processing/payment_failed` drive `Order.status`; the confirmation email fires after commit, best-effort
+- Frontend: `CheckoutConfirmPage` places the order, creates the intent, and mounts Stripe's Payment Element (card + PromptPay, since `automatic_payment_methods` is enabled server-side), confirming with `redirect: 'if_required'`; supports retrying an already-created order via a `retryOrderId` query param. `PaymentSuccessPage` polls `GET /orders/:id` rather than trusting the client-side confirm result, since webhook delivery races the redirect
+- Cart clearing is deferred until payment actually settles (`markPaid`), not at checkout time, so an abandoned or failed payment doesn't silently empty the cart
+
+### Shipping & order tracking (added)
+
+- `shipments` / `shipment_events` modules: creating a `Shipment` moves its order to `shipped`; each `ShipmentEvent` optionally advances it further via a `ShipmentStatus → OrderStatus` map (`picked_up|in_transit|out_for_delivery → shipping`, `delivered → delivered`) gated by `OrdersService.transitionStatus`'s `ALLOWED_TRANSITIONS`, so an out-of-order carrier scan can't walk a delivered order backward
+- `carriers` module: admin-only CRUD (`@Roles('admin')`) plus one public `GET /carriers` for shipping-option pickers, filtered to active carriers. `tracking-url.util.ts` builds the customer tracking link from `Carrier.trackingUrlTemplate`'s `{trackingNumber}` placeholder, shared by the dispatch email and the tracking endpoint so they can't drift apart
+- Shipment-dispatch email sent from `ShipmentsService.create`, best-effort, via the same `MailService` used for OTP and order confirmation
+- Frontend: `OrdersPage` (5 grouped status tabs over the 9 raw `OrderStatus` values, search, sort, skeletons), `OrderDetailPage` (progress stepper for on-track orders, explanatory card for cancelled/refunded/failed), `OrderTrackingPage` (shipment timeline, falls back to already-fetched shipment data on error)
+- `backend/src/seed/shipping.seed.ts` (`npm run seed:shipping`) — upserts 3 real carriers with working tracking URL templates, and with `-- --order=<id>` creates a full shipment + timeline for a given order; `backend/src/seed/products.seed.ts` (`npm run seed:products`) seeds catalog products with placeholder images
+
+### RBAC (added)
+
+- `User.role` (`admin` | `customer`) plus `RolesGuard` + `@Roles(...)` decorator, stacked after `AuthGuard` (`@UseGuards(AuthGuard, RolesGuard) @Roles('admin')`). Role is re-read from the database rather than trusted from the JWT, since tokens minted before roles existed carry none. Applied to carrier write routes and admin order routes
+
+### Notifications module (added, not yet wired up)
+
+- `notifications` module: `Notification` entity + `GET /notifications`, `PATCH /notifications/:id/read`, `PATCH /notifications/read-all`, and a `createNotification` service method intended for other services to call. Nothing calls it yet — the in-app notification table stays empty for now. Actual customer emails (order confirmation, shipment dispatch) go through `MailService` directly, not through this module
+
+### Fixed
+
+- `Order` timestamps (`createdAt`/`updatedAt`/`deletedAt`) were an untyped Postgres `timestamp` with no zone, so UTC-written values read back shifted by the server's offset — now explicit `type: 'timestamptz'`
+- `CartItemService.update` returned a bare row with no `product`/`user` relations after a quantity change
+- Scrollbar now always reserves its gutter (`scrollbar-gutter: stable`) so switching between short and tall pages doesn't shift centered/flex layouts horizontally
+
 ### Migration notes
 
 - **Database switched from SQLite to Postgres.** `backend/mydb.sqlite` is no longer read by the app; `TypeOrmModule` now connects to Postgres via `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB`/`POSTGRES_DB_HOST`/`POSTGRES_DB_PORT`/`POSTGRES_DB_SSL`. Local dev runs it via `docker compose up -d` in `backend/` (`backend/docker-compose.yml`, credentials default to `rumo`/`rumo123`/`rumo`). All 15 tables' worth of existing data (4 users, 55 products, 19 categories, etc.) were copied over in FK dependency order and audited: row counts, ids, emails and password hashes all match the SQLite source exactly; serial sequences were reset past the migrated max ids

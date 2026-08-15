@@ -44,7 +44,11 @@ Local dev runs Postgres via `backend/docker-compose.yml` (`docker compose up -d`
 
 **Declare `@Column` types explicitly.** A bare `@Column() foo: number` lets TypeORM guess the native column type from the driver, and the guess is driver-specific: SQLite mapped an untyped `number` to a real/float column, Postgres maps the same declaration to `integer`. That divergence is invisible until a real decimal value hits the Postgres integer column and the insert fails — this is exactly what broke `Product.ratingAvg` during the SQLite→Postgres migration. Always set `type: 'int'`, `'decimal'`, etc. explicitly. Decimal/numeric columns then come back from `pg` as **strings**, not numbers (precision safety) — if the frontend does arithmetic on the value, add a TypeORM `transformer` to parse it back to a number on read (see `Product.ratingAvg` for the pattern) rather than pushing the coercion onto every call site.
 
-**Catalog data model** (drives most of the complexity): `Product` → `ProductSku` → `ProductSkuOptionValue` → `ProductOptionValue` → `ProductOption`, plus `ProductImage` and `Category`. Orders: `Order` → `OrderItem`, `Address`. Shipping: `Shipment` → `ShipmentEvent`, `Carrier`. Cart: `CartItem`. `Product.storeType` (`mall` | `seller`) distinguishes first-party vs marketplace listings and is filtered on throughout search/home/mall endpoints.
+**Catalog data model** (drives most of the complexity): `Product` → `ProductSku` → `ProductSkuOptionValue` → `ProductOptionValue` → `ProductOption`, plus `ProductImage` and `Category`. Orders: `Order` → `OrderItem`, `Address`. Shipping: `Shipment` → `ShipmentEvent`, `Carrier`. Cart: `CartItem`. `Product.storeType` (`mall` | `seller`) distinguishes first-party vs marketplace listings and is filtered on throughout search/home/mall endpoints. There is no seller-account concept behind `storeType` yet — it's a data tag, not an ownership model.
+
+**Order status is state-machine driven, not set directly.** `OrderStatus` (`src/orders/order-status.enum.ts`) has 9 values (`pending, processing, paid, failed, shipped, shipping, delivered, cancelled, refunded`) with an explicit `ALLOWED_TRANSITIONS` map, including empty (terminal) arrays for `cancelled`/`refunded`. `OrdersService.transitionStatus` no-ops with a warning on a disallowed move rather than throwing, so an out-of-order carrier scan can't walk a delivered order backward. Two other services write `Order.status` directly: `ShipmentsService.create` moves an order to `shipped` the moment its first `Shipment` row is created ("handing the parcel to a carrier is what makes an order shipped"), and `ShipmentEventsService.create` moves it again via a `ShipmentStatus → OrderStatus` map (`picked_up|in_transit|out_for_delivery → shipping`, `delivered → delivered`; `pending|failed|returned` deliberately leave `Order.status` untouched). `ShipmentStatus` (7 values, `src/shipments/shipment-status.enum.ts`) is kept separate from `OrderStatus` on purpose — one order can have more than one shipment. Payment webhooks separately drive `paid|processing|failed` (see Payments below).
+
+**Tracking URLs**: `Carrier.trackingUrlTemplate` must contain the literal placeholder `{trackingNumber}` — `src/carriers/tracking-url.util.ts` (`buildTrackingUrl`) does a plain string replace and returns `null` if the template or tracking number is missing. Shared by the shipment-dispatch email and the customer tracking endpoint so both produce the same link; a mistyped placeholder breaks the emailed link silently.
 
 **File uploads**: product/category images go through Multer `FileInterceptor` in the relevant controllers and are written under `backend/uploads/`. `ServeStaticModule` exposes `uploads/products` at `/static-images` and `uploads/categories` at `/category-images` (configured in `app.module.ts`).
 
@@ -70,6 +74,22 @@ Two things there are load-bearing and easy to break: the **cooldown is deliberat
 
 Env vars for all of the above are documented in `backend/.env.example`.
 
+**RBAC.** `User.role` is `'admin' | 'customer'`. Admin-only routes stack `@UseGuards(AuthGuard, RolesGuard) @Roles('admin')` — order matters, `RolesGuard` (`src/auth/roles.guard.ts`) assumes `AuthGuard` already ran and populated `req.user`. It re-reads the role from the database via `UsersService.findOne` rather than trusting the JWT claim, since tokens minted before roles existed carry none. `@Roles(...)` (`src/auth/roles.decorator.ts`) is a plain `SetMetadata`; a route with no `@Roles()` is allowed through untouched. Current usage: `carriers` write routes and admin-only `orders` routes. `GET /carriers` is deliberately the one public carrier route (a shipping-options picker needs it and it's not user-specific).
+
+## Payments
+
+Stripe is the only payment integration; there is no mock path. `src/stripe/` owns the SDK client (`StripeService`, DI token `STRIPE_CLIENT`, API version pinned) and webhook verification; `src/payments/` is the thin controller/service that creates PaymentIntents.
+
+**Creating an intent.** `POST /payments/create-intent` (`AuthGuard`) never trusts a client-supplied amount — `PaymentsService.createPaymentIntent` derives it via `OrdersService.calculateTotalInSatang(orderId)` (`order.total` × 100, rounded; Postgres returns `decimal` columns as strings so this always goes through `Number()` first). It reuses an existing PaymentIntent if one is still open (`requires_payment_method|requires_confirmation|requires_action`), and uses an idempotency key of `pi-create-${orderId}` otherwise. `automatic_payment_methods: { enabled: true }` is set server-side, so Stripe (not the frontend) decides which methods to surface — currently renders as card + PromptPay via one Payment Element.
+
+**The webhook** (`POST /payments/webhook`) has no `AuthGuard` — Stripe calls it directly, and trust comes entirely from `StripeService.constructEvent` verifying the signature against `STRIPE_WEBHOOK_SECRET`. Events are deduped via a `ProcessedEvent` row (`src/stripe/processed-event.entity.ts`, keyed on `event.id`, since Stripe retries at-least-once) written inside the same transaction as the status change, so a handler failure leaves the event unmarked and retryable. `payment_intent.succeeded → OrdersService.markPaid` (also clears the matching cart rows), `.processing → markProcessing`, `.payment_failed → markFailed`. The order-confirmation email is sent *after* the transaction commits, best-effort — a mail failure there does not roll back the payment state.
+
+Env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (backend), `VITE_STRIPE_PUBLIC_KEY` (frontend). Frontend flow: `CheckoutConfirmPage` places the order, creates the intent, mounts Stripe's Payment Element, and confirms with `redirect: 'if_required'`; a `retryOrderId` query param re-enters on an already-created order instead of re-checking-out. `PaymentSuccessPage` does not trust the client-side confirm result — it polls `GET /orders/:id` for up to ~15s waiting for the webhook to actually flip `order.status`, since confirmation and webhook delivery are racing.
+
+## Notifications & mail
+
+Two separate systems, don't conflate them. `src/notifications/` is an in-app `Notification` entity (`type: 'order'|'promo'|'system'`, read/unread) with a service method `createNotification` meant to be called by other services — as of now **nothing calls it**; the CRUD/read endpoints exist but the table stays empty. The actual customer-facing emails go straight through `MailService` (`src/mail/mail.service.ts`): `sendOrderConfirmation` is called from `StripeService` after a webhook settles a payment, and `sendShipmentNotification` is called from `ShipmentsService.create` when a shipment is first recorded — both best-effort, failures are swallowed/logged rather than surfaced.
+
 ## Testing notes (backend)
 
 - **Most existing `.spec.ts` files are failing Nest CLI scaffolds** that never mocked their dependencies (~29 suites). They were already red before any recent work — do not treat them as a regression you caused. Real coverage currently exists for `auth/*`, `mail/*` and `users.service`; follow those as the pattern when filling in others.
@@ -81,13 +101,17 @@ Env vars for all of the above are documented in `backend/.env.example`.
 
 ## Frontend architecture
 
-Quasar app-vite structure. Routes are declared in `frontend/src/router/routes.ts`, all under a single `MainLayout` shell; pages live in `src/pages/`. Domain state is split into Pinia stores under `src/stores/` (`productStore`, `categoryStore`, `productImageStore`) rather than fetched ad hoc from components. `frontend/src/models.ts` hand-mirrors the backend entity shapes (camelCase) — there is no shared types package, so backend entity changes must be manually reflected there.
+Quasar app-vite structure. Routes are declared in `frontend/src/router/routes.ts`, all under a single `MainLayout` shell; pages live in `src/pages/`. Domain state is split into Pinia stores under `src/stores/` (`productStore`, `categoryStore`, `productImageStore`, `orderStore`, `checkoutStore`, `cartStore`) rather than fetched ad hoc from components. `frontend/src/models.ts` hand-mirrors the backend entity shapes (camelCase) — there is no shared types package, so backend entity changes must be manually reflected there.
+
+**Orders & tracking.** `orderStore` groups the backend's 9 raw `OrderStatus` values into 5 UX tabs (`pending`, `preparing`, `shipping`, `delivered`, `cancelled`) for `OrdersPage`. `OrderDetailPage` renders a 4-step progress stepper for orders "on track" and a separate explanatory card for off-track ones (cancelled/refunded/failed) rather than trying to force every status onto one stepper. `OrderTrackingPage` shows the shipment timeline and falls back to whatever shipment data `OrderDetailPage` already fetched in-session if its own request fails, rather than showing a bare error.
 
 API access goes through the singleton `$api` axios instance created in `boot/axios.ts` (`baseURL` from `VITE_API` env var, defaults to `http://localhost:3000`) — use `api` (named export) or `this.$api`, not a fresh axios instance per call.
 
 i18n is wired via `boot/i18n.ts` + `src/i18n/`, currently `en-US` only.
 
 Quasar's `Notify` and `Loading` plugins are registered in `quasar.config.ts`. They must stay registered — the Pinia stores call `Notify.create` / `Loading.show` imperatively, and those are silent no-ops if the plugin list is empty.
+
+`html { overflow-y: scroll; scrollbar-gutter: stable }` is set globally in `src/css/app.scss` so the scrollbar's width is always reserved — without it, navigating between a short and a tall page toggles the scrollbar and shifts centered/flex layouts horizontally.
 
 ## Auth UI
 
