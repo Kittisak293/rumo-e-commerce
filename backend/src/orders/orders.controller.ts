@@ -38,6 +38,16 @@ export class OrdersController {
     return this.ordersService.findAll();
   }
 
+  // The admin shipping-dashboard queue: orders that need or have had shipping
+  // action, with the item/shipment relations findAll() above deliberately
+  // doesn't load (that route is used elsewhere and has test coverage).
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('admin/shipping-queue')
+  findShippingQueue() {
+    return this.ordersService.findShippingQueue();
+  }
+
   @UseGuards(AuthGuard)
   @Post('checkout')
   async checkout(

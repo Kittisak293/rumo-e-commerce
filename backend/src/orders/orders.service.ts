@@ -128,6 +128,36 @@ export class OrdersService {
     return await this.ordersRepo.find({ relations: ['user', 'address'] });
   }
 
+  // Admin shipping queue: orders that need or have had shipping action —
+  // pending/processing/failed/cancelled/refunded orders never reach a
+  // shipment, so they're excluded here. Oldest first: the longest-waiting
+  // order is the most urgent to act on.
+  async findShippingQueue() {
+    return await this.ordersRepo.find({
+      where: {
+        status: In([
+          OrderStatus.PAID,
+          OrderStatus.SHIPPED,
+          OrderStatus.SHIPPING,
+          OrderStatus.DELIVERED,
+        ]),
+      },
+      relations: [
+        'user',
+        'address',
+        'orderItems',
+        'orderItems.product',
+        'shipments',
+        'shipments.carrier',
+        'shipments.shipmentEvents',
+      ],
+      order: {
+        createdAt: 'ASC',
+        shipments: { shipmentEvents: { occurredAt: 'DESC' } },
+      },
+    });
+  }
+
   async findByUser(userId: number) {
     return await this.ordersRepo.find({
       where: { user: { id: userId } },

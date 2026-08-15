@@ -33,6 +33,16 @@ export class CarriersController {
     return this.carriersService.findAllActive();
   }
 
+  // Admin management screen needs deactivated carriers too — 'admin' is a
+  // static segment and must stay registered before ':id' below or that
+  // dynamic route would swallow it first.
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('admin')
+  findAllForAdmin() {
+    return this.carriersService.findAll();
+  }
+
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin')
   @Get(':id')

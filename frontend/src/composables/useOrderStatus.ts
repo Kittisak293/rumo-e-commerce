@@ -55,6 +55,34 @@ export function orderStepIndex(status: string): 0 | 1 | 2 | 3 | null {
   }
 }
 
+// ShipmentStatus (7 values) badge colors — transcribed from the design doc's
+// badge-reference table (docs/design/DESIGN-shipping-admin.html, turn 5a).
+// Deliberately separate from ORDER_STATUS_META: same badge shape, distinct
+// palette so the two never look interchangeable when shown side by side.
+export const SHIPMENT_STATUS_META: Record<string, OrderStatusMeta> = {
+  pending: { label: 'รอขนส่งเข้ารับ', color: '#6b7280', bg: '#f3f4f6' },
+  picked_up: { label: 'ขนส่งรับพัสดุแล้ว', color: '#8e4dff', bg: '#f5f3ff' },
+  in_transit: { label: 'อยู่ระหว่างขนส่ง', color: '#6d28d9', bg: '#ede9fe' },
+  out_for_delivery: { label: 'กำลังนำจ่าย', color: '#6d28d9', bg: '#ddd6fe' },
+  delivered: { label: 'ส่งถึงแล้ว', color: '#16a34a', bg: '#dcfce7' },
+  failed: { label: 'นำจ่ายไม่สำเร็จ', color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
+  returned: { label: 'ตีกลับผู้ขาย', color: '#c2410c', bg: '#fff7ed', border: '#fed7aa' },
+};
+
+export function getShipmentStatusMeta(status: string): OrderStatusMeta {
+  return SHIPMENT_STATUS_META[status] ?? FALLBACK_META;
+}
+
+// Mirrors backend `ORDER_STATUS_FOR_EVENT` (shipment_events.service.ts) —
+// used only to warn the admin in the event form before they save, never to
+// drive the actual transition (the backend is the source of truth for that).
+export const ORDER_STATUS_FOR_SHIPMENT_EVENT: Partial<Record<string, string>> = {
+  picked_up: 'shipping',
+  in_transit: 'shipping',
+  out_for_delivery: 'shipping',
+  delivered: 'delivered',
+};
+
 export function formatThaiDateTime(iso: string): string {
   return new Date(iso).toLocaleDateString('th-TH', {
     year: 'numeric',
