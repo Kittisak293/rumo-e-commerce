@@ -32,7 +32,7 @@
                 <div class="admin-profile-role">ผู้ดูแลระบบ</div>
               </div>
             </div>
-            <button class="icon-click" @click="onLogout" title="ออกจากระบบ">
+            <button class="icon-click" @click="logoutDialogOpen = true" title="ออกจากระบบ">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
                 <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -41,6 +41,26 @@
         </div>
       </q-toolbar>
     </q-header>
+
+    <q-dialog v-model="logoutDialogOpen">
+      <div class="app-delete-modal">
+        <div class="app-logout-icon">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1" stroke="#6d28d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="app-delete-title">ออกจากระบบ?</div>
+        <div class="app-delete-desc">คุณต้องเข้าสู่ระบบใหม่อีกครั้งเพื่อใช้งานต่อ</div>
+        <div class="app-delete-actions">
+          <button type="button" class="app-btn-secondary" style="flex: 1" @click="logoutDialogOpen = false">
+            ยกเลิก
+          </button>
+          <button type="button" class="app-btn-logout" style="flex: 1" @click="confirmLogout">
+            ออกจากระบบ
+          </button>
+        </div>
+      </div>
+    </q-dialog>
 
     <q-drawer
       v-model="leftOpen"
@@ -106,12 +126,12 @@ const menuItems: MenuItem[] = [
   {
     label: 'ภาพรวมแอดมิน',
     route: 'account',
-    icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>',
+    icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 21h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="5" y="13" width="4" height="8" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="10" y="8" width="4" height="13" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="15" y="3" width="4" height="18" rx="1" stroke="currentColor" stroke-width="1.8"/></svg>',
   },
   {
     label: 'จัดการพัสดุ',
     route: 'adminShipments',
-    icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16 3H1v13h15V3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" transform="translate(2,4) scale(0.85)"/><path d="M16 8l4 2.5V16l-4-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" transform="translate(2,4) scale(0.85)"/><circle cx="5.5" cy="18.5" r="2" stroke="currentColor" stroke-width="1.8" transform="translate(2,1) scale(0.85)"/><circle cx="14.5" cy="18.5" r="2" stroke="currentColor" stroke-width="1.8" transform="translate(2,1) scale(0.85)"/></svg>',
+    icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 7.5l9-4.5 9 4.5v9L12 21l-9-4.5v-9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7.5 5.25l9 4.5v3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   },
   {
     label: 'จัดการคำสั่งซื้อ',
@@ -146,7 +166,10 @@ function isActive(item: MenuItem): boolean {
   return item.activeRoutes?.includes(name) ?? false;
 }
 
-const onLogout = () => {
+const logoutDialogOpen = ref(false);
+
+const confirmLogout = () => {
+  logoutDialogOpen.value = false;
   auth.logout();
   cart.reset();
   void router.push({ name: 'login' });
@@ -350,5 +373,78 @@ const navigateTo = async (routeName: string) => {
 
 .drawer-item--active .drawer-svg-icon path {
   stroke: white;
+}
+
+/* Logout confirmation modal */
+.app-delete-modal {
+  width: 420px;
+  max-width: 92vw;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.app-logout-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #f3e8ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.app-delete-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1d;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.app-delete-desc {
+  font-size: 13.5px;
+  color: #6b7280;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.app-delete-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.app-btn-secondary {
+  font-family: inherit;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 14px;
+  cursor: pointer;
+  color: #6b7280;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+}
+
+.app-btn-logout {
+  font-family: inherit;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 14px;
+  cursor: pointer;
+  color: #fff;
+  background: #6d28d9;
+  border: none;
+}
+
+.app-btn-logout:hover {
+  background: #5b21b6;
 }
 </style>

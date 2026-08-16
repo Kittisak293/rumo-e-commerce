@@ -10,6 +10,13 @@ html {
   scrollbar-gutter: stable;
 }
 
+// When q-dialog opens, Quasar adds overflow: hidden to body which can hide
+// the scrollbar. Force the scrollbar to stay reserved.
+body.q-body--locked {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
 body,
 * {
   font-family: 'Kanit', sans-serif !important;
