@@ -10,6 +10,7 @@ import { Shipment } from 'src/shipments/entities/shipment.entity';
 import { CartItem } from 'src/cart-items/entities/cart-item.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthModule } from 'src/auth/auth.module';
       Product,
     ]),
     AuthModule,
+    NotificationsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

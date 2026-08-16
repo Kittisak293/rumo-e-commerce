@@ -16,6 +16,43 @@ import { Address } from 'src/addresses/entities/address.entity';
 import { CartItem } from 'src/cart-items/entities/cart-item.entity';
 import { OrderItem } from 'src/order_items/entities/order_item.entity';
 import { Product } from 'src/products/entities/product.entity';
+import { NotificationsService } from 'src/notifications/notifications.service';
+
+// Only statuses a customer should actually be pinged about — PROCESSING is a
+// transient in-between state on the way to PAID/FAILED and not worth a ping.
+const ORDER_STATUS_NOTIFICATION_COPY: Partial<
+  Record<OrderStatus, { title: string; message: (orderLabel: string) => string }>
+> = {
+  [OrderStatus.PAID]: {
+    title: 'ชำระเงินสำเร็จ',
+    message: (orderLabel) => `คำสั่งซื้อ ${orderLabel} ชำระเงินเรียบร้อยแล้ว`,
+  },
+  [OrderStatus.FAILED]: {
+    title: 'การชำระเงินไม่สำเร็จ',
+    message: (orderLabel) => `คำสั่งซื้อ ${orderLabel} ชำระเงินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง`,
+  },
+  [OrderStatus.SHIPPED]: {
+    title: 'จัดส่งสินค้าแล้ว',
+    message: (orderLabel) => `คำสั่งซื้อ ${orderLabel} ถูกส่งให้ขนส่งแล้ว`,
+  },
+  [OrderStatus.SHIPPING]: {
+    title: 'สินค้ากำลังจัดส่ง',
+    message: (orderLabel) => `คำสั่งซื้อ ${orderLabel} กำลังอยู่ระหว่างการจัดส่ง`,
+  },
+  [OrderStatus.DELIVERED]: {
+    title: 'จัดส่งสำเร็จ',
+    message: (orderLabel) => `คำสั่งซื้อ ${orderLabel} ถึงปลายทางแล้ว`,
+  },
+  [OrderStatus.CANCELLED]: {
+    title: 'ยกเลิกคำสั่งซื้อ',
+    message: (orderLabel) => `คำสั่งซื้อ ${orderLabel} ถูกยกเลิก`,
+  },
+  [OrderStatus.REFUNDED]: {
+    title: 'คืนเงินสำเร็จ',
+    message: (orderLabel) => `คำสั่งซื้อ ${orderLabel} ได้รับการคืนเงินแล้ว`,
+  },
+};
+
 @Injectable()
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
@@ -33,6 +70,7 @@ export class OrdersService {
     private readonly orderItemsRepo: Repository<OrderItem>,
     @InjectRepository(Product)
     private readonly productsRepo: Repository<Product>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async checkout(userId: number, addressId: number) {
@@ -327,7 +365,10 @@ export class OrdersService {
     manager?: EntityManager,
   ): Promise<void> {
     const repo = manager ? manager.getRepository(Order) : this.ordersRepo;
-    const order = await repo.findOneByOrFail({ id: orderId });
+    const order = await repo.findOneOrFail({
+      where: { id: orderId },
+      relations: ['user'],
+    });
     const allowed = ALLOWED_TRANSITIONS[order.status as OrderStatus];
     if (!allowed || !allowed.includes(target)) {
       this.logger.warn(
@@ -337,6 +378,31 @@ export class OrdersService {
     }
     order.status = target;
     await repo.save(order);
+    await this.notifyStatusChange(order, target);
+  }
+
+  // Best-effort, like the shipment/order emails elsewhere — a notification
+  // failure must never roll back an already-committed status transition.
+  private async notifyStatusChange(
+    order: Order,
+    target: OrderStatus,
+  ): Promise<void> {
+    const copy = ORDER_STATUS_NOTIFICATION_COPY[target];
+    if (!copy) return;
+    try {
+      const orderLabel = order.orderNumber ?? `#${order.id}`;
+      await this.notificationsService.createNotification(
+        order.user,
+        'order',
+        copy.title,
+        copy.message(orderLabel),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to create notification for order #${order.id}`,
+        err,
+      );
+    }
   }
 
   async markPaid(

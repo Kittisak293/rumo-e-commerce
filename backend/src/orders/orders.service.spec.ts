@@ -5,6 +5,7 @@ describe('OrdersService', () => {
   const ordersRepo = {
     findOne: jest.fn(),
     findOneByOrFail: jest.fn(),
+    findOneOrFail: jest.fn(),
     save: jest.fn(),
   };
   const noop = {};
@@ -12,6 +13,7 @@ describe('OrdersService', () => {
   const buildService = () =>
     new OrdersService(
       ordersRepo as never,
+      noop as never,
       noop as never,
       noop as never,
       noop as never,
