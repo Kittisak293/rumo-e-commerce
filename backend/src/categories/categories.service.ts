@@ -60,9 +60,7 @@ export class CategoryService {
     await this.assertNameAvailable(createCategoryDto.name);
 
     const category = this.categoriesRepository.create(createCategoryDto);
-    category.slug = await this.ensureUniqueSlug(
-      this.slugify(category.name),
-    );
+    category.slug = await this.ensureUniqueSlug(this.slugify(category.name));
 
     return await this.categoriesRepository.save(category);
   }

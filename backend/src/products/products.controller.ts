@@ -67,9 +67,12 @@ export class ProductsController {
     @Query('q') q: string,
     @Query('sortBy') sortBy?: string,
     @Query('storeType') storeType?: 'mall' | 'seller',
-    @Query('priceMin', new ParseFloatPipe({ optional: true })) priceMin?: number,
-    @Query('priceMax', new ParseFloatPipe({ optional: true })) priceMax?: number,
-    @Query('ratingMin', new ParseFloatPipe({ optional: true })) ratingMin?: number,
+    @Query('priceMin', new ParseFloatPipe({ optional: true }))
+    priceMin?: number,
+    @Query('priceMax', new ParseFloatPipe({ optional: true }))
+    priceMax?: number,
+    @Query('ratingMin', new ParseFloatPipe({ optional: true }))
+    ratingMin?: number,
   ) {
     return this.productsService.search({
       q,
@@ -85,10 +88,14 @@ export class ProductsController {
   searchHomeProducts(
     @Query('sortBy') sortBy?: string,
     @Query('storeType') storeType?: 'mall' | 'seller',
-    @Query('priceMin', new ParseFloatPipe({ optional: true })) priceMin?: number,
-    @Query('priceMax', new ParseFloatPipe({ optional: true })) priceMax?: number,
-    @Query('ratingMin', new ParseFloatPipe({ optional: true })) ratingMin?: number,
-    @Query('categoryId', new ParseIntPipe({ optional: true })) categoryId?: number,
+    @Query('priceMin', new ParseFloatPipe({ optional: true }))
+    priceMin?: number,
+    @Query('priceMax', new ParseFloatPipe({ optional: true }))
+    priceMax?: number,
+    @Query('ratingMin', new ParseFloatPipe({ optional: true }))
+    ratingMin?: number,
+    @Query('categoryId', new ParseIntPipe({ optional: true }))
+    categoryId?: number,
   ) {
     return this.productsService.searchHomeProducts({
       sortBy,
@@ -104,10 +111,14 @@ export class ProductsController {
   searchCategoryProducts(
     @Query('sortBy') sortBy?: string,
     @Query('storeType') storeType?: 'mall' | 'seller',
-    @Query('priceMin', new ParseFloatPipe({ optional: true })) priceMin?: number,
-    @Query('priceMax', new ParseFloatPipe({ optional: true })) priceMax?: number,
-    @Query('ratingMin', new ParseFloatPipe({ optional: true })) ratingMin?: number,
-    @Query('categoryId', new ParseIntPipe({ optional: true })) categoryId?: number,
+    @Query('priceMin', new ParseFloatPipe({ optional: true }))
+    priceMin?: number,
+    @Query('priceMax', new ParseFloatPipe({ optional: true }))
+    priceMax?: number,
+    @Query('ratingMin', new ParseFloatPipe({ optional: true }))
+    ratingMin?: number,
+    @Query('categoryId', new ParseIntPipe({ optional: true }))
+    categoryId?: number,
   ) {
     return this.productsService.searchCategoryProducts({
       sortBy,
