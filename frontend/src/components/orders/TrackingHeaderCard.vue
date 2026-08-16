@@ -3,7 +3,7 @@
     <div class="tracking-header__top">
       <div class="tracking-header__status-block">
         <div class="tracking-header__label">สถานะปัจจุบัน</div>
-        <div class="tracking-header__status">{{ getStatusLabel(status) }}</div>
+        <div class="tracking-header__status">{{ getShipmentStatusMeta(status).label }}</div>
         <div v-if="lastLocation" class="tracking-header__location">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path d="M12 21s-7-6.5-7-11.5A7 7 0 0 1 19 9.5C19 14.5 12 21 12 21z" stroke="#fff" stroke-width="1.8" />
@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { getStatusLabel, formatThaiDate } from 'src/composables/useOrderStatus';
+import { getShipmentStatusMeta, formatThaiDate } from 'src/composables/useOrderStatus';
 
 const props = defineProps<{
   status: string;

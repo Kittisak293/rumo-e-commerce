@@ -4,7 +4,7 @@
       <div class="stepper__track">
         <div class="stepper__line" :class="{ 'stepper__line--first': index === 0 }" :style="lineStyle(index - 1)" />
         <div class="stepper__circle" :class="circleClass(index)">
-          <svg v-if="index < (currentStep ?? -1)" width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <svg v-if="stateClass(index) === 'is-done'" width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <span v-else-if="index === currentStep" class="stepper__dot stepper__dot--current" />
@@ -36,9 +36,14 @@ const props = defineProps<{
   dateLabels?: (string | null)[];
 }>();
 
+// The last step (delivered) is terminal — once reached it reads as
+// completed, not "in progress", so it gets the same checkmark as earlier
+// done steps instead of the current-step dot.
 function stateClass(index: number): string {
   if (index < props.currentStep) return 'is-done';
-  if (index === props.currentStep) return 'is-current';
+  if (index === props.currentStep) {
+    return index === STEPS.length - 1 ? 'is-done' : 'is-current';
+  }
   return 'is-future';
 }
 
