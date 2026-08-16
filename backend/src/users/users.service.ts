@@ -1,16 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+
+const PUBLIC_USER_SELECT = [
+  'id',
+  'email',
+  'name',
+  'role',
+  'age',
+  'emailVerified',
+  'createdAt',
+] as const;
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -27,14 +44,14 @@ export class UsersService {
 
   async findAll() {
     return await this.usersRepository.find({
-      select: ['id', 'email', 'name', 'role', 'age', 'emailVerified'],
+      select: [...PUBLIC_USER_SELECT],
     });
   }
 
   async findOne(id: number) {
     return await this.usersRepository.findOne({
       where: { id: id },
-      select: ['id', 'email', 'name', 'role', 'age', 'emailVerified'],
+      select: [...PUBLIC_USER_SELECT],
     });
   }
 
@@ -72,18 +89,80 @@ export class UsersService {
     await this.usersRepository.update(id, { passwordHash });
   }
 
+  /**
+   * `role` is never accepted here — it never reaches the DTO (whitelisted
+   * out by ValidationPipe since CreateUserDto has no `role` field) and is
+   * changed exclusively through `updateRole`, which carries the
+   * last-admin/self-change safety checks. Only writes the fields actually
+   * sent, and always returns the updated row (previously returned
+   * `undefined` and did nothing when `password` was omitted).
+   */
   async update(id: number, updateUserDto: UpdateUserDto) {
+    const patch: Partial<User> = {};
+    if (updateUserDto.email !== undefined) patch.email = updateUserDto.email;
+    if (updateUserDto.name !== undefined) patch.name = updateUserDto.name;
+    if (updateUserDto.age !== undefined) patch.age = updateUserDto.age;
     if (updateUserDto.password) {
-      const hash = await bcrypt.hash(updateUserDto.password, 10);
-      const user = this.usersRepository.create({
-        email: updateUserDto.email,
-        name: updateUserDto.name,
-        passwordHash: hash,
-        age: updateUserDto.age,
-      });
-
-      return await this.usersRepository.update(id, user);
+      patch.passwordHash = await bcrypt.hash(updateUserDto.password, 10);
     }
+
+    if (Object.keys(patch).length > 0) {
+      await this.usersRepository.update(id, patch);
+    }
+
+    return await this.findOne(id);
+  }
+
+  /**
+   * The only path allowed to change `role`. Two safety checks live here
+   * (not in the controller/UI) because the API is reachable directly:
+   *  - an admin cannot change their own role, in either direction
+   *  - the last remaining (non-deleted) admin cannot be demoted
+   * The count-then-write is wrapped in one transaction with a row lock on
+   * the target so two concurrent demotions can't both pass the count check
+   * and leave zero admins.
+   */
+  async updateRole(
+    actorId: number,
+    targetId: number,
+    nextRole: 'admin' | 'customer',
+  ) {
+    if (actorId === targetId) {
+      throw new ForbiddenException('Admins cannot change their own role');
+    }
+
+    return await this.dataSource.transaction(async (manager) => {
+      const target = await manager.findOne(User, {
+        where: { id: targetId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!target) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (target.role === nextRole) {
+        return await manager.findOne(User, {
+          where: { id: targetId },
+          select: [...PUBLIC_USER_SELECT],
+        });
+      }
+
+      if (target.role === 'admin' && nextRole === 'customer') {
+        const adminCount = await manager.count(User, {
+          where: { role: 'admin' },
+        });
+        if (adminCount <= 1) {
+          throw new ConflictException('Cannot remove the last admin');
+        }
+      }
+
+      await manager.update(User, targetId, { role: nextRole });
+
+      return await manager.findOne(User, {
+        where: { id: targetId },
+        select: [...PUBLIC_USER_SELECT],
+      });
+    });
   }
 
   async remove(id: number) {
