@@ -1,77 +1,108 @@
 import { defineStore } from 'pinia';
-import { Loading, Notify } from 'quasar';
 import { api } from 'src/boot/axios';
 import type { Category } from 'src/models';
 import { ref } from 'vue';
 
+function describeError(err: unknown, fallback: string): string {
+  const error = err as { response?: { data?: { message?: string | string[] } }; message?: string };
+  const message = error.response?.data?.message;
+  if (Array.isArray(message)) return message.join(', ');
+  if (typeof message === 'string') return message;
+  return error.message || fallback;
+}
+
 export const useCategoryStore = defineStore('Category', () => {
   const categories = ref<Category[]>([]);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+  const actionLoading = ref(false);
+  const actionError = ref<string | null>(null);
 
-  async function addCategory(p: Category, file: File | null) {
-    const formData = new FormData();
-    formData.append('name', p.name);
-    if (file) {
-      formData.append('file', file);
-    }
-    await api.post('/category', formData);
-    await getCategories();
-  }
-
-  async function delCategory(p: Category) {
-    try {
-      Loading.show();
-      const res = await api.delete('/category/' + p.id);
-      console.log(res.data);
-      await getCategories();
-    } catch (err) {
-      console.error(err);
-      Notify.create({
-        color: 'negative',
-        position: 'top',
-        message: 'Delete failed',
-        icon: 'report_problem',
-      });
-    } finally {
-      // console.log('finally');
-      Loading.hide();
-    }
-  }
-
-  async function updateCategory(id: number, p: Category, file: File | null) {
-    const formData = new FormData();
-    formData.append('name', p.name);
-    if (file) {
-      formData.append('file', file);
-    }
-    await api.patch(`/category/${id}`, formData);
-    await getCategories();
+  function clearActionError() {
+    actionError.value = null;
   }
 
   async function getCategories() {
+    loading.value = true;
+    error.value = null;
     try {
-      Loading.show();
-      const res = await api.get('/category');
-      // console.log(res.data);
+      const res = await api.get<Category[]>('/category');
       categories.value = res.data;
-    } catch (err) {
-      console.error(err);
-      Notify.create({
-        color: 'negative',
-        position: 'top',
-        message: 'Loading failed',
-        icon: 'report_problem',
-      });
+    } catch (err: unknown) {
+      error.value = describeError(err, 'โหลดรายการหมวดหมู่ไม่สำเร็จ');
     } finally {
-      // console.log('finally');
-      Loading.hide();
+      loading.value = false;
+    }
+  }
+
+  // `imageUrl` is the field name the backend's FileInterceptor listens on
+  // (`FileInterceptor('imageUrl')`) — appending under any other key gets the
+  // file silently dropped and the category falls back to unknown.jpg.
+  async function addCategory(name: string, file: File | null): Promise<boolean> {
+    actionLoading.value = true;
+    actionError.value = null;
+    try {
+      const formData = new FormData();
+      formData.append('name', name);
+      if (file) {
+        formData.append('imageUrl', file);
+      }
+      await api.post('/category', formData);
+      await getCategories();
+      return true;
+    } catch (err: unknown) {
+      actionError.value = describeError(err, 'เพิ่มหมวดหมู่ไม่สำเร็จ');
+      return false;
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
+  async function updateCategory(id: number, name: string, file: File | null): Promise<boolean> {
+    actionLoading.value = true;
+    actionError.value = null;
+    try {
+      const formData = new FormData();
+      formData.append('name', name);
+      if (file) {
+        formData.append('imageUrl', file);
+      }
+      await api.patch(`/category/${id}`, formData);
+      await getCategories();
+      return true;
+    } catch (err: unknown) {
+      actionError.value = describeError(err, 'แก้ไขหมวดหมู่ไม่สำเร็จ');
+      return false;
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
+  async function delCategory(id: number): Promise<boolean> {
+    actionLoading.value = true;
+    actionError.value = null;
+    try {
+      await api.delete(`/category/${id}`);
+      categories.value = categories.value.filter((c) => c.id !== id);
+      return true;
+    } catch (err: unknown) {
+      actionError.value = describeError(err, 'ลบหมวดหมู่ไม่สำเร็จ');
+      return false;
+    } finally {
+      actionLoading.value = false;
     }
   }
 
   return {
     categories,
-    addCategory,
-    delCategory,
-    updateCategory,
+    loading,
+    error,
+    actionLoading,
+    actionError,
+    clearActionError,
     getCategories,
+    addCategory,
+    updateCategory,
+    delCategory,
   };
 });
