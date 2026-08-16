@@ -1,7 +1,7 @@
 <template>
   <div class="product-card">
     <div class="product-card__image-wrap">
-      <img :src="image || '/product-images/unknown.jpg'" :alt="name" />
+      <img :src="displaySrc" :alt="name" @error="onImgError" />
     </div>
 
     <div class="product-card__body">
@@ -23,7 +23,9 @@
 </template>
 
 <script setup lang="ts">
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { computed, ref, watch } from 'vue';
+import mallLogo from 'src/assets/ui/mall2_purple.png';
+
 const props = defineProps<{
   image: string;
   name: string;
@@ -33,7 +35,32 @@ const props = defineProps<{
   storeType?: 'mall' | 'seller';
 }>();
 
-import mallLogo from 'src/assets/ui/mall2_purple.png';
+// Inline SVG placeholder — no network round trip, so it always renders even
+// offline. Used both when there's no image URL at all and when the given
+// URL 404s (e.g. a product row whose file was never actually uploaded).
+const FALLBACK_IMAGE =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">' +
+      '<rect width="24" height="24" rx="4" fill="#f3f4f6"/>' +
+      '<path d="M4 17l4.5-5 3 3.2L15 10l5 7H4z" fill="#d1d5db"/>' +
+      '<circle cx="8" cy="8" r="1.6" fill="#d1d5db"/>' +
+      '</svg>',
+  );
+
+const imgError = ref(false);
+watch(
+  () => props.image,
+  () => {
+    imgError.value = false;
+  },
+);
+
+const displaySrc = computed(() => (!props.image || imgError.value ? FALLBACK_IMAGE : props.image));
+
+function onImgError() {
+  imgError.value = true;
+}
 </script>
 
 <style scoped>

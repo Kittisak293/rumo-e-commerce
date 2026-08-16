@@ -32,7 +32,7 @@
         <div v-for="p in products" :key="p.id">
           <ProductCard
             :key="p.id"
-            :image="'http://localhost:3000' + p.imageUrl"
+            :image="getImageUrl(p.imageUrl)"
             :name="p.name"
             :price="p.price"
             :sold="p.soldCount"
@@ -133,7 +133,7 @@
           <CategoryCard
             :key="p.id"
             :id="p.id"
-            :image="'http://localhost:3000' + p.imageUrl"
+            :image="getImageUrl(p.imageUrl)"
             :name="p.name"
             @selectCategory="handleCategorySelect"
           />
@@ -152,6 +152,7 @@ import type { Product, Category } from 'src/models';
 import { api } from 'src/boot/axios';
 import { useCategoryStore } from 'src/stores/categoryStore';
 import CategoryCard from 'src/components/CategoryCard.vue';
+import { getImageUrl } from 'src/utils/imageUrl';
 
 const products = ref<Product[]>([]);
 const categories = ref<Category[]>([]);

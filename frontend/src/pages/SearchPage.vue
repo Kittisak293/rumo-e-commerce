@@ -23,7 +23,7 @@
         <div v-for="p in products" :key="p.id">
           <ProductCard
             :key="p.id"
-            :image="'http://localhost:3000' + p.imageUrl"
+            :image="getImageUrl(p.imageUrl)"
             :name="p.name"
             :price="p.price"
             :sold="p.soldCount"
@@ -135,6 +135,7 @@ import { useRoute } from 'vue-router';
 import { api } from 'src/boot/axios';
 import ProductCard from 'src/components/ProductCard.vue';
 import { type Product } from 'src/models';
+import { getImageUrl } from 'src/utils/imageUrl';
 
 const route = useRoute();
 const products = ref<Product[]>([]);
