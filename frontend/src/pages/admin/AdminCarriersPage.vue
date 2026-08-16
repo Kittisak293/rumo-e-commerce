@@ -5,7 +5,6 @@
         <div class="acp-page__title">บริษัทขนส่ง</div>
         <div class="acp-page__sub">ตัวเลือกที่แอดมินเลือกได้ตอนสร้างพัสดุ · ปิดใช้งานแล้วจะไม่โผล่ให้เลือก</div>
       </div>
-      <button type="button" class="acp-add-btn" @click="openCreate">เพิ่มบริษัทขนส่ง</button>
     </div>
 
     <div v-if="store.error" class="acp-error-banner">
@@ -13,9 +12,36 @@
       <div>{{ store.error }}</div>
     </div>
 
+    <div class="acp-toolbar">
+      <div class="acp-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="acp-search__icon">
+          <circle cx="11" cy="11" r="6.5" stroke="#9ca3af" stroke-width="1.8" />
+          <path d="M20 20l-4.35-4.35" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="ค้นหาชื่อบริษัทขนส่งหรือ code"
+          class="acp-search__input"
+        />
+      </div>
+    </div>
+
+    <div class="acp-page__header">
+      <div class="acp-summary-text">{{ filterSummary }}</div>
+      <div class="acp-header-right">
+        <button type="button" class="acp-add-btn" @click="openCreate">+ เพิ่มบริษัทขนส่ง</button>
+      </div>
+    </div>
+
     <div v-if="store.carriers.length === 0" class="acp-state-card">
       <div class="acp-state-title">ยังไม่มีบริษัทขนส่ง</div>
       <div class="acp-state-sub">เพิ่มบริษัทขนส่งแรกเพื่อเริ่มสร้างพัสดุ</div>
+    </div>
+
+    <div v-else-if="filteredCarriers.length === 0" class="acp-state-card">
+      <div class="acp-state-title">ไม่พบบริษัทขนส่งที่ตรงกับคำค้น</div>
+      <div class="acp-state-sub">ลองค้นหาด้วยคำอื่น</div>
     </div>
 
     <div v-else class="acp-card">
@@ -30,7 +56,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="carrier in store.carriers" :key="carrier.id" class="acp-row">
+          <tr v-for="carrier in filteredCarriers" :key="carrier.id" class="acp-row">
             <td class="acp-td">
               <div class="acp-carrier">
                 <span class="acp-avatar" :class="{ 'acp-avatar--inactive': !carrier.isActive }">{{ initials(carrier.name) }}</span>
@@ -139,6 +165,24 @@ const SAMPLE = SAMPLE_TRACKING_NUMBER;
 
 onMounted(() => void store.fetchCarriers());
 
+const searchQuery = ref('');
+
+const filteredCarriers = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase();
+  if (!q) return store.carriers;
+  return store.carriers.filter(
+    (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q),
+  );
+});
+
+const filterSummary = computed(() => {
+  const q = searchQuery.value.trim();
+  if (q) {
+    return `กรองอยู่: คำค้น “${q}” — พบ ${filteredCarriers.value.length} รายการ`;
+  }
+  return `แสดงทั้งหมด ${filteredCarriers.value.length} รายการ`;
+});
+
 function initials(name: string): string {
   return name.trim().slice(0, 2).toUpperCase();
 }
@@ -219,8 +263,15 @@ async function save() {
 .acp-page__header {
   display: flex;
   align-items: flex-end;
+  justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.acp-summary-text {
+  font-size: 12.5px;
+  color: #6b7280;
 }
 
 .acp-page__title {
@@ -233,6 +284,53 @@ async function save() {
   font-size: 13px;
   color: #6b7280;
   margin-top: 4px;
+}
+
+.acp-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.acp-search {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+  min-width: 200px;
+}
+
+.acp-search__icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.acp-search__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px 11px 40px;
+  border-radius: 14px;
+  border: 1.5px solid #e5e7eb;
+  background: #fafafa;
+  font-size: 13.5px;
+  color: #1d1d1d;
+  font-family: inherit;
+}
+
+.acp-search__input:focus {
+  outline: none;
+  border-color: #8e4dff;
+  background: #fff;
+}
+
+.acp-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .acp-add-btn {
