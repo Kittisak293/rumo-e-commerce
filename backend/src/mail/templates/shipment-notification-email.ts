@@ -51,8 +51,7 @@ export function buildShipmentNotificationEmail(
     html: `
 <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#1d1d1d">
   <div style="text-align:center;margin-bottom:28px">
-    <div style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:#ede9fe;color:#6d28d9;font-size:26px">&#128666;</div>
-    <h1 style="margin:16px 0 4px;font-size:20px;font-weight:700">พัสดุถูกจัดส่งแล้ว</h1>
+    <h1 style="margin:0 0 4px;font-size:20px;font-weight:700">พัสดุถูกจัดส่งแล้ว</h1>
     <p style="margin:0;font-size:14px;color:#6b7280">คำสั่งซื้อ ${esc(shipment.orderNumber)} กำลังเดินทางไปหาคุณ</p>
   </div>
 
@@ -80,7 +79,7 @@ export function buildShipmentNotificationEmail(
   ${
     shipment.trackingUrl
       ? `<div style="text-align:center;margin-top:20px">
-    <a href="${esc(shipment.trackingUrl)}" style="display:inline-block;padding:12px 28px;border-radius:14px;background:linear-gradient(135deg,#8e4dff,#6d28d9);color:#fff;text-decoration:none;font-weight:600;font-size:14px">ติดตามพัสดุ</a>
+    <a href="${esc(shipment.trackingUrl)}" style="display:inline-block;padding:12px 28px;border-radius:14px;background:#6d28d9;color:#fff;text-decoration:none;font-weight:600;font-size:14px">ติดตามพัสดุ</a>
   </div>`
       : ''
   }
