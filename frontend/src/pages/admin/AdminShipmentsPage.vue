@@ -5,7 +5,6 @@
         <div class="ash-page__title">คิวงานจัดส่ง</div>
         <div class="ash-page__sub">เรียงงานค้างนานสุดขึ้นก่อน</div>
       </div>
-      <router-link :to="{ name: 'adminCarriers' }" class="ash-page__carriers-link">จัดการบริษัทขนส่ง</router-link>
     </div>
 
     <div class="ash-toolbar">
@@ -139,6 +138,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { useAdminShipmentStore } from 'src/stores/adminShipmentStore';
 import type { AdminOrderData } from 'src/stores/adminShipmentStore';
 import { formatThaiDateShort } from 'src/composables/useOrderStatus';
@@ -147,28 +147,35 @@ import CreateShipmentDialog from 'src/components/admin/CreateShipmentDialog.vue'
 import AddShipmentEventDialog from 'src/components/admin/AddShipmentEventDialog.vue';
 
 const store = useAdminShipmentStore();
+const route = useRoute();
 
-type Tab = '' | 'preparing' | 'shipping';
+type Tab = '' | 'preparing' | 'shipping' | 'stuck';
 const TABS: { key: Tab; label: string }[] = [
   { key: '', label: 'ทั้งหมด' },
   { key: 'preparing', label: 'เตรียมจัดส่ง' },
   { key: 'shipping', label: 'กำลังจัดส่ง' },
+  { key: 'stuck', label: 'พัสดุติดขัด' },
 ];
 const activeTab = ref<Tab>('');
 const searchQuery = ref('');
 
-function matchesTab(status: string, tab: Tab): boolean {
-  if (tab === 'preparing') return status === 'paid';
-  if (tab === 'shipping') return ['shipped', 'shipping'].includes(status);
+function isStuck(order: AdminOrderData): boolean {
+  return order.shipments.some((s) => s.status === 'failed' || s.status === 'returned');
+}
+
+function matchesTab(order: AdminOrderData, tab: Tab): boolean {
+  if (tab === 'preparing') return order.status === 'paid';
+  if (tab === 'shipping') return ['shipped', 'shipping'].includes(order.status);
+  if (tab === 'stuck') return isStuck(order);
   return true;
 }
 
 function tabCount(tab: Tab): number {
-  return store.orders.filter((o) => matchesTab(o.status, tab)).length;
+  return store.orders.filter((o) => matchesTab(o, tab)).length;
 }
 
 const filteredOrders = computed(() => {
-  let list = store.orders.filter((o) => matchesTab(o.status, activeTab.value));
+  let list = store.orders.filter((o) => matchesTab(o, activeTab.value));
   const q = searchQuery.value.trim().toLowerCase();
   if (q) {
     list = list.filter(
@@ -192,7 +199,14 @@ function load() {
   void store.fetchCarriers();
 }
 
-onMounted(load);
+onMounted(() => {
+  // Deep-linked from the admin dashboard's backlog cards, e.g. ?tab=stuck
+  const requestedTab = route.query.tab;
+  if (typeof requestedTab === 'string' && TABS.some((t) => t.key === requestedTab)) {
+    activeTab.value = requestedTab as Tab;
+  }
+  load();
+});
 
 const createDialogOpen = ref(false);
 const createTarget = ref<AdminOrderData | null>(null);

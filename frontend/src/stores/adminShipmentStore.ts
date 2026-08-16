@@ -84,16 +84,16 @@ export const useAdminShipmentStore = defineStore('adminShipment', {
       }
     },
 
-    async createShipment(payload: CreateShipmentPayload): Promise<boolean> {
+    async createShipment(payload: CreateShipmentPayload): Promise<number | null> {
       this.actionLoading = true;
       this.actionError = null;
       try {
-        await api.post('/shipments', payload);
+        const res = await api.post<{ id: number }>('/shipments', payload);
         await this.fetchQueue();
-        return true;
+        return res.data.id;
       } catch (err: unknown) {
         this.actionError = describeError(err, 'สร้างพัสดุไม่สำเร็จ');
-        return false;
+        return null;
       } finally {
         this.actionLoading = false;
       }

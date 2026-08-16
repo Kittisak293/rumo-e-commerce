@@ -35,12 +35,6 @@
               <span class="aed-preset__num">{{ idx + 1 }}</span>
               {{ preset.label }}
             </button>
-            <button type="button" class="aed-preset aed-preset--failed" @click="applyPreset(FAILED_PRESET)">
-              นำจ่ายไม่สำเร็จ
-            </button>
-            <button type="button" class="aed-preset aed-preset--returned" @click="applyPreset(RETURNED_PRESET)">
-              ตีกลับผู้ขาย
-            </button>
           </div>
 
           <div class="aed-row">
@@ -122,9 +116,9 @@ const PRESETS: Preset[] = [
   { status: 'in_transit', label: 'ถึงศูนย์คัดแยกปลายทาง', description: 'พัสดุถึงศูนย์คัดแยกปลายทาง' },
   { status: 'out_for_delivery', label: 'พนักงานกำลังนำจ่าย', description: 'พนักงานกำลังนำจ่าย' },
   { status: 'delivered', label: 'ส่งถึงผู้รับเรียบร้อย', description: 'ส่งถึงผู้รับเรียบร้อย' },
+  { status: 'failed', label: 'นำจ่ายไม่สำเร็จ', description: 'นำจ่ายไม่สำเร็จ ไม่พบผู้รับ' },
+  { status: 'returned', label: 'พัสดุถูกตีกลับผู้ขาย', description: 'พัสดุถูกตีกลับผู้ขาย' },
 ];
-const FAILED_PRESET: Preset = { status: 'failed', label: '', description: 'นำจ่ายไม่สำเร็จ ไม่พบผู้รับ' };
-const RETURNED_PRESET: Preset = { status: 'returned', label: '', description: 'พัสดุถูกตีกลับผู้ขาย' };
 
 const events = computed(() => props.shipment.shipmentEvents ?? []);
 

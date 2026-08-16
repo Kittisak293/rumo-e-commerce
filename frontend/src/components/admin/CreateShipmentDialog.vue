@@ -35,7 +35,7 @@
             </div>
           </div>
 
-          <div class="csd-warning">
+          <!-- <div class="csd-warning">
             <div class="csd-warning__head">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                 <path d="M4 6l8 6 8-6M4 6h16v12H4V6z" stroke="#6d28d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -52,17 +52,18 @@
                 <b>{{ trackingNumber || '—' }}</b>
               </div>
             </div>
-          </div>
+          </div> -->
 
-          <div v-if="store.actionError" class="csd-error">{{ store.actionError }}</div>
+          <div v-if="formError" class="csd-error">{{ formError }}</div>
+          <div v-else-if="store.actionError" class="csd-error">{{ store.actionError }}</div>
 
           <div class="csd-actions">
             <button type="button" class="csd-btn csd-btn--secondary" @click="close">ยกเลิก</button>
             <button
               type="button"
               class="csd-btn csd-btn--primary"
-              :disabled="!canSubmit || store.actionLoading"
-              @click="submit"
+              :disabled="store.actionLoading"
+              @click="onCreateClick"
             >
               {{ store.actionLoading ? 'กำลังสร้าง...' : 'สร้างพัสดุและส่งอีเมล' }}
             </button>
@@ -102,6 +103,50 @@
         </div>
       </div>
     </div>
+
+    <!-- Confirm before creating shipment + sending email -->
+    <q-dialog v-model="confirmOpen">
+      <div class="csd-confirm-modal">
+        <div class="csd-confirm-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6l8 6 8-6M4 6h16v12H4V6z" stroke="#6d28d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="csd-confirm-title">ยืนยันสร้างพัสดุและส่งอีเมล?</div>
+        <div class="csd-confirm-desc">
+          ระบบจะส่งอีเมลแจ้งเลขพัสดุถึง <b>{{ order.user.email }}</b> ทันที การกระทำนี้ย้อนกลับไม่ได้
+        </div>
+        <div class="csd-confirm-summary">
+          <div class="csd-confirm-summary__row">
+            <span>ขนส่ง</span>
+            <span>{{ selectedCarrierName || '—' }}</span>
+          </div>
+          <div class="csd-confirm-summary__row">
+            <span>เลขพัสดุ</span>
+            <span>{{ trackingNumber || '—' }}</span>
+          </div>
+        </div>
+        <div class="csd-confirm-actions">
+          <button
+            type="button"
+            class="csd-btn csd-btn--secondary"
+            style="flex: 1"
+            :disabled="store.actionLoading"
+            @click="confirmOpen = false"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            class="csd-btn csd-btn--primary"
+            :disabled="store.actionLoading"
+            @click="onConfirmSubmit"
+          >
+            {{ store.actionLoading ? 'กำลังสร้าง...' : 'ยืนยันและส่งอีเมล' }}
+          </button>
+        </div>
+      </div>
+    </q-dialog>
   </q-dialog>
 </template>
 
@@ -129,14 +174,37 @@ const selectedCarrierName = computed(
   () => store.carriers.find((c) => c.id === carrierId.value)?.name ?? '',
 );
 
+const confirmOpen = ref(false);
+
 const canSubmit = computed(() => !!carrierId.value && trackingNumber.value.trim().length > 0);
+const formError = ref('');
 
 function resetForm() {
   carrierId.value = null;
   trackingNumber.value = '';
   lastLocation.value = '';
   estimatedDeliveryAt.value = '';
+  confirmOpen.value = false;
+  formError.value = '';
   store.clearActionError();
+}
+
+function onCreateClick() {
+  if (!carrierId.value) {
+    formError.value = 'กรุณาเลือกบริษัทขนส่ง';
+    return;
+  }
+  if (!trackingNumber.value.trim()) {
+    formError.value = 'กรุณากรอกเลขพัสดุ';
+    return;
+  }
+  if (!estimatedDeliveryAt.value) {
+    formError.value = 'กรุณาเลือกวันที่คาดว่าจะถึง';
+    return;
+  }
+  formError.value = '';
+  store.clearActionError();
+  confirmOpen.value = true;
 }
 
 watch(
@@ -150,19 +218,34 @@ function close() {
   emit('update:modelValue', false);
 }
 
+async function onConfirmSubmit() {
+  await submit();
+  confirmOpen.value = false;
+}
+
 async function submit() {
   if (!canSubmit.value || !carrierId.value) return;
-  const ok = await store.createShipment({
+  const shipmentId = await store.createShipment({
     orderId: props.order.id,
     carrierId: carrierId.value,
     trackingNumber: trackingNumber.value.trim(),
     ...(lastLocation.value.trim() ? { lastLocation: lastLocation.value.trim() } : {}),
     ...(estimatedDeliveryAt.value ? { estimatedDeliveryAt: new Date(estimatedDeliveryAt.value).toISOString() } : {}),
   });
-  if (ok) {
-    emit('created');
-    close();
+  if (!shipmentId) return;
+
+  const shipmentEventOk = await store.addShipmentEvent({
+    shipmentId,
+    status: 'in_transit',
+    description: 'พัสดุถูกส่งมอบให้ขนส่งแล้ว',
+    ...(lastLocation.value.trim() ? { location: lastLocation.value.trim() } : {}),
+  });
+  if (!shipmentEventOk) {
+    store.actionError = 'เกิดข้อผิดพลาดในการบันทึกสถานะพัสดุ กรุณาลองใหม่';
+    return;
   }
+  emit('created');
+  close();
 }
 </script>
 
@@ -436,6 +519,73 @@ async function submit() {
   font-size: 20px;
   font-weight: 700;
   color: #6d28d9;
+}
+
+.csd-confirm-modal {
+  width: 420px;
+  max-width: 92vw;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.csd-confirm-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #ede9fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.csd-confirm-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1d;
+  margin-bottom: 8px;
+}
+
+.csd-confirm-desc {
+  font-size: 13.5px;
+  color: #6b7280;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.csd-confirm-summary {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.csd-confirm-summary__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: #6b7280;
+}
+
+.csd-confirm-summary__row + .csd-confirm-summary__row {
+  margin-top: 6px;
+}
+
+.csd-confirm-summary__row span:last-child {
+  font-weight: 600;
+  color: #1d1d1d;
+}
+
+.csd-confirm-actions {
+  display: flex;
+  gap: 10px;
 }
 
 @media (max-width: 720px) {
