@@ -42,6 +42,25 @@ describe('OrdersService', () => {
     });
   });
 
+  describe('findOneForAdmin', () => {
+    it('returns the order regardless of owner', async () => {
+      const order = { id: 10, user: { id: 999 } };
+      ordersRepo.findOne.mockResolvedValue(order);
+
+      await expect(buildService().findOneForAdmin(10)).resolves.toBe(order);
+      expect(ordersRepo.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 10 } }),
+      );
+    });
+
+    it('throws NotFoundException when the order does not exist', async () => {
+      ordersRepo.findOne.mockResolvedValue(null);
+      await expect(buildService().findOneForAdmin(10)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+  });
+
   describe('findTracking', () => {
     it('returns the order graph when owned by the requesting user', async () => {
       const order = { id: 10, user: { id: 1 }, shipments: [] };

@@ -180,6 +180,28 @@ export class OrdersService {
     });
   }
 
+  // Admin order-detail read: unlike findOneForUser, not scoped to a
+  // requesting user — the admin registry page needs to open any customer's
+  // order. Loads the full graph so the detail drawer never needs a second
+  // request.
+  async findOneForAdmin(id: number) {
+    const order = await this.ordersRepo.findOne({
+      where: { id },
+      relations: [
+        'user',
+        'address',
+        'orderItems',
+        'orderItems.product',
+        'shipments',
+        'shipments.carrier',
+      ],
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    return order;
+  }
+
   // Same as findOne but scoped to the caller — the order-detail page uses
   // this so one customer can't page through another's order by guessing ids.
   async findOneForUser(id: number, userId: number) {

@@ -48,6 +48,15 @@ export class OrdersController {
     return this.ordersService.findShippingQueue();
   }
 
+  // Must stay above the generic ':id' route below, or Nest matches this
+  // path against findOne('admin') instead.
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('admin/:id')
+  findOneForAdmin(@Param('id') id: string) {
+    return this.ordersService.findOneForAdmin(+id);
+  }
+
   @UseGuards(AuthGuard)
   @Post('checkout')
   async checkout(
