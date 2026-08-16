@@ -1,16 +1,29 @@
 <template>
-  <div class="row q-col-gutter-md">
-    <div class="col-auto self-center">
-      <div class="column q-gutter-y-sm items-center">
-        <button
-          class="icon-click"
-          @click="scrollUp"
-          :disabled="scrollIndex === 0"
-          :class="{ 'disabled-btn': scrollIndex === 0 }"
-        >
-          <img :src="arrowIcon" alt="arrowIcon" style="width: 12px" class="arrowIcon" />
-        </button>
+  <div class="gallery-layout">
+    <div class="gallery-layout__main">
+      <div class="main-image-container bg-grey-2 rounded-borders flex flex-center">
+        <q-img :src="currentImage" fit="cover" style="height: 100%; width: 100%" spinner-color="primary">
+          <template #error>
+            <div class="img-fallback img-fallback--main">
+              <q-icon name="image_not_supported" size="40px" />
+              <div class="q-mt-sm">ไม่พบรูปภาพ</div>
+            </div>
+          </template>
+        </q-img>
+      </div>
+    </div>
 
+    <div class="gallery-layout__rail">
+      <button
+        class="icon-click rail-arrow"
+        @click="scrollUp"
+        :disabled="scrollIndex === 0"
+        :class="{ 'disabled-btn': scrollIndex === 0 }"
+      >
+        <img :src="arrowIcon" alt="arrowIcon" style="width: 12px" class="arrowIcon" />
+      </button>
+
+      <div class="thumbnail-strip">
         <div
           v-for="item in visibleThumbnails"
           :key="item.originalIndex"
@@ -19,38 +32,35 @@
           @mouseover="selectedIndex = item.originalIndex"
           @click="selectedIndex = item.originalIndex"
         >
-          <q-img
-            :src="item.img"
-            class="rounded-borders"
-            style="width: 60px; height: 60px"
-            fit="cover"
-          />
+          <q-img :src="item.img" class="rounded-borders" style="width: 60px; height: 60px" fit="cover">
+            <template #error>
+              <div class="img-fallback">
+                <q-icon name="image_not_supported" size="18px" />
+              </div>
+            </template>
+          </q-img>
         </div>
-
-        <button
-          class="icon-click"
-          @click="scrollDown"
-          :disabled="scrollIndex >= maxScrollIndex"
-          :class="{ 'disabled-btn': scrollIndex >= maxScrollIndex }"
-        >
-          <img :src="arrowDownIcon" alt="arrowIcon" style="width: 12px" class="arrowIcon" />
-        </button>
-
-        <q-chip clickable color="grey-2" text-color="black" size="sm" @click="openDialog()">
-          ดูรูปทั้งหมด
-        </q-chip>
       </div>
-    </div>
 
-    <div class="col">
-      <div class="main-image-container bg-grey-2 rounded-borders flex flex-center">
-        <q-img :src="currentImage" fit="cover" style="height: 100%; width: 100%" spinner-color="primary" />
-      </div>
+      <button
+        class="icon-click rail-arrow"
+        @click="scrollDown"
+        :disabled="scrollIndex >= maxScrollIndex"
+        :class="{ 'disabled-btn': scrollIndex >= maxScrollIndex }"
+      >
+        <img :src="arrowDownIcon" alt="arrowIcon" style="width: 12px" class="arrowIcon" />
+      </button>
+
+      <button type="button" class="view-all-btn" @click="openDialog()">
+        <q-icon name="grid_view" size="14px" class="q-mr-xs" />
+        ดูรูปทั้งหมด
+      </button>
     </div>
   </div>
 
   <q-dialog v-model="dialogOpen" transition-show="scale" transition-hide="scale">
     <q-card
+      class="gallery-dialog-card"
       style="width: 1200px; max-width: 90vw; height: 80vh; border-radius: 20px; overflow: hidden"
     >
       <q-btn
@@ -64,8 +74,8 @@
         size="lg"
       />
 
-      <div class="row full-height">
-        <div class="col-12 col-md-8 bg-grey-2 flex flex-center row no-wrap q-pa-md">
+      <div class="row full-height gallery-dialog-row">
+        <div class="col-12 col-md-8 bg-grey-2 flex flex-center row no-wrap q-pa-md gallery-dialog-main">
           <button class="icon-click" @click="prevDialogImage" style="margin-right: 15px">
             <img :src="arrowDownIcon" alt="arrowIcon" style="width: 12px" class="arrowIconLeft" />
           </button>
@@ -84,7 +94,14 @@
               :src="images[dialogIndex]"
               fit="contain"
               style="height: max-content; width: 100%"
-            />
+            >
+              <template #error>
+                <div class="img-fallback img-fallback--main">
+                  <q-icon name="image_not_supported" size="40px" />
+                  <div class="q-mt-sm">ไม่พบรูปภาพ</div>
+                </div>
+              </template>
+            </q-img>
           </div>
 
           <button class="icon-click" @click="nextDialogImage" style="margin-left: 15px">
@@ -108,7 +125,13 @@
                   fit="contain"
                   class="rounded-borders"
                   style="border: 1px solid #cacaca; border-radius: 10px"
-                />
+                >
+                  <template #error>
+                    <div class="img-fallback">
+                      <q-icon name="image_not_supported" size="16px" />
+                    </div>
+                  </template>
+                </q-img>
               </div>
             </div>
           </div>
@@ -203,6 +226,43 @@ const prevDialogImage = () => {
 </script>
 
 <style scoped>
+.view-all-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6d28d9;
+  background: #f5f3ff;
+  border: 1px solid #e9d8fd;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.view-all-btn:hover {
+  background: #ede9fe;
+  border-color: #6d28d9;
+}
+
+.img-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.img-fallback--main {
+  font-size: 13px;
+}
+
 .thumbnail-card {
   border: 2px solid transparent; /* ขอบปกติใสไว้ */
   border-radius: 12px;
@@ -215,9 +275,90 @@ const prevDialogImage = () => {
   border-color: #8a33ff;
 }
 
+.gallery-layout {
+  display: flex;
+  gap: 16px;
+}
+
+.gallery-layout__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.gallery-layout__rail {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.thumbnail-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .main-image-container {
   height: 500px; /* กรอบรูปใหญ่คงที่ ให้รูป cover เต็มกรอบพอดี */
   overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .gallery-layout {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .gallery-layout__rail {
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+  }
+
+  .rail-arrow {
+    display: none;
+  }
+
+  .thumbnail-strip {
+    flex-direction: row;
+    overflow-x: auto;
+    flex: 1;
+    min-width: 0;
+    padding: 2px;
+  }
+
+  .thumbnail-card {
+    flex: 0 0 auto;
+  }
+
+  .view-all-btn {
+    flex: 0 0 auto;
+  }
+
+  .main-image-container {
+    height: auto;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+  }
+
+  .gallery-dialog-card {
+    height: 92vh !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+    border-radius: 0 !important;
+  }
+
+  .gallery-dialog-row {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+  }
+
+  .gallery-dialog-main {
+    flex: 0 0 auto;
+    height: 45vh;
+  }
 }
 
 /* รูปมีเงาตาม PNG */
