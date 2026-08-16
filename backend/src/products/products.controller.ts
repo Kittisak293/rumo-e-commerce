@@ -9,6 +9,9 @@ import {
   UseInterceptors,
   UploadedFile,
   Query,
+  UseGuards,
+  ParseFloatPipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -18,11 +21,16 @@ import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { extname } from 'path';
 import { v4 } from 'uuid';
 import { diskStorage } from 'multer';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Post()
   @ApiBody({ description: 'ข้อมูลสินค้า', type: CreateProductDto })
   @ApiConsumes('multipart/form-data')
@@ -31,7 +39,6 @@ export class ProductsController {
       storage: diskStorage({
         destination: './uploads/products',
         filename: (req, file, callback) => {
-          console.log(file);
           const uniqueFileName = v4() + extname(file.originalname);
           callback(null, uniqueFileName);
         },
@@ -60,9 +67,9 @@ export class ProductsController {
     @Query('q') q: string,
     @Query('sortBy') sortBy?: string,
     @Query('storeType') storeType?: 'mall' | 'seller',
-    @Query('priceMin') priceMin?: number,
-    @Query('priceMax') priceMax?: number,
-    @Query('ratingMin') ratingMin?: number,
+    @Query('priceMin', new ParseFloatPipe({ optional: true })) priceMin?: number,
+    @Query('priceMax', new ParseFloatPipe({ optional: true })) priceMax?: number,
+    @Query('ratingMin', new ParseFloatPipe({ optional: true })) ratingMin?: number,
   ) {
     return this.productsService.search({
       q,
@@ -78,10 +85,10 @@ export class ProductsController {
   searchHomeProducts(
     @Query('sortBy') sortBy?: string,
     @Query('storeType') storeType?: 'mall' | 'seller',
-    @Query('priceMin') priceMin?: number,
-    @Query('priceMax') priceMax?: number,
-    @Query('ratingMin') ratingMin?: number,
-    @Query('categoryId') categoryId?: number,
+    @Query('priceMin', new ParseFloatPipe({ optional: true })) priceMin?: number,
+    @Query('priceMax', new ParseFloatPipe({ optional: true })) priceMax?: number,
+    @Query('ratingMin', new ParseFloatPipe({ optional: true })) ratingMin?: number,
+    @Query('categoryId', new ParseIntPipe({ optional: true })) categoryId?: number,
   ) {
     return this.productsService.searchHomeProducts({
       sortBy,
@@ -97,10 +104,10 @@ export class ProductsController {
   searchCategoryProducts(
     @Query('sortBy') sortBy?: string,
     @Query('storeType') storeType?: 'mall' | 'seller',
-    @Query('priceMin') priceMin?: number,
-    @Query('priceMax') priceMax?: number,
-    @Query('ratingMin') ratingMin?: number,
-    @Query('categoryId') categoryId?: number,
+    @Query('priceMin', new ParseFloatPipe({ optional: true })) priceMin?: number,
+    @Query('priceMax', new ParseFloatPipe({ optional: true })) priceMax?: number,
+    @Query('ratingMin', new ParseFloatPipe({ optional: true })) ratingMin?: number,
+    @Query('categoryId', new ParseIntPipe({ optional: true })) categoryId?: number,
   ) {
     return this.productsService.searchCategoryProducts({
       sortBy,
@@ -122,6 +129,8 @@ export class ProductsController {
     return this.productsService.findOne(+id);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Patch(':id')
   @ApiBody({ description: 'ข้อมูลสินค้า', type: UpdateProductDto })
   @ApiConsumes('multipart/form-data')
@@ -130,7 +139,6 @@ export class ProductsController {
       storage: diskStorage({
         destination: './uploads/products',
         filename: (req, file, callback) => {
-          console.log(file);
           const uniqueFileName = v4() + extname(file.originalname);
           callback(null, uniqueFileName);
         },
@@ -142,13 +150,14 @@ export class ProductsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() updateProductDto: UpdateProductDto,
   ) {
-    console.log(file);
     return this.productsService.update(+id, {
       ...updateProductDto,
       imageUrl: file ? '/static-images/' + file.filename : undefined,
     });
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productsService.remove(+id);

@@ -10,6 +10,8 @@ import { ProductImage } from 'src/product-images/entities/product-image.entity';
 import { ProductOption } from 'src/product-options/entities/product-option.entity';
 import { ProductSku } from 'src/product-skus/entities/product-sku.entity';
 
+import { AuthModule } from 'src/auth/auth.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -21,6 +23,7 @@ import { ProductSku } from 'src/product-skus/entities/product-sku.entity';
       ProductOption,
       ProductSku,
     ]),
+    AuthModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

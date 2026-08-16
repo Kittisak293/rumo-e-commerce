@@ -31,7 +31,10 @@ export class ProductsService {
   }
 
   async findAll() {
-    return await this.productsRepository.find({ relations: ['category'] });
+    return await this.productsRepository.find({
+      relations: ['category'],
+      order: { id: 'DESC' },
+    });
   }
 
   async findOne(id: number): Promise<Product> {
@@ -45,18 +48,46 @@ export class ProductsService {
     id: number,
     updateProductDto: UpdateProductDto & { imageUrl?: string },
   ): Promise<Product> {
-    const product = this.productsRepository.create(updateProductDto);
-    const category = await this.categoriesRepository.findOneByOrFail({
-      id: updateProductDto.categoryId,
+    const existing = await this.productsRepository.findOneOrFail({
+      where: { id },
+      relations: ['category'],
     });
-    product.category = category;
-    await this.productsRepository.update(id, product);
-    return await this.productsRepository.findOneOrFail({ where: { id: id } });
+
+    if (updateProductDto.name !== undefined) {
+      existing.name = updateProductDto.name;
+    }
+    if (updateProductDto.description !== undefined) {
+      existing.description = updateProductDto.description;
+    }
+    if (updateProductDto.price !== undefined) {
+      existing.price = updateProductDto.price;
+    }
+    if (updateProductDto.stock !== undefined) {
+      existing.stock = updateProductDto.stock;
+    }
+    if (updateProductDto.storeType !== undefined) {
+      existing.storeType = updateProductDto.storeType;
+    }
+    if (updateProductDto.imageUrl !== undefined) {
+      existing.imageUrl = updateProductDto.imageUrl;
+    }
+    if (
+      updateProductDto.categoryId !== undefined &&
+      updateProductDto.categoryId !== null
+    ) {
+      const category = await this.categoriesRepository.findOneByOrFail({
+        id: updateProductDto.categoryId,
+      });
+      existing.category = category;
+    }
+
+    return await this.productsRepository.save(existing);
   }
 
   async remove(id: number) {
-    const product = await this.productsRepository.findOne({
-      where: { id: id },
+    const product = await this.productsRepository.findOneOrFail({
+      where: { id },
+      relations: ['category'],
     });
     await this.productsRepository.softDelete(id);
     return product;
@@ -112,7 +143,7 @@ export class ProductsService {
     // จัดเรียง
     switch (filters.sortBy) {
       case 'popular':
-        qb.orderBy('p.sold', 'DESC');
+        qb.orderBy('p.soldCount', 'DESC');
         break;
       case 'latest':
         qb.orderBy('p.createdAt', 'DESC');
@@ -137,7 +168,9 @@ export class ProductsService {
     ratingMin?: number;
     categoryId?: number;
   }) {
-    const qb = this.productsRepository.createQueryBuilder('p');
+    const qb = this.productsRepository
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.category', 'category');
     // ประเภทร้าน
     if (filters.storeType) {
       qb.andWhere('p.storeType = :storeType', { storeType: filters.storeType });
@@ -166,7 +199,7 @@ export class ProductsService {
     // จัดเรียง
     switch (filters.sortBy) {
       case 'popular':
-        qb.orderBy('p.sold', 'DESC');
+        qb.orderBy('p.soldCount', 'DESC');
         break;
       case 'latest':
         qb.orderBy('p.createdAt', 'DESC');
@@ -222,7 +255,7 @@ export class ProductsService {
     // จัดเรียง
     switch (filters.sortBy) {
       case 'popular':
-        qb.orderBy('p.sold', 'DESC');
+        qb.orderBy('p.soldCount', 'DESC');
         break;
       case 'latest':
         qb.orderBy('p.createdAt', 'DESC');
