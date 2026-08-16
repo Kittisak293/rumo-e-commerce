@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
@@ -17,11 +18,16 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 } from 'uuid';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Post()
   @ApiBody({ description: 'ข้อมูลหมวดหมู่', type: CreateCategoryDto })
   @ApiConsumes('multipart/form-data')
@@ -59,6 +65,8 @@ export class CategoryController {
     return this.categoryService.findOne(+id);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Patch(':id')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
@@ -84,6 +92,8 @@ export class CategoryController {
     });
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoryService.remove(+id);
