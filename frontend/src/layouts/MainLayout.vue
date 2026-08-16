@@ -27,6 +27,9 @@
           <div class="row items-center q-gutter-md">
             <button class="icon-click" @click="navigateTo('notifications')">
               <img :src="bellLogo" alt="BELL" style="width: 35px" />
+              <span v-if="notifications.unreadCount > 0" class="cart-badge">{{
+                notifications.unreadCount > 99 ? '99+' : notifications.unreadCount
+              }}</span>
             </button>
 
             <button class="icon-click cart-icon" @click="navigateTo('checkout')">
@@ -166,6 +169,7 @@ import peopleLogo from 'src/assets/icons/people.png';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from 'src/stores/authStore';
 import { useCartStore } from 'src/stores/cartStore';
+import { useNotificationStore } from 'src/stores/notificationStore';
 
 const leftOpen = ref(true); // ให้ drawer โชว์บน desktop
 const ordersActive = computed(
@@ -176,16 +180,25 @@ const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
 const cart = useCartStore();
+const notifications = useNotificationStore();
 
 onMounted(() => {
-  if (auth.isAuthenticated) void cart.fetchCount();
+  if (auth.isAuthenticated) {
+    void cart.fetchCount();
+    void notifications.fetchNotifications();
+  }
 });
 
 watch(
   () => auth.isAuthenticated,
   (loggedIn) => {
-    if (loggedIn) void cart.fetchCount();
-    else cart.reset();
+    if (loggedIn) {
+      void cart.fetchCount();
+      void notifications.fetchNotifications();
+    } else {
+      cart.reset();
+      notifications.notifications = [];
+    }
   },
 );
 
