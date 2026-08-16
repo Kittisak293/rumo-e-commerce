@@ -3,7 +3,7 @@
     <div class="ash-page__header">
       <div>
         <div class="ash-page__title">คิวงานจัดส่ง</div>
-        <div class="ash-page__sub">เรียงงานค้างนานสุดขึ้นก่อน</div>
+        <div class="ash-page__sub">คิวพัสดุที่ต้องจัดส่ง</div>
       </div>
     </div>
 

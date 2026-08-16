@@ -3,7 +3,7 @@
     <div class="adb-header">
       <div>
         <div class="adb-header__title">ภาพรวมแอดมิน</div>
-        <div class="adb-header__sub">งานค้างที่ต้องทำตอนนี้ และยอดขายย้อนหลัง</div>
+        <div class="adb-header__sub">ยอดขาย · งานค้างที่ต้องทำตอนนี้</div>
       </div>
     </div>
 

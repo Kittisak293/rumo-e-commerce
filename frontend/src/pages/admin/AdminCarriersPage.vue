@@ -3,7 +3,7 @@
     <div class="acp-page__header">
       <div>
         <div class="acp-page__title">บริษัทขนส่ง</div>
-        <div class="acp-page__sub">ตัวเลือกที่แอดมินเลือกได้ตอนสร้างพัสดุ · ปิดใช้งานแล้วจะไม่โผล่ให้เลือก</div>
+        <div class="acp-page__sub">ตัวเลือกที่แอดมินเลือกได้ตอนสร้างพัสดุ</div>
       </div>
     </div>
 
@@ -297,7 +297,7 @@ async function save() {
 .acp-search {
   position: relative;
   flex: 1;
-  max-width: 360px;
+  max-width: 400px;
   min-width: 200px;
 }
 
@@ -336,8 +336,8 @@ async function save() {
 .acp-add-btn {
   font-family: inherit;
   box-sizing: border-box;
-  padding: 11px 18px;
-  font-size: 14px;
+  padding: 9px 16px;
+  font-size: 13px;
   font-weight: 600;
   color: #fff;
   background: #6d28d9;

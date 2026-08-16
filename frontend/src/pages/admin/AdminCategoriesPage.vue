@@ -3,11 +3,9 @@
     <div class="acg-header">
       <div>
         <div class="acg-header__title">จัดการหมวดหมู่</div>
-        <div class="acg-header__sub">ทั้งหมด {{ store.categories.length }} หมวด</div>
+        <div class="app-page__sub">หมวดหมู่สินค้าทั้งร้าน</div>
       </div>
-      <button type="button" class="acg-add-btn" @click="openCreate">+ เพิ่มหมวดหมู่</button>
     </div>
-
     <div class="acg-toolbar">
       <div class="acg-search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="acg-search__icon">
@@ -16,7 +14,13 @@
         </svg>
         <input v-model="searchQuery" type="text" placeholder="ค้นหาชื่อหมวดหมู่" class="acg-search__input" />
       </div>
+      <div class="acg-toolbar__row">
+        <div class="acg-header__sub">แสดงทั้งหมด {{ filteredCategories.length }} หมวด</div>
+        <button type="button" class="acg-add-btn" @click="openCreate">+ เพิ่มหมวดหมู่</button>
+      </div>
     </div>
+
+    
 
     <div v-if="productStore.error" class="acg-warn-banner">
       <div class="acg-warn-banner__icon">!</div>
@@ -422,11 +426,26 @@ async function confirmDelete() {
 
 .acg-toolbar {
   margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.acg-toolbar__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.acg-header__sub {
+  white-space: nowrap;
 }
 
 .acg-search {
   position: relative;
   max-width: 400px;
+  width: 100%;
 }
 
 .acg-search__icon {
@@ -1003,4 +1022,29 @@ async function confirmDelete() {
     width: 100%;
   }
 }
+
+.app-page__sub {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.app-search__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px 11px 40px;
+  border-radius: 14px;
+  border: 1.5px solid #e5e7eb;
+  background: #fafafa;
+  font-size: 13.5px;
+  color: #1d1d1d;
+  font-family: inherit;
+}
+
+.app-search__input:focus {
+  outline: none;
+  border-color: #8e4dff;
+  background: #fff;
+}
+
 </style>

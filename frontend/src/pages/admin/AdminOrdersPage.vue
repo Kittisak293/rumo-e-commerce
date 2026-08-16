@@ -3,7 +3,7 @@
     <div class="ado-page__header">
       <div>
         <div class="ado-page__title">จัดการคำสั่งซื้อ</div>
-        <div class="ado-page__sub">ทะเบียนคำสั่งซื้อทั้งหมด เรียงใหม่สุดขึ้นก่อน</div>
+        <div class="ado-page__sub">ทะเบียนคำสั่งซื้อทั้งหมด</div>
       </div>
     </div>
 

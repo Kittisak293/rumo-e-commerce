@@ -4,7 +4,7 @@
     <div class="app-page__header">
       <div>
         <h1 class="app-page__title">จัดการสินค้า</h1>
-        <div class="app-page__sub">แคตตาล็อกสินค้าทั้งร้าน แก้สต็อกและราคาได้จากที่นี่</div>
+        <div class="app-page__sub">แคตตาล็อกสินค้าทั้งร้าน</div>
       </div>
     </div>
 
@@ -778,7 +778,7 @@ async function confirmDelete() {
 .app-search {
   position: relative;
   flex: 1;
-  max-width: 360px;
+  max-width: 400px;
   min-width: 200px;
 }
 
