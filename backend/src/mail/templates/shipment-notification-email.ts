@@ -37,9 +37,9 @@ export function buildShipmentNotificationEmail(
     : null;
 
   return {
-    subject: `พัสดุออกจัดส่งแล้ว — คำสั่งซื้อ ${shipment.orderNumber} — RUMO`,
+    subject: `พัสดุถูกจัดส่งแล้ว — คำสั่งซื้อ ${shipment.orderNumber} — RUMO`,
     text: [
-      'พัสดุของคุณออกจัดส่งแล้ว',
+      'พัสดุของคุณถูกจัดส่งเรียบร้อยแล้ว',
       '',
       `คำสั่งซื้อ ${shipment.orderNumber} ถูกส่งมอบให้ ${shipment.carrierName} เรียบร้อยแล้ว`,
       '',
@@ -52,7 +52,7 @@ export function buildShipmentNotificationEmail(
 <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#1d1d1d">
   <div style="text-align:center;margin-bottom:28px">
     <div style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:#ede9fe;color:#6d28d9;font-size:26px">&#128666;</div>
-    <h1 style="margin:16px 0 4px;font-size:20px;font-weight:700">พัสดุออกจัดส่งแล้ว</h1>
+    <h1 style="margin:16px 0 4px;font-size:20px;font-weight:700">พัสดุถูกจัดส่งแล้ว</h1>
     <p style="margin:0;font-size:14px;color:#6b7280">คำสั่งซื้อ ${esc(shipment.orderNumber)} กำลังเดินทางไปหาคุณ</p>
   </div>
 
