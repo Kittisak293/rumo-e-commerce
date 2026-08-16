@@ -73,7 +73,7 @@
               type="button"
               class="aed-btn aed-btn--primary"
               :disabled="!canSubmit || store.actionLoading"
-              @click="submit"
+              @click="onSaveClick"
             >
               {{ store.actionLoading ? 'กำลังบันทึก...' : 'บันทึกเหตุการณ์' }}
             </button>
@@ -81,6 +81,56 @@
         </div>
       </div>
     </div>
+
+    <!-- Confirm before recording the event + possibly moving the order status -->
+    <q-dialog v-model="confirmOpen">
+      <div class="aed-confirm-modal">
+        <div class="aed-confirm-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6l8 6 8-6M4 6h16v12H4V6z" stroke="#6d28d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="aed-confirm-title">ยืนยันบันทึกเหตุการณ์พัสดุ?</div>
+        <div class="aed-confirm-desc">
+          ลูกค้าจะเห็นเหตุการณ์นี้ในหน้าติดตามพัสดุทันที
+          <template v-if="autoOrderStatusLabel">สถานะคำสั่งซื้อจะเปลี่ยนเป็น <b>{{ autoOrderStatusLabel }}</b> ด้วย</template>
+        </div>
+        <div class="aed-confirm-summary">
+          <div class="aed-confirm-summary__row">
+            <span>สถานะพัสดุ</span>
+            <span>{{ getShipmentStatusMeta(status).label }}</span>
+          </div>
+          <div v-if="location" class="aed-confirm-summary__row">
+            <span>ตำแหน่ง</span>
+            <span>{{ location }}</span>
+          </div>
+          <div class="aed-confirm-summary__row">
+            <span>รายละเอียด</span>
+            <span>{{ description }}</span>
+          </div>
+        </div>
+        <div class="aed-confirm-actions">
+          <button
+            type="button"
+            class="aed-btn aed-btn--secondary"
+            style="flex: 1"
+            :disabled="store.actionLoading"
+            @click="confirmOpen = false"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            class="aed-btn aed-btn--primary"
+            style="flex: 1"
+            :disabled="store.actionLoading"
+            @click="onConfirmSubmit"
+          >
+            {{ store.actionLoading ? 'กำลังบันทึก...' : 'ยืนยันบันทึก' }}
+          </button>
+        </div>
+      </div>
+    </q-dialog>
   </q-dialog>
 </template>
 
@@ -91,7 +141,12 @@ import type { AdminOrderData } from 'src/stores/adminShipmentStore';
 import type { ShipmentData } from 'src/stores/orderStore';
 import ShipmentTimeline from 'src/components/orders/ShipmentTimeline.vue';
 import ShipmentStatusPill from 'src/components/admin/ShipmentStatusPill.vue';
-import { SHIPMENT_STATUS_META, ORDER_STATUS_FOR_SHIPMENT_EVENT, getOrderStatusMeta } from 'src/composables/useOrderStatus';
+import {
+  SHIPMENT_STATUS_META,
+  ORDER_STATUS_FOR_SHIPMENT_EVENT,
+  getOrderStatusMeta,
+  getShipmentStatusMeta,
+} from 'src/composables/useOrderStatus';
 
 const props = defineProps<{ modelValue: boolean; order: AdminOrderData; shipment: ShipmentData }>();
 const emit = defineEmits<{ 'update:modelValue': [boolean]; saved: [] }>();
@@ -126,6 +181,7 @@ const status = ref('pending');
 const description = ref('');
 const location = ref('');
 const occurredAt = ref('');
+const confirmOpen = ref(false);
 
 function nowLocalInput(): string {
   const d = new Date();
@@ -138,6 +194,7 @@ function resetForm() {
   description.value = '';
   location.value = '';
   occurredAt.value = nowLocalInput();
+  confirmOpen.value = false;
   store.clearActionError();
 }
 
@@ -159,6 +216,16 @@ const autoOrderStatusLabel = computed(() => {
   const target = ORDER_STATUS_FOR_SHIPMENT_EVENT[status.value];
   return target ? getOrderStatusMeta(target).label : '';
 });
+
+function onSaveClick() {
+  if (!canSubmit.value) return;
+  confirmOpen.value = true;
+}
+
+async function onConfirmSubmit() {
+  await submit();
+  confirmOpen.value = false;
+}
 
 async function submit() {
   if (!canSubmit.value) return;
@@ -408,6 +475,75 @@ async function submit() {
   opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.aed-confirm-modal {
+  width: 420px;
+  max-width: 92vw;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.aed-confirm-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #ede9fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.aed-confirm-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1d;
+  margin-bottom: 8px;
+}
+
+.aed-confirm-desc {
+  font-size: 13.5px;
+  color: #6b7280;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.aed-confirm-summary {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.aed-confirm-summary__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  color: #6b7280;
+}
+
+.aed-confirm-summary__row + .aed-confirm-summary__row {
+  margin-top: 6px;
+}
+
+.aed-confirm-summary__row span:last-child {
+  font-weight: 600;
+  color: #1d1d1d;
+  text-align: right;
+}
+
+.aed-confirm-actions {
+  display: flex;
+  gap: 10px;
 }
 
 @media (max-width: 720px) {
